@@ -197,3 +197,56 @@ echo "${list1[0]} ${new_list[@]:0:4}"
 
 
 
+
+
+!/bin/bash
+
+# Define two lists
+
+list1=("C001" "PC002" "PC001" "PC005" "PC003")
+
+list2=("PC001" "PC002" "PC003" "PC004" "PC005")
+
+# Extract the customer ID from list1
+
+customer_id="${list1[0]}"
+
+# Remove the first element of list1
+
+list1=("${list1[@]:1}")
+
+# Create a new empty array to hold the policy codes in the order of the second list
+
+new_list=()
+
+# Loop through each element in list2
+
+for i in "${list2[@]}"
+
+do
+
+    # Loop through each element in list1 to find the index of the matching policy code
+
+    for j in "${!list1[@]}"
+
+    do
+
+        if [[ "$i" == "${list1[$j]}" ]]
+
+        then
+
+            # If a matching policy code is found, add it to the new list in the order of list2
+
+            new_list+=("${list1[$j]}")
+
+            break
+
+        fi
+
+    done
+
+done
+
+# Print the customer ID followed by the first four policy codes in the order of list2
+
+echo "$customer_id ${new_list[@]:0:4}"
