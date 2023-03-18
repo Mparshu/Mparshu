@@ -1,0 +1,60 @@
+List Content Comparison.
+
+
+prasadswami76@gmail.com
+Create a shell script to check whether Content from one list is present in another list or not
+
+Sure, here's a shell script that will check if the content from one list is present in another list or not:
+
+bash
+Copy code
+#!/bin/bash
+
+# Define two lists
+list1=("apple" "banana" "cherry" "date")
+list2=("cherry" "date" "fig" "grape")
+
+# Loop through each element in list1
+for i in "${list1[@]}"
+do
+    # Check if the element is present in list2
+    if [[ "${list2[*]}" =~ "$i" ]]
+    then
+        echo "$i is present in list2"
+    else
+        echo "$i is not present in list2"
+    fi
+done
+In this script, we have defined two lists, list1 and list2, and we are looping through each element in list1. For each element in list1, we are checking if it is present in list2 using the =~ operator in the if statement. If the element is present in list2, we print a message saying it is present, otherwise, we print a message saying it is not present.
+
+You can modify the script by replacing the elements in list1 and list2 with your own lists, and run it on your local machine by saving it in a file with a .sh extension, making it executable using chmod +x script.sh, and running it with ./script.sh.
+
+
+
+
+prasadswami76@gmail.com
+In the first list I have policycodes in random order.. In second list I have policycodes in arranged order.. I want to check if policycodes from first list is present in second list or not.. if yes then arrange thoes in second list order
+
+Sure, here's an updated script that will check if the policy codes from the first list are present in the second list and if so, arrange them in the same order as the second list:
+
+bash
+Copy code
+#!/bin/bash
+
+# Define two lists
+list1=("PC002" "PC001" "PC005" "PC003")
+list2=("PC001" "PC002" "PC003" "PC004" "PC005")
+
+# Loop through each element in list1
+for i in "${list1[@]}"
+do
+    # Check if the element is present in list2
+    if [[ "${list2[*]}" =~ "$i" ]]
+    then
+        # If present, add it to a new array in the order of list2
+        new_list+=("$i")
+    fi
+done
+
+# Print the new list
+echo "${new_list[@]}"
