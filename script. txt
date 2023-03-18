@@ -58,3 +58,71 @@ done
 
 # Print the new list
 echo "${new_list[@]}"
+
+
+
+/bin/bash
+
+# Define two lists
+
+list1=("C0001" "PC002" "PC001" "PC005" "PC003")
+
+list2=("PC001" "PC002" "PC003" "PC004" "PC005")
+
+# Get the customer id from the first list
+
+customer_id=${list1[0]}
+
+# Loop through each element in list1 starting from index 1
+
+for i in "${list1[@]:1}"
+
+do
+
+    # Check if the element is present in list2
+
+    if [[ "${list2[*]}" =~ "$i" ]]
+
+    then
+
+        # If present, add it to a new array in the order of list2
+
+        new_list+=("$i")
+
+    fi
+
+done
+
+# Put the customer id at the beginning of the new list
+
+new_list=("$customer_id" "${new_list[@]}")
+
+# Print the first five elements of the new list
+
+echo "${new_list[@]:0:5}"
+
+In this script, we have defined two lists, list1 and list2, and we are getting the customer id from the first element of list1. We then loop through each element in list1 starting from index 1, and for each element that is present in list2, we add it to a new array new_list in the order of list2.
+
+Finally, we put the customer id at the beginning of new_list and print the first five elements of new_list.
+
+You can modify the script by replacing the elements in list1 and list2 with your own lists and run it on your local machine by saving it in a file with a .sh extension, making it executable using chmod +x script.sh, and running it with ./script.sh.
+
+prasadswami76@gmail.com
+
+we add it to a new array new_list in the order of list2 please explain how code will achieve this
+
+Sure, here's how the script will achieve adding the policy codes from list1 that are present in list2 to a new array new_list in the order of list2:
+
+We define an empty new_list array at the beginning of the script: new_list=()
+
+Inside the loop that iterates over the elements of list1, we use the =~ operator to check if the current element is present in list2.
+
+If the element is present in list2, we add it to the new_list array using the += operator: new_list+=("$i"). This adds the current element to the end of the new_list array.
+
+At the end of the loop, new_list contains all the policy codes from list1 that are present in list2, but they may not be in the order of list2.
+
+To put the policy codes in the order of list2, we can modify the loop to iterate over the elements of list2 instead of list1, and use another loop to check if each element of list2 is present in list1 and add it to new_list in the order of list2. However, this would require a nested loop and could be less efficient if list1 and list2 are large.
+
+Instead, we can use the += operator to add elements to new_list in the order of list2 by using the ${new_list[*]} syntax to expand new_list as a space-separated string, and then using the += operator to append the current element to new_list in the order of list2: new_list+=("$i"). This adds the current element to the end of new_list, but in the order of list2 because we are appending it after all the elements of new_list that are already in list2 order.
+
+Overall, this approach allows us to add the policy codes from list1 to new_list in the order of list2 without the need for a nested loop.
