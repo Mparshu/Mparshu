@@ -123,6 +123,77 @@ At the end of the loop, new_list contains all the policy codes from list1 that a
 
 To put the policy codes in the order of list2, we can modify the loop to iterate over the elements of list2 instead of list1, and use another loop to check if each element of list2 is present in list1 and add it to new_list in the order of list2. However, this would require a nested loop and could be less efficient if list1 and list2 are large.
 
+
+
+
+we can modify the loop to iterate over the elements of list2 instead of list1, and use another loop to check if each element of list2 is present in list1 and add it to new_list in the order of 
+
+
+
 Instead, we can use the += operator to add elements to new_list in the order of list2 by using the ${new_list[*]} syntax to expand new_list as a space-separated string, and then using the += operator to append the current element to new_list in the order of list2: new_list+=("$i"). This adds the current element to the end of new_list, but in the order of list2 because we are appending it after all the elements of new_list that are already in list2 order.
 
 Overall, this approach allows us to add the policy codes from list1 to new_list in the order of list2 without the need for a nested loop.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ash
+
+Copy code
+
+#!/bin/bash
+
+# Define two lists
+
+list1=("PC002" "PC001" "PC005" "PC003")
+
+list2=("PC001" "PC002" "PC003" "PC004" "PC005")
+
+# Create a new empty array to hold the policy codes in the order of the second list
+
+new_list=()
+
+# Loop through each element in list2
+
+for i in "${list2[@]}"
+
+do
+
+    # Loop through each element in list1 to find the index of the matching policy code
+
+    for j in "${!list1[@]}"
+
+    do
+
+        if [[ "$i" == "${list1[$j]}" ]]
+
+        then
+
+            # If a matching policy code is found, add it to the new list in the order of list2
+
+            new_list+=("${list1[$j]}")
+
+            break
+
+        fi
+
+    done
+
+done
+
+# Print the new array
+
+echo "${list1[0]} ${new_list[@]:0:4}"
+
+
+
