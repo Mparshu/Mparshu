@@ -347,4 +347,79 @@ ChatGPT Mar 14 Version. Free Research Preview. Our goal is to make AI systems mo
 
 
 
+import csv
+
+# Define the path to the CSV file
+
+csv_file = "path/to/file.csv"
+
+# Define the second list
+
+list2 = ["PC001", "PC002", "PC003", "PC004", "PC005"]
+
+# Create the target CSV file with header
+
+with open("target.csv", "w") as target_file:
+
+    writer = csv.writer(target_file)
+
+    writer.writerow(["Customer ID", "Policy Code 1", "Policy Code 2", "Policy Code 3", "Policy Code 4"])
+
+    # Loop through each line in the CSV file
+
+    with open(csv_file, "r") as file:
+
+        reader = csv.reader(file)
+
+        for fields in reader:
+
+            # Extract the customer ID and policy codes from the line
+
+            customer_id = fields[0]
+
+            list1 = fields[1:]
+
+            # Remove the customer ID from list1
+
+            list1 = list1[1:]
+
+            # Create a new empty list to hold the policy codes in the order of the second list
+
+            new_list = []
+
+            # Loop through each element in list2
+
+            for i in list2:
+
+                # Loop through each element in list1 to find the index of the matching policy code
+
+                for j, code in enumerate(list1):
+
+                    if i == code:
+
+                        # If a matching policy code is found, add it to the new list in the order of list2
+
+                        new_list.append(code)
+
+                        break
+
+                else:
+
+                    # If no matching policy code is found, add a padding of 0 to the new list
+
+                    new_list.append("0")
+
+            # Create a new row for the target CSV file
+
+            new_row = [customer_id] + new_list[:4]
+
+            # Add the new row to the target CSV file
+
+            writer.writerow(new_row)
+
+Note that in Python, we use the csv module to read and write CSV files, and we use a with statement to ensure that the files are properly closed after we are done with them. We also use lists instead of arrays to store the policy codes, and we use the enumerate() function to loop through a list while keeping track of the index.
+
+
+
+
 
