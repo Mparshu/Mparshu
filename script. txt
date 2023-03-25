@@ -423,3 +423,37 @@ Note that in Python, we use the csv module to read and write CSV files, and we u
 
 
 
+
+
+
+
+
+Run Command from Variable
+
+prasadswami76@gmail.com
+
+I have one command stored as a variable I want to run that command in shell script how to do that
+
+To run a command stored in a variable in a shell script, you can use the eval command in Bash. The eval command allows you to evaluate a command that is stored in a string variable as if it were a regular command.
+
+Here's an example:
+
+bash
+
+Copy code
+
+#!/bin/bash
+
+# Store the command in a variable
+
+cmd="ls -l"
+
+# Use eval to run the command
+
+eval $cmd
+
+In this example, the ls -l command is stored in the cmd variable. The eval command is then used to run the command stored in the cmd variable.
+
+Note that using eval can be dangerous if the contents of the variable are not properly sanitized, as it can execute arbitrary commands. Make sure that the variable only contains a valid command that you want to run.
+
+
