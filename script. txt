@@ -457,3 +457,67 @@ In this example, the ls -l command is stored in the cmd variable. The eval comma
 Note that using eval can be dangerous if the contents of the variable are not properly sanitized, as it can execute arbitrary commands. Make sure that the variable only contains a valid command that you want to run.
 
 
+
+
+
+
+
+You're right. Here's an updated version of the script that can handle a variable number of CSV files provided as a single argument, including the case where only one CSV file is provided:
+
+bash
+
+Copy code
+
+#!/bin/bash
+
+# check that one argument has been provided
+
+if [ "$#" -ne 1 ]; then
+
+    echo "Usage: $0 <csv1 csv2 csv3 ...>"
+
+    exit 1
+
+fi
+
+# split the argument into an array of CSV filenames
+
+IFS=' ' read -r -a files <<< "$1"
+
+# check that all files are CSV files
+
+for file in "${files[@]}"; do
+
+    if [ ! -f "$file" ] || [ "${file##*.}" != "csv" ]; then
+
+        echo "$file is not a CSV file"
+
+        exit 1
+
+    fi
+
+done
+
+# append all CSV files to the first one
+
+first_file="${files[0]}"
+
+for file in "${files[@]:1}"; do
+
+    cat "$file" >> "$first_file"
+
+done
+
+Save this script to a file, for example append_csv.sh, and make it executable with the command chmod +x append_csv.sh.
+
+To use the script, run it with the names of the CSV files as a single argument separated by spaces, like this:
+
+bash
+
+Copy code
+
+./append_csv.sh "csv1.csv csv2.csv csv3.csv"
+
+The script will split the argument into an array of CSV filenames, check that all files are CSV files, and append the contents of all CSV files to the first one in the order they are provided. If only one CSV file is provided, the script will simply exit without appending anything.
+
+ChatGPT Mar 14 Version. Free Rese
