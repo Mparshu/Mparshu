@@ -521,3 +521,35 @@ Copy code
 The script will split the argument into an array of CSV filenames, check that all files are CSV files, and append the contents of all CSV files to the first one in the order they are provided. If only one CSV file is provided, the script will simply exit without appending anything.
 
 ChatGPT Mar 14 Version. Free Rese
+
+
+
+
+!/bin/bash
+
+# Set path to CSV file
+csv_file="table_names.csv"
+
+# Initialize associative array to store table names and counts
+declare -A counts
+
+# Read table names from CSV file and execute Hive queries
+while read -r table_name
+do
+    # Define Hive query using table name
+    hive_query="SELECT COUNT(*) FROM $table_name;"
+
+    # Execute Hive query and store count in associative array
+    count=$(hive -e "$hive_query" | tail -1)
+    counts[$table_name]=$count
+
+    echo "Counted $count records in $table_name"
+done < "$csv_file"
+
+# Print table names and their corresponding counts
+echo "Table Counts:"
+for table_name in "${!counts[@]}"
+do
+    count=${counts[$table_name]}
+    echo "$table_name: $count"
+done
