@@ -553,3 +553,35 @@ do
     count=${counts[$table_name]}
     echo "$table_name: $count"
 done
+
+
+
+
+@echo off
+:menu
+cls
+echo Select an option:
+echo 1. Option 1
+echo 2. Option 2
+echo 3. Option 3
+echo 4. Option 4
+
+set /p choice=Enter your choice (1-4):
+
+if "%choice%"=="1" (
+  echo You have selected Option 1
+  echo You have selected Option 1 > output.txt
+) else if "%choice%"=="2" (
+  echo You have selected Option 2
+  echo You have selected Option 2 > output.txt
+) else if "%choice%"=="3" (
+  echo You have selected Option 3
+  echo You have selected Option 3 > output.txt
+) else if "%choice%"=="4" (
+echo You have selected Option 4
+  echo You have selected Option 4 > output.txt
+) else (
+  echo Invalid choice. Please try again.
+  pause
+  goto menu
+)
