@@ -558,6 +558,12 @@ done
 
 
 @echo off
+
+set /p email=Enter your email address:
+echo Your email address is %email%
+echo Your email address is %email% > output.txt
+
+
 :menu
 cls
 echo Select an option:
