@@ -595,3 +595,4 @@ echo You have selected Option 4
 
 
 {(1, 1, 1), (1, 1, 0), (1, 1, NULL), (1, 0, 1), (1, 0, 0), (1, 0, NULL), (1, NULL, 1), (1, NULL, 0), (1, NULL, NULL), (0, 1, 1), (0, 1, 0), (0, 1, NULL), (0, 0, 1), (0, 0, 0), (0, 0, NULL), (0, NULL, 1), (0, NULL, 0), (0, NULL, NULL), (NULL, 1, 1), (NULL, 1, 0), (NULL, 1, NULL), (NULL, 0, 1), (NULL, 0, 0), (NULL, 0, NULL), (NULL, NULL, 1), (NULL, NULL, 0), (NULL, NULL, NULL)}
+{(1, 1, 1), (1, 1, 0), (1, 1, NULL), (1, 0, 1), (1, 0, 0), (1, 0, NULL), (1, NULL, 1), (1, NULL, 0), (1, NULL, NULL), (0, 1, 1), (0, 1, 0), (0, 1, NULL), (0, 0, 1), (0, 0, 0), (0, 0, NULL), (0, NULL, 1), (0, NULL, 0), (0, NULL, NULL), (NULL, 1, 1), (NULL, 1, 0), (NULL, 1, NULL), (NULL, 0, 1), (NULL, 0, 0), (NULL, 0, NULL), (NULL, NULL, 1), (NULL, NULL, 0), (NULL, NULL, NULL)}
