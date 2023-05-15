@@ -596,3 +596,22 @@ echo You have selected Option 4
 
 {(1, 1, 1), (1, 1, 0), (1, 1, NULL), (1, 0, 1), (1, 0, 0), (1, 0, NULL), (1, NULL, 1), (1, NULL, 0), (1, NULL, NULL), (0, 1, 1), (0, 1, 0), (0, 1, NULL), (0, 0, 1), (0, 0, 0), (0, 0, NULL), (0, NULL, 1), (0, NULL, 0), (0, NULL, NULL), (NULL, 1, 1), (NULL, 1, 0), (NULL, 1, NULL), (NULL, 0, 1), (NULL, 0, 0), (NULL, 0, NULL), (NULL, NULL, 1), (NULL, NULL, 0), (NULL, NULL, NULL)}
 {(1, 1, 1), (1, 1, 0), (1, 1, NULL), (1, 0, 1), (1, 0, 0), (1, 0, NULL), (1, NULL, 1), (1, NULL, 0), (1, NULL, NULL), (0, 1, 1), (0, 1, 0), (0, 1, NULL), (0, 0, 1), (0, 0, 0), (0, 0, NULL), (0, NULL, 1), (0, NULL, 0), (0, NULL, NULL), (NULL, 1, 1), (NULL, 1, 0), (NULL, 1, NULL), (NULL, 0, 1), (NULL, 0, 0), (NULL, 0, NULL), (NULL, NULL, 1), (NULL, NULL, 0), (NULL, NULL, NULL)}
+
+
+
+
+@echo off
+setlocal enabledelayedexpansion
+
+set "infile=input.txt"
+set "outfile=output.csv"
+
+if exist "%outfile%" del "%outfile%"
+
+for /f "tokens=* delims=" %%a in ('type "%infile%"') do (
+  set "line=%%a"
+  set "line=!line:	=,!"
+  echo !line!>>"%outfile%"
+)
+
+echo "Conversion complete."
