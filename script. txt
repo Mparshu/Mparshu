@@ -615,3 +615,34 @@ for /f "tokens=* delims=" %%a in ('type "%infile%"') do (
 )
 
 echo "Conversion complete."
+
+option batch abort
+option confirm off
+open sftp://username:password@example.com
+
+# File 1
+if exist C:\local\file1.txt (
+    put C:\local\file1.txt /remote/path/file1.txt
+    echo sh shellscript.sh > output.txt
+) else (
+    echo File 1 not found
+)
+
+# File 2
+if exist C:\local\file2.txt (
+    put C:\local\file2.txt /remote/path/file2.txt
+    echo sh shellscript.sh > output.txt
+) else (
+    echo File 2 not found
+)
+
+# File 3
+if exist C:\local\file3.txt (
+    put C:\local\file3.txt /remote/path/file3.txt
+    echo sh shellscript.sh > output.txt
+) else (
+    echo File 3 not found
+)
+
+exit
+
