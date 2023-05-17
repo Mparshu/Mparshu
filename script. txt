@@ -669,3 +669,13 @@ fileclose handle
 !del filenames.txt
 
 exit
+
+
+@echo off
+set /p answer="Do you want to eat ice cream? (yes/no): "
+if /i "%answer%"=="yes" (
+    set /p quantity="How many ice creams do you want to eat? "
+    echo You want to eat %quantity% ice cream(s).
+) else (
+    echo That's okay.
+)
