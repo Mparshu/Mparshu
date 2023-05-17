@@ -646,3 +646,26 @@ if exist C:\local\file3.txt (
 
 exit
 
+
+
+#Local outbound location
+lcd C:\Outbound
+
+# Download filenames.txt
+get /remote/path/filenames.txt
+
+# Read filenames.txt and transfer each file
+option transfer binary
+fileopen handle filenames.txt
+while !feof handle
+    filegets remotePath handle
+    if !feof handle
+        get %remotePath%
+    end
+end
+fileclose handle
+
+# Delete filenames.txt from the local machine
+!del filenames.txt
+
+exit
