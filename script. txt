@@ -679,3 +679,23 @@ if /i "%answer%"=="yes" (
 ) else (
     echo That's okay.
 )
+
+setlocal enabledelayedexpansion
+
+set "infile=input.txt"
+set "outfile=output.csv"
+
+if exist "%outfile%" del "%outfile%"
+
+for /f "tokens=* delims=" %%a in ('type "%infile%"') do (
+  set "line=%%a"
+  set "line=!line:	=,!"
+  echo !line!>>"%outfile%"
+)
+
+echo "Conversion complete."
+
+
+
+
+
