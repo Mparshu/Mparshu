@@ -695,7 +695,37 @@ for /f "tokens=* delims=" %%a in ('type "%infile%"') do (
 
 echo "Conversion complete."
 
+------------------------------
 
+The error message "relaying denied from 10.122.6.125" typically indicates that the SMTP server is configured to reject relayed email messages from the IP address 10.122.6.125. Here's some information to help you understand this error:
 
+Relaying in SMTP:
 
+Relaying refers to the process of sending an email through one SMTP server to another, where the second server delivers the email to its intended recipient.
+To prevent misuse and spam, SMTP servers are often configured to deny relaying by default.
+Relaying Denied Error:
+
+When you receive the "relaying denied" error message, it means that the SMTP server receiving the email (possibly the recipient's server) has determined that the server originating the email (10.122.6.125 in this case) is not allowed to relay messages through it.
+This restriction is in place to prevent unauthorized or unsolicited emails from being relayed through the server.
+Possible Causes and Solutions:
+
+Misconfiguration: Ensure that the email client or application you're using is correctly configured to send emails through the appropriate SMTP server, and that the server's settings permit relaying.
+Authentication: Some SMTP servers require authentication before allowing relaying. Ensure that you have provided the necessary authentication credentials (username and password) for the SMTP server.
+IP restriction: The SMTP server may have IP-based restrictions in place, allowing relaying only from specific IP addresses or ranges. Check with the server administrator to verify if your IP address (10.122.6.125) is allowed for relaying.
+SMTP server policy: The server's policy might simply disallow relaying for security reasons. In such cases, you may need to relay emails through an authorized SMTP server or contact the server administrator for further assistance.
+It's worth noting that resolving relaying issues often requires administrative access and configuration changes on the SMTP server. If you're not the administrator of the server or lack the necessary privileges, it's recommended to reach out to the appropriate IT department or the server administrator for further assistance in resolving the relaying denied error.
+
+------------------------------------------------------------------
+#!/bin/bash
+
+input_file="input.txt"
+output_file="output.csv"
+
+awk 'BEGIN { FS = "|\\^"; OFS = "," } {
+  for (i = 1; i <= NF; i++) {
+    printf "%s%s", $i, (i < NF ? OFS : "")
+  }
+  print ""
+}' "$input_file" > "$output_file"
+---------------------------------------------------
 
