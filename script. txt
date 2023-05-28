@@ -728,4 +728,6 @@ awk 'BEGIN { FS = "|\\^"; OFS = "," } {
   print ""
 }' "$input_file" > "$output_file"
 ---------------------------------------------------
-
+$dummyshell = New-Object -com "Wscript.shell"
+$dummyshell.sendkeys(".")
+---+++++++---+---+---------
