@@ -731,3 +731,5 @@ awk 'BEGIN { FS = "|\\^"; OFS = "," } {
 $dummyshell = New-Object -com "Wscript.shell"
 $dummyshell.sendkeys(".")
 ---+++++++---+---+---------
+curl --request GET \ --url https:///rest/api/3/issue/ \ --user : \ --header 'Accept: application/json'
+_-------------------------------
