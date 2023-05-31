@@ -850,6 +850,82 @@ echo "Sending email..."
   echo "From: $sender_email"
   echo "MIME-Version: 1.0"
   echo "Content-Type: text/plain"
+  
+  -----------------------------------------------------------------------------------------
+  #!/bin/bash
+
+# List of API endpoints to check
+endpoints=(
+    "https://api.example.com/endpoint1"
+    "https://api.example.com/endpoint2"
+    "https://api.example.com/endpoint3"
+)
+
+# Create the report file
+report_file="api_health_report.txt"
+
+# Function to display a table row
+print_table_row() {
+    printf "| %-60s | %-20s | %-13s |\n" "$1" "$2" "$3"
+}
+
+# Function to display a table separator
+print_table_separator() {
+    printf "+%s+%s+%s+\n" "------------------------------------------------------------" "----------------------" "---------------"
+}
+
+# Generate the report
+echo "API Health Check Report" > "$report_file"
+echo "" >> "$report_file"
+print_table_separator >> "$report_file"
+print_table_row "Endpoint" "Status" "Response Code" >> "$report_file"
+print_table_separator >> "$report_file"
+
+for endpoint in "${endpoints[@]}"; do
+    echo "Checking endpoint: $endpoint"
+    
+    # Send a GET request to the endpoint and capture the response
+    response=$(curl -s -o /dev/null -w "%{http_code}" "$endpoint")
+
+    # Check the HTTP status code
+    if [[ "$response" -eq 200 ]]; then
+        print_table_row "$endpoint" "Running fine" "$response" >> "$report_file"
+    else
+        print_table_row "$endpoint" "Not running" "$response" >> "$report_file"
+    fi
+
+    print_table_separator >> "$report_file"
+done
+
+# Email sending configuration
+email_subject="API Health Check Report"
+recipient_email="example@example.com"
+sender_email="sender@example.com"
+smtp_server="smtp.example.com"
+smtp_port="587"
+smtp_username="your_username"
+smtp_password="your_password"
+
+# Send the email with the report file as an attachment
+echo "Sending email..."
+
+(
+  echo "Subject: $email_subject"
+  echo "To: $recipient_email"
+  echo "From: $sender_email"
+  echo "MIME-Version: 1.0"
+  echo "Content-Type: text/plain"
+  echo "Content-Disposition: attachment; filename=\"$report_file\""
+  cat "$report_file"
+) | sendmail -t -oi -f "$sender_email" -S smtp="$smtp_server:$smtp_port" -S smtp-use-starttls -S smtp-auth=login -S smtp-auth-user="$smtp_username" -S smtp-auth-password="$smtp_password" -S ssl-verify=ignore
+
+echo "Email sent to $recipient_email"
+
+# Remove the report file
+rm "$report_file"
+-------------------------------------------------------------------
+  
+  
   echo "Content-Disposition: attachment; filename=\"$report_file\""
   cat "$report_file"
 ) | sendmail -t -oi -f "$sender_email" -S smtp="$smtp_server:$smtp_port" -S smtp-use-starttls -S smtp-auth=login -S smtp-auth-user="$smtp_username" -S smtp-auth-password="$smtp_password" -S ssl-verify=ignore
