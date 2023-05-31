@@ -778,3 +778,11 @@ echo "</body></html>" >> "$report_file"
 
 echo "HTML report generated: $report_file"
 ----------------------------------------------------------
+(
+  echo "Subject: $email_subject"
+  echo "MIME-Version: 1.0"
+  echo "Content-Type: text/html"
+  echo "Content-Disposition: inline"
+  echo "Content-Transfer-Encoding: 7bit"
+  cat "$report_file"
+) | 
