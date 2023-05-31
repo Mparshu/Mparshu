@@ -733,3 +733,48 @@ $dummyshell.sendkeys(".")
 ---+++++++---+---+---------
 curl --request GET \ --url https:///rest/api/3/issue/ \ --user : \ --header 'Accept: application/json'
 _-------------------------------
+#!/bin/bash
+
+# List of API endpoints to check
+endpoints=(
+    "https://api.example.com/endpoint1"
+    "https://api.example.com/endpoint2"
+    "https://api.example.com/endpoint3"
+)
+
+# Create the HTML report file
+report_file="api_health_report.html"
+echo "<html><body>" > "$report_file"
+
+# Iterate over the endpoints
+for endpoint in "${endpoints[@]}"; do
+    echo "Checking endpoint: $endpoint"
+    
+    # Send a GET request to the endpoint and capture the response
+    response=$(curl -s -o /dev/null -w "%{http_code}" "$endpoint")
+
+    # Check the HTTP status code
+    if [[ "$response" -eq 200 ]]; then
+        echo "Endpoint is running fine."
+        status_msg="Endpoint is running fine."
+        status_color="green"
+    else
+        echo "Endpoint is not running. HTTP status code: $response"
+        status_msg="Endpoint is not running."
+        status_color="red"
+    fi
+
+    # Add the endpoint, status, and response code to the HTML report
+    echo "<p><strong>Endpoint:</strong> $endpoint</p>" >> "$report_file"
+    echo "<p><strong>Status:</strong> <span style=\"color: $status_color;\">$status_msg</span></p>" >> "$report_file"
+    echo "<p><strong>Response Code:</strong> $response</p>" >> "$report_file"
+    echo "<hr>" >> "$report_file"
+
+    echo "------------------------------"
+done
+
+# Close the HTML report
+echo "</body></html>" >> "$report_file"
+
+echo "HTML report generated: $report_file"
+----------------------------------------------------------
