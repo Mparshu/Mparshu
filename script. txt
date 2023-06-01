@@ -1002,6 +1002,78 @@ echo "</html>" >>"$REPORT_FILE"
 
 echo "Comparison report generated: $REPORT_FILE"
 -------------------------------------------------------
+#!/bin/bash
 
+# Variables
+HIVE_SOURCE_QUERY="SELECT * FROM source_table;"
+HIVE_TARGET_QUERY="SELECT * FROM target_table;"
+BEELINE_CONNECTION_URL="jdbc:hive2://localhost:10000/default"
+
+# Run Hive source query
+SOURCE_RESULT=$(beeline -u "$BEELINE_CONNECTION_URL" -e "$HIVE_SOURCE_QUERY" --outputformat=tsv2 --showHeader=false)
+
+# Run Hive target query
+TARGET_RESULT=$(beeline -u "$BEELINE_CONNECTION_URL" -e "$HIVE_TARGET_QUERY" --outputformat=tsv2 --showHeader=false)
+
+# Compare results
+IFS=$'\n' read -r -a SOURCE_LINES <<< "$SOURCE_RESULT"
+IFS=$'\n' read -r -a TARGET_LINES <<< "$TARGET_RESULT"
+
+MISMATCHED_LINES=()
+for ((i = 0; i < ${#SOURCE_LINES[@]}; i++)); do
+    if [[ "${SOURCE_LINES[$i]}" != "${TARGET_LINES[$i]}" ]]; then
+        MISMATCHED_LINES+=("$i")
+    fi
+done
+
+if [ ${#MISMATCHED_LINES[@]} -eq 0 ]; then
+    RESULT_STATUS="Success"
+else
+    RESULT_STATUS="Failure"
+fi
+
+# Create HTML report
+REPORT_FILE="comparison_report.html"
+
+cat >"$REPORT_FILE" <<EOF
+<!DOCTYPE html>
+<html>
+<head>
+<title>Hive Query Comparison Report</title>
+<style>
+.diff {
+    color: red;
+}
+</style>
+</head>
+<body>
+<h1>Hive Query Comparison Report</h1>
+<h2>Source Query:</h2>
+<pre>$HIVE_SOURCE_QUERY</pre>
+<h2>Target Query:</h2>
+<pre>$HIVE_TARGET_QUERY</pre>
+<h2>Comparison Result:</h2>
+<p>Result: $RESULT_STATUS</p>
+<h2>Source Result:</h2>
+<pre>$SOURCE_RESULT</pre>
+<h2>Target Result:</h2>
+<pre>$TARGET_RESULT</pre>
+EOF
+
+if [ ${#MISMATCHED_LINES[@]} -gt 0 ]; then
+    echo "<h2>Mismatched Lines:</h2>" >>"$REPORT_FILE"
+    for line_num in "${MISMATCHED_LINES[@]}"; do
+        echo "<h3>Line $((line_num + 1)):</h3>" >>"$REPORT_FILE"
+        echo "<pre>" >>"$REPORT_FILE"
+        diff -u <(echo "${SOURCE_LINES[$line_num]}") <(echo "${TARGET_LINES[$line_num]}") | tail -n +4 >>"$REPORT_FILE"
+        echo "</pre>" >>"$REPORT_FILE"
+    done
+fi
+
+echo "</body>" >>"$REPORT_FILE"
+echo "</html>" >>"$REPORT_FILE"
+
+echo "Comparison report generated: $REPORT_FILE"
+-------------------------------------------------------------------------
 
 
