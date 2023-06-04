@@ -1171,4 +1171,6 @@ echo "</html>" >> "$REPORT_FILE"
 
 echo "Comparison report generated: $REPORT_FILE"
 --------------------------------------------------------------------------------------------------
-
+        # Print the merged output file with color highlighting for differences
+        awk -F ',' 'NR>1{print "<tr>"; for(i=1;i<=NF;i++){if($i != $(i+NF)){print "<td><font color=\"red\">"$i"</font></td>"}else{print "<td>"$i"</td>"}} print "</tr>"}' "$output_data"
+        ------------------------------------------------------------------------------------------------------
