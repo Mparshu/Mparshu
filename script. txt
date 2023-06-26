@@ -1174,3 +1174,22 @@ echo "Comparison report generated: $REPORT_FILE"
         # Print the merged output file with color highlighting for differences
         awk -F ',' 'NR>1{print "<tr>"; for(i=1;i<=NF;i++){if($i != $(i+NF)){print "<td><font color=\"red\">"$i"</font></td>"}else{print "<td>"$i"</td>"}} print "</tr>"}' "$output_data"
         ------------------------------------------------------------------------------------------------------
+- Create table with an array of structs
+CREATE TABLE my_table (
+  id INT,
+  persons ARRAY<STRUCT<name:STRING, age:INT>>
+);
+
+-- Insert data into the table
+INSERT INTO my_table VALUES
+  (1, array(named_struct('name', 'John', 'age', 25), named_struct('name', 'Alice', 'age', 30))),
+  (2, array(named_struct('name', 'Bob', 'age', 28), named_struct('name', 'Jane', 'age', NULL)));
+
+- Update age value within the array of structs
+UPDATE my_table
+SET persons = transform(persons, p -> IF(p.name = 'Jane', named_struct('name', p.name, 'age', 35), p))
+WHERE array_contains(transform(persons, p -> p.name), 'Jane');
+
+-- Query the updated table
+SELECT * FROM my_table;
+
