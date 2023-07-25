@@ -1226,3 +1226,44 @@ Best regards,
 [Your Company/Organization]
 [Your Email Address]
 [Your Phone Number]
+
+
+------------------+------------++-+
+#!/bin/bash
+
+if [ "$#" -ne 2 ]; then
+  echo "Usage: $0 <tablename> <backuptablename>"
+  exit 1
+fi
+
+tablename=$1
+backuptablename=$2
+
+# Check if the backup table already exists in Hive
+backup_table_check=$(hive -S -e "SHOW TABLES LIKE '$backuptablename';")
+
+if [ -n "$backup_table_check" ]; then
+  echo "Backup table '$backuptablename' already exists in Hive."
+  exit 1
+fi
+
+# Run the SHOW CREATE TABLE query and store the output
+hive_output=$(hive -S -e "SHOW CREATE TABLE $tablename;")
+
+# Check if the table exists in Hive
+if [ -z "$hive_output" ]; then
+  echo "Table '$tablename' not found in Hive."
+  exit 1
+fi
+
+# Replace the tablename with backuptablename in the query
+updated_query=$(echo "$hive_output" | sed "s/$tablename/$backuptablename/g")
+
+# Create the backup table in Hive
+hive -e "$updated_query"
+
+if [ $? -eq 0 ]; then
+  echo "Backup table '$backuptablename' created successfully."
+else
+  echo "Failed to create backup table '$backuptablename'."
+fi
