@@ -1267,3 +1267,6 @@ if [ $? -eq 0 ]; then
 else
   echo "Failed to create backup table '$backuptablename'."
 fi
+
+--------------------
+cat ~/.ssh/id_rsa.pub | ssh username@IP address "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys"
