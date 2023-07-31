@@ -1270,3 +1270,10 @@ fi
 
 --------------------
 cat ~/.ssh/id_rsa.pub | ssh username@IP address "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys"
+
+
+----++-++++++++++++-++++++++
+ssh://name@server.com
+sftp://name@server.com
+ssh -N -L 1337:localhost:1337 name@server.com
+ssh -L [LOCAL_IP:]LOCAL_PORT:DESTINATION:DESTINATION_PORT [USER@]SSH_SERVER
