@@ -1287,3 +1287,12 @@ ssh -L [LOCAL_IP:]LOCAL_PORT:DESTINATION:DESTINATION_PORT [USER@]SSH_SERVER
     Insert code solution for Day 1.
   {expand-section}
 {expand}
+
+
+
+
+double compressing files (compressing multiple tar.gz files into one tar.gz file) can potentially cause corruption issues. Compressing an already compressed file may lead to unexpected results, as the compression algorithms might not work optimally on pre-compressed data.
+
+Each compression step introduces additional complexity, and it can be difficult for compression algorithms to efficiently handle data that is already compressed. This can result in higher chances of data corruption, loss of data, or inflated file sizes.
+
+To avoid such issues, it's generally recommended not to compress already compressed files unless you have specific reasons to do so and are aware of the potential risks. If you need to distribute multiple tar.gz files together, it's better to keep them separate and provide clear instructions for decompressing and using them individually.
