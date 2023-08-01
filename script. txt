@@ -1277,3 +1277,13 @@ ssh://name@server.com
 sftp://name@server.com
 ssh -N -L 1337:localhost:1337 name@server.com
 ssh -L [LOCAL_IP:]LOCAL_PORT:DESTINATION:DESTINATION_PORT [USER@]SSH_SERVER
+
+---------------------------
+{expand:title=Day 1}
+  {expand-section:title=Problem}
+    Insert problem description for Day 1.
+  {expand-section}
+  {expand-section:title=Solution}
+    Insert code solution for Day 1.
+  {expand-section}
+{expand}
