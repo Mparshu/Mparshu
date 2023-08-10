@@ -1296,3 +1296,35 @@ double compressing files (compressing multiple tar.gz files into one tar.gz file
 Each compression step introduces additional complexity, and it can be difficult for compression algorithms to efficiently handle data that is already compressed. This can result in higher chances of data corruption, loss of data, or inflated file sizes.
 
 To avoid such issues, it's generally recommended not to compress already compressed files unless you have specific reasons to do so and are aware of the potential risks. If you need to distribute multiple tar.gz files together, it's better to keep them separate and provide clear instructions for decompressing and using them individually.
+
+--------------------------------------
+
+
+#!/bin/bash
+
+# Check if the correct number of arguments is provided
+if [ "$#" -ne 3 ]; then
+    echo "Usage: $0 <source_database> <source_table> <backup_table>"
+    exit 1
+fi
+
+# Store the arguments in variables
+source_database="$1"
+source_table="$2"
+backup_table="$3"
+
+# Run the Hive query to get the CREATE TABLE statement
+create_statement=$(hive -S -e "SHOW CREATE TABLE $source_database.$source_table")
+
+# Check if the query executed successfully
+if [ $? -eq 0 ]; then
+    # Modify the CREATE TABLE statement for the backup
+    modified_statement=$(echo "$create_statement" | sed "s/$source_table/$backup_table/g")
+
+    # Create the backup table using the modified statement
+    hive -e "$modified_statement"
+    echo "Backup table '$backup_table' created successfully!"
+else
+    echo "Error running Hive query. Check if the source database and table exist."
+    exit 1
+fi
