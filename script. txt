@@ -1328,3 +1328,44 @@ else
     echo "Error running Hive query. Check if the source database and table exist."
     exit 1
 fi
+
+
+
+
+#!/bin/bash
+
+# Check if the table names file exists
+table_names_file="table_names.txt"
+
+if [ ! -f "$table_names_file" ]; then
+    echo "Table names file '$table_names_file' not found."
+    exit 1
+fi
+
+# Read table names from the text file into an array
+readarray -t table_names < "$table_names_file"
+
+# Loop through each table
+for table_name in "${table_names[@]}"; do
+    # Define the output SQL file name for this table
+    output_file="${table_name}_insert_queries.sql"
+
+    # Clear the contents of the output file (if it exists)
+    > "$output_file"
+
+    # Loop to generate INSERT queries with sys_recordkey values for this table
+    for ((i = 3000; i <= 8000; i++)); do
+        sys_recordkey="RecordKey_$i"
+
+        # Create the INSERT query
+        insert_query="INSERT INTO $table_name (sys_recordkey) VALUES ('$sys_recordkey');"
+
+        # Append the INSERT query to the output file
+        echo "$insert_query" >> "$output_file"
+    done
+
+    # Add the 'run_sql' line to the output file
+    echo "m_db run dbc -file $output_file" >> "$output_file"
+
+    echo "SQL insert queries for $table_name generated and saved in $output_file"
+done
