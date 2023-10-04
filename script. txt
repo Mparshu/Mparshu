@@ -1389,3 +1389,5 @@ driver.get("https://google.com")
         else
             policydecision_list+=("V99")
         fi
+array3=( ["PC002"]="V1" ["PC003"]="V2" ["PC001"]="V3" )
+
