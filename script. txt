@@ -1391,3 +1391,47 @@ driver.get("https://google.com")
         fi
 array3=( ["PC002"]="V1" ["PC003"]="V2" ["PC001"]="V3" )
 
+
+--------------------------------------
+
+#!/bin/bash
+
+csv_file="/Inbound/exclusion.csv"
+
+# Define the associative array with key-value pairs
+declare -A array3
+array3=( ["PC002"]="V1" ["PC003"]="V2" ["PC001"]="V3" )
+
+echo $csv_file
+
+while IFS='|' read -r customerid policycodes previousadverseactioncode; do
+    # Remove square brackets and split policycodes into an array
+    policycodes_list=($(sed 's/\[//;s/\]//;s/,/\n/g;s/\"//g' <<< "$policycodes"))
+
+    # Remove square brackets and split previousadverseactioncode into an array
+    previousadverseactioncode_list=($(sed 's/\[//;s/\]//;s/,/\n/g;s/\"//g' <<< "$previousadverseactioncode"))
+
+    echo "Customer ID: $customerid"
+    policydecision_list=()  # New list to hold policy decision values
+    priority_list=()  # New list to hold priority values
+
+    # Check conditions for priority_list
+    if [ "${previousadverseactioncode_list[0]}" == "NULL" ] || [ "${previousadverseactioncode_list[3]}" == "NULL" ] || [ "${previousadverseactioncode_list[4]}" == "NULL" ] || [ "${previousadverseactioncode_list[5]}" == "NULL" ] || [ "${previousadverseactioncode_list[6]}" == "NULL" ]; then
+        priority_list+=(-999 -999 -999 -999)
+    elif [ ${#policycodes_list[@]} -eq 0 ] && [ "${previousadverseactioncode_list[0]}" == "null" ] && [ "${previousadverseactioncode_list[1]}" == "null" ] && [ "${previousadverseactioncode_list[2]}" == "null" ] && [ "${previousadverseactioncode_list[3]}" == "null" ]; then
+        priority_list+=(-998 -998 -998 -998)
+    else
+        # Add padding of 0s if policycodes_list has less than four values
+        while [ ${#policycodes_list[@]} -lt 4 ]; do
+            policycodes_list+=("0")
+        done
+
+        if [ "${previousadverseactioncode_list[@]:0:4}" == "${policycodes_list[@]:0:4}" ]; then
+            priority_list+=(-997 -997 -997 -997)
+        else
+            priority_list+=("Unknown" "Unknown" "Unknown" "Unknown")
+        fi
+    fi
+
+    echo "Priority List: ${priority_list[@]}"
+done < "$csv_file"
