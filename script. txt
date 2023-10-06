@@ -1440,3 +1440,8 @@ done < "$csv_file"
 SELECT id, name, address, phone
 FROM customer
 LATERAL VIEW explode(array_repeat(struct(*), 6)) exploded_table AS exploded_row;
+
+
+SELECT id, name, address, phone, col
+FROM customer
+LATERAL VIEW explode(array('A', 'B', 'C', 'D', 'E', 'F')) exploded_table AS col;
