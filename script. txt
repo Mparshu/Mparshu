@@ -1435,3 +1435,8 @@ while IFS='|' read -r customerid policycodes previousadverseactioncode; do
 
     echo "Priority List: ${priority_list[@]}"
 done < "$csv_file"
+
+
+SELECT id, name, address, phone
+FROM customer
+LATERAL VIEW explode(array_repeat(struct(*), 6)) exploded_table AS exploded_row;
