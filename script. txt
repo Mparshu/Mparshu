@@ -1445,3 +1445,55 @@ LATERAL VIEW explode(array_repeat(struct(*), 6)) exploded_table AS exploded_row;
 SELECT id, name, address, phone, col
 FROM customer
 LATERAL VIEW explode(array('A', 'B', 'C', 'D', 'E', 'F')) exploded_table AS col;
+
+--------------------------------------------------------------------------------
+
+
+Day 1: Introduction to Linux Commands
+Session 1 (30 minutes)
+
+Introduction to Linux:
+
+Provide a brief overview of Linux and its significance.
+Explain the concept of a shell and the Bash shell.
+Command Line Interface (CLI) Basics:
+
+Discuss the basic structure of a Linux command: command, options, and arguments.
+Demonstrate how to access the terminal in Linux.
+Session 2 (30 minutes)
+
+Navigating the File System:
+
+Cover essential commands: pwd, ls, cd, mkdir, rmdir.
+Explain relative and absolute paths.
+File and Directory Manipulation:
+
+Discuss commands: cp, mv, rm.
+Introduce wildcard characters (*, ?).
+Day 2: Advanced Linux Commands and Text Processing
+Session 1 (30 minutes)
+
+File and Text Processing with Awk and Sed:
+Introduce awk for text and data extraction, covering basic syntax and examples.
+Explain sed for text stream editing, focusing on search and replace operations.
+Session 2 (30 minutes)
+
+Advanced Text Processing with Awk and Sed:
+Demonstrate advanced text filtering, transformation, and substitution using awk and sed.
+Provide practical examples and exercises for students to practice awk and sed commands.
+Day 3: Introduction to Shell Scripting
+Session 1 (30 minutes)
+
+Basics of Shell Scripting:
+
+Define a shell script and explain its purpose.
+Guide students in creating a simple shell script, explaining the script's structure.
+Variables and Control Structures:
+
+Introduce variables, data types, and their usage in shell scripts.
+Cover control structures: if statements for conditional branching and loops (for and while loops).
+Session 2 (30 minutes)
+
+Functions and Script Organization:
+Describe functions in shell scripting, including declaration and usage.
+Emphasize organizing scripts into functions for modularity and readability.
