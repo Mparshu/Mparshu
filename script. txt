@@ -1678,6 +1678,9 @@ awk '/pattern/' {print $2}
 ---------------------------------------------------------
 
 
+Certainly! In shell scripting, >, >>, <, and | are special characters used for redirection, and tee is a command used in conjunction with these redirection operators. Here's what they do:> (Greater Than):It is used for output redirection.command > file redirects the standard output of command to file.If file does not exist, it is created. If it exists, it is truncated.>> (Double Greater Than):Similar to >, but appends output to the end of the file.command >> file appends the standard output of command to file.If file does not exist, it is created. If it exists, output is added at the end.< (Less Than):It is used for input redirection.command < file redirects the standard input of command from file.command reads input from file instead of the keyboard.| (Pipe):It is used to connect the output of one command as input to another command.command1 | command2 runs command1 and passes its output as input to command2.Allows the chaining of commands in a shell script.tee:tee is a command-line tool that reads from standard input and writes to standard output and files simultaneously.It is often used in conjunction with pipes (|) to capture and display the output and also save it to a file.Example: command | tee file.txt will display the output of command and save it to file.txt simultaneously.In summary, these operators and the tee command provide powerful ways to manage input and output in shell scripts, allowing you to control where the input comes from and where the output goes.
+
+
 
 
 
