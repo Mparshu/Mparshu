@@ -2147,5 +2147,52 @@ The `curl` command makes a GET request to the specified API endpoint with basic 
 
 Make sure to update the variables (`JIRA_BASE_URL`, `JIRA_API_ENDPOINT`, `USERNAME`, `API_TOKEN`, and `ISSUE_KEY`) with your own Jira details before running the script. This script demonstrates how to fetch issue details, but you can modify it to perform other operations based on the Jira API documentation.
 ---------------------------------------------------------------------
+Birthday Mail
+Certainly! Below is an example of a shell script that reads a CSV file with pipe-delimited fields containing name, email, and birthday information. The script checks if today's date matches any of the birthdays in the file and sends a birthday wish email to the respective person using the SMTP protocol. Please replace `smtp_server`, `smtp_port`, `smtp_username`, `smtp_password` with your SMTP server details and provide the correct path to your CSV file.
+
+```bash
+#!/bin/bash
+
+# SMTP Server details
+smtp_server="your_smtp_server"
+smtp_port="your_smtp_port"
+smtp_username="your_smtp_username"
+smtp_password="your_smtp_password"
+
+# CSV file path
+csv_file="path/to/your/csvfile.csv"
+
+# Get current date in format MM-DD
+current_date=$(date +%m-%d)
+
+# Read the CSV file and send birthday wishes
+while IFS='|' read -r name email birthday; do
+    # Extract month and day from the birthday field (MM-DD)
+    birthday_month_day=$(echo "$birthday" | cut -d'-' -f2-)
+
+    # Check if current date matches birthday
+    if [ "$current_date" == "$birthday_month_day" ]; then
+        # Send birthday wish email
+        echo "Subject: Happy Birthday, $name!
+From: Your Name <your_email@example.com>
+To: $email
+
+Dear $name,
+
+Happy Birthday! 🎉🎂
+
+Best regards,
+Your Name" | \
+        /usr/sbin/sendmail -S "$smtp_server:$smtp_port" \
+                            -au"$smtp_username" -ap"$smtp_password" \
+                            -f"your_email@example.com" "$email"
+        
+        echo "Birthday wish sent to $name ($email)"
+    fi
+done < "$csv_file"
+```
+
+Make sure to update the SMTP server details, CSV file path, and customize the email message as needed. Please note that sending emails via SMTP may require appropriate permissions and configurations on your server. Also, ensure that the `sendmail` command is available on your system. You might need to adjust the command if you are using a different mail sending method.
+---------------------------------------------------------
 
 
