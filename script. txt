@@ -1796,6 +1796,356 @@ grep -rin 'pattern' directory/
 This will perform a case-insensitive, recursive search for 'pattern' in files inside the specified directory, showing line numbers for matches.
 
 These examples cover the basic usage and some common arguments for `sed`, `awk`, and `grep`. Each of these commands has many more advanced features and options, so feel free to explore their respective documentation for further details.
+------------------------------------------------------------
+Certainly! In shell scripting, loops are used to execute a block of code repeatedly based on a condition. There are mainly three types of loops: `for`, `while`, and `until`. Additionally, `IFS` (Internal Field Separator) is not a loop but an environment variable used to split a string into fields based on a delimiter. Let's explore each one:
 
+### 1. `for` Loop:
+The `for` loop is used to iterate a specific set of statements for a predefined number of times or over a list of items.
+
+**Syntax:**
+```bash
+for variable in list
+do
+    # Code to be executed for each item in the list
+done
+```
+
+**Example:**
+```bash
+for i in {1..5}
+do
+    echo "Number: $i"
+done
+```
+This will print numbers from 1 to 5.
+
+### 2. `while` Loop:
+The `while` loop is used to execute a set of commands as long as a specified condition is true.
+
+**Syntax:**
+```bash
+while [ condition ]
+do
+    # Code to be executed as long as the condition is true
+done
+```
+
+**Example:**
+```bash
+count=1
+while [ $count -le 5 ]
+do
+    echo "Count: $count"
+    ((count++))
+done
+```
+This will print numbers from 1 to 5 using a `while` loop.
+
+### 3. `until` Loop:
+The `until` loop is used to execute a set of commands as long as a specified condition is false.
+
+**Syntax:**
+```bash
+until [ condition ]
+do
+    # Code to be executed as long as the condition is false
+done
+```
+
+**Example:**
+```bash
+count=1
+until [ $count -gt 5 ]
+do
+    echo "Count: $count"
+    ((count++))
+done
+```
+This will print numbers from 1 to 5 using an `until` loop.
+
+### `IFS` (Internal Field Separator):
+`IFS` is not a loop, but an environment variable used to split a string into fields based on a delimiter.
+
+**Example:**
+```bash
+sentence="This is a sentence"
+IFS=" " # Setting space as the delimiter
+read -ra words <<< "$sentence"
+for word in "${words[@]}"
+do
+    echo "Word: $word"
+done
+```
+This will split the sentence into words based on spaces and print each word separately.
+
+These examples cover different types of loops in shell scripting (`for`, `while`, and `until`) as well as the usage of `IFS` to split strings. Each type of loop has its own specific use cases, allowing you to create flexible and powerful scripts.
+----------------------------------------------------
+Command substitution in shell scripting allows you to execute a command and use its output (stdout) as a value in the script. This can be achieved using backticks (\``) or `$()` syntax. Here's how it works:
+
+### Using Backticks (\``):
+```bash
+variable_name=`command`
+```
+
+### Using `$()` Syntax:
+```bash
+variable_name=$(command)
+```
+
+Here are a few examples to illustrate command substitution:
+
+**Example 1: Capturing Command Output**
+```bash
+current_date=`date`
+echo "Current date and time: $current_date"
+```
+In this example, the `date` command is executed, and its output is stored in the `current_date` variable, which is then printed.
+
+**Example 2: Command Substitution with a File**
+```bash
+file_count=$(ls -l | wc -l)
+echo "Number of files in the current directory: $file_count"
+```
+In this example, `ls -l` lists the files in the current directory, `wc -l` counts the number of lines in the output, and the result is stored in the `file_count` variable.
+
+**Example 3: Using Command Substitution in a Command**
+```bash
+echo "Today is $(date +%A), $(date +%B) $(date +%d), $(date +%Y)"
+```
+In this example, the `date` command is used within the `echo` statement using command substitution to print the current day, month, date, and year.
+
+**Example 4: Command Substitution with Arithmetic**
+```bash
+result=$(( $(echo "10 + 20") ))
+echo "Result of the arithmetic operation: $result"
+```
+In this example, command substitution is used inside an arithmetic operation to calculate the sum of 10 and 20.
+
+Command substitution is a powerful feature that allows you to capture the output of commands and use it as variables or inputs for other commands within your shell scripts.
+--------------------------------------------------------------------------------
+In shell scripting, `if-else` statements are used to make decisions based on conditions. Here's the basic structure:
+
+```bash
+if [ condition ]
+then
+    # Code to be executed if the condition is true
+else
+    # Code to be executed if the condition is false
+fi
+```
+
+The square brackets `[ ]` are used for evaluating the condition. The `then` keyword indicates the start of the code block to be executed if the condition is true. The `else` keyword is followed by the code block to be executed if the condition is false. The `fi` keyword marks the end of the `if-else` block.
+
+Here are a few examples to illustrate `if-else` statements in shell scripting:
+
+**Example 1: Checking if a Number is Even or Odd**
+```bash
+echo "Enter a number: "
+read number
+
+if [ $((number % 2)) -eq 0 ]
+then
+    echo "$number is even."
+else
+    echo "$number is odd."
+fi
+```
+
+In this example, the script checks if the input number is even or odd and prints the corresponding message.
+
+**Example 2: Comparing Strings**
+```bash
+expected="password123"
+echo "Enter the password: "
+read password
+
+if [ "$password" = "$expected" ]
+then
+    echo "Access granted."
+else
+    echo "Access denied."
+fi
+```
+
+In this example, the script checks if the entered password matches the expected password and grants or denies access accordingly.
+
+**Example 3: Nested `if-else`**
+```bash
+echo "Enter your age: "
+read age
+
+if [ $age -ge 18 ]
+then
+    echo "You are eligible to vote."
+    
+    if [ $age -ge 60 ]
+    then
+        echo "You are also eligible for senior citizen benefits."
+    fi
+else
+    echo "You are not eligible to vote."
+fi
+```
+
+In this example, the script checks the age and provides different messages based on whether the person is eligible to vote and whether they qualify for senior citizen benefits.
+
+`if-else` statements allow you to create conditional logic in your shell scripts, making it possible to execute different code blocks based on specific conditions.
+----------------------------------------------------------------------------------------------------
+In shell scripting, **arguments** refer to the values provided to a script or a function when it is executed. These arguments allow you to pass input data to your script or function, making them dynamic and versatile. 
+
+### Arguments in Shell Script:
+
+**Syntax for accessing script arguments:**
+- `$0`: Name of the script itself.
+- `$1`, `$2`, `$3`, ...: The first, second, third, and so on, arguments passed to the script.
+
+**Example Script:**
+```bash
+#!/bin/bash
+
+echo "Script name: $0"
+echo "First argument: $1"
+echo "Second argument: $2"
+echo "All arguments: $@"
+echo "Number of arguments: $#"
+```
+
+In this script, `$0` represents the script name, `$1` and `$2` represent the first and second arguments passed to the script, respectively. `$@` represents all the arguments, and `$#` represents the total number of arguments passed.
+
+**Executing the Script:**
+```bash
+./script.sh arg1 arg2
+```
+Output:
+```
+Script name: ./script.sh
+First argument: arg1
+Second argument: arg2
+All arguments: arg1 arg2
+Number of arguments: 2
+```
+
+### Arguments in Functions:
+
+**Syntax for accessing function arguments:**
+- `$1`, `$2`, `$3`, ...: The first, second, third, and so on, arguments passed to the function.
+
+**Example Function:**
+```bash
+#!/bin/bash
+
+function greet {
+    echo "Hello, $1!"
+}
+
+greet "Alice"
+greet "Bob"
+```
+
+In this function, `$1` represents the first argument passed to the `greet` function.
+
+**Function Execution:**
+```bash
+./script.sh
+```
+Output:
+```
+Hello, Alice!
+Hello, Bob!
+```
+
+In the example, the `greet` function is called twice with different arguments.
+
+You can use these arguments to make your scripts and functions more flexible and capable of handling various input scenarios. These arguments allow your scripts and functions to be reused with different data without modifying the script logic.
+------------------------------------------------------------------------------
+SMTP (Simple Mail Transfer Protocol) is a protocol used in email communication to send messages from a client to a server or between servers. You can use the `telnet` command in a shell script to interact with an SMTP server and send emails using the SMTP protocol. Below is an example of how you can send an email using SMTP in a shell script using the `telnet` command with verbose output.
+
+**Shell Script to Send Email using SMTP:**
+
+```bash
+#!/bin/bash
+
+# SMTP Server Details
+SMTP_SERVER="smtp.example.com"
+SMTP_PORT="25"
+SENDER_EMAIL="sender@example.com"
+RECIPIENT_EMAIL="recipient@example.com"
+
+# Email Content
+EMAIL_SUBJECT="Test Email"
+EMAIL_BODY="This is a test email sent using SMTP in shell script."
+
+# Connect to SMTP server using telnet
+{
+    sleep 1
+    echo "EHLO example.com"
+    sleep 1
+    echo "MAIL FROM:<$SENDER_EMAIL>"
+    sleep 1
+    echo "RCPT TO:<$RECIPIENT_EMAIL>"
+    sleep 1
+    echo "DATA"
+    sleep 1
+    echo "Subject: $EMAIL_SUBJECT"
+    echo -e "$EMAIL_BODY"
+    echo "."
+    echo "QUIT"
+} | telnet -c "$SMTP_SERVER" "$SMTP_PORT"
+
+echo "Email sent successfully."
+```
+
+In this script:
+
+1. Replace `"smtp.example.com"` with your SMTP server address.
+2. Set `"25"` as the port number for unencrypted SMTP communication. For encrypted SMTP (SMTPS) use port `"587"` or `"465"` depending on the encryption method (STARTTLS or SSL/TLS).
+3. Set `"sender@example.com"` and `"recipient@example.com"` with the sender and recipient email addresses, respectively.
+4. Set the `EMAIL_SUBJECT` and `EMAIL_BODY` variables with the desired email subject and body.
+
+The script uses `telnet` to connect to the SMTP server and sends SMTP commands to send the email. The `-c` option in `telnet` enables character mode, allowing you to send commands non-interactively. The `sleep` commands are added to give the server some time to respond between each command.
+
+Make sure to customize the script with your SMTP server details and run it in a shell environment that allows network connections. Note that this example does not handle authentication or encryption, which are typically required in real-world scenarios.
+---------------------------------------------------------
+Certainly! The `curl` command in shell scripting is a powerful tool for making HTTP requests to various services, including APIs. Below is an example of how you can use `curl` in a shell script to interact with the Jira API for demonstration purposes.
+
+### Prerequisites:
+Before using the Jira API, make sure you have the following information:
+- Jira Base URL
+- API endpoint you want to access
+- Authentication credentials (usually in the form of username and API token)
+
+### Example Shell Script Using `curl` and Jira API:
+
+```bash
+#!/bin/bash
+
+# Jira API Details
+JIRA_BASE_URL="https://your-jira-instance.atlassian.net"
+JIRA_API_ENDPOINT="/rest/api/2/issue"
+USERNAME="your_username"
+API_TOKEN="your_api_token"
+
+# Issue Key to Fetch (replace 'PROJECT-123' with a valid Jira issue key)
+ISSUE_KEY="PROJECT-123"
+
+# API Request URL
+API_URL="$JIRA_BASE_URL$JIRA_API_ENDPOINT/$ISSUE_KEY"
+
+# Curl command to fetch Jira issue details
+curl -u "$USERNAME:$API_TOKEN" -X GET -H "Content-Type: application/json" "$API_URL"
+```
+
+In this script:
+
+- `JIRA_BASE_URL` is the base URL of your Jira instance.
+- `JIRA_API_ENDPOINT` is the specific API endpoint you want to access (in this case, fetching a specific issue).
+- `USERNAME` is your Jira username.
+- `API_TOKEN` is your Jira API token. You can generate an API token in your Jira account settings.
+- `ISSUE_KEY` is the key of the Jira issue you want to fetch. Replace it with a valid issue key from your Jira instance.
+
+The `curl` command makes a GET request to the specified API endpoint with basic authentication using your Jira username and API token. The response from the Jira API will be printed to the terminal.
+
+Make sure to update the variables (`JIRA_BASE_URL`, `JIRA_API_ENDPOINT`, `USERNAME`, `API_TOKEN`, and `ISSUE_KEY`) with your own Jira details before running the script. This script demonstrates how to fetch issue details, but you can modify it to perform other operations based on the Jira API documentation.
+---------------------------------------------------------------------
 
 
