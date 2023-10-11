@@ -2195,4 +2195,4 @@ done < "$csv_file"
 Make sure to update the SMTP server details, CSV file path, and customize the email message as needed. Please note that sending emails via SMTP may require appropriate permissions and configurations on your server. Also, ensure that the `sendmail` command is available on your system. You might need to adjust the command if you are using a different mail sending method.
 ---------------------------------------------------------
 
-
+I have csv pipe delimited file with name|mail-id|birthday. create a shell script which will check the current date if currecnt date matches with the birthday then we will send the birthday wish to the person via mail using smtp protocol
