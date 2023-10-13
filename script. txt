@@ -2196,3 +2196,57 @@ Make sure to update the SMTP server details, CSV file path, and customize the em
 ---------------------------------------------------------
 
 I have csv pipe delimited file with name|mail-id|birthday. create a shell script which will check the current date if currecnt date matches with the birthday then we will send the birthday wish to the person via mail using smtp protocol
+
+
+
+-------------------------------------------------------
+<dependency>  
+    <groupId>com.sparkjava</groupId>  
+    <artifactId>spark-core</artifactId>  
+    <version>2.9.3</version>  
+</dependency>  
+-----------------------------
+import static spark.Spark.*;  
+public class HelloWorld   
+{  
+    public static void main(String[] args)   
+{  
+        get("/hello", (req, res) -> "Hello World");  
+    }  
+}  
+
+https://www.javatpoint.com/spark-java
+
+SparkSession spark = SparkSession.builder().master("yarn").appName("Application").enableHiveSupport().getOrCreate();
+Dataset<Row> ds = spark.read().parquet(filename);
+
+---------------------------------------------------
+
+import org.apache.spark.sql.Dataset;
+import org.apache.spark.sql.Row;
+import org.apache.spark.sql.SparkSession;
+
+public class ParquetFileReader {
+    public static void main(String[] args) {
+        // Create a SparkSession
+        SparkSession spark = SparkSession.builder()
+                .appName("ParquetFileReader")
+                .master("local[*]") // You can change the master URL based on your Spark cluster configuration
+                .getOrCreate();
+
+        // Specify the path to the Parquet file
+        String parquetFilePath = "path/to/your/parquet/file";
+
+        // Read the Parquet file into a DataFrame
+        Dataset<Row> parquetFile = spark.read().parquet(parquetFilePath);
+
+        // Show the schema of the DataFrame
+        parquetFile.printSchema();
+
+        // Show the data in the DataFrame
+        parquetFile.show();
+
+        // Stop the SparkSession
+        spark.stop();
+    }
+}
