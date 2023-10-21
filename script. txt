@@ -2459,4 +2459,14 @@ done
 ---------------------------------------------------------
 To create temporary log files in Linux, you can use the mktemp utility available on most Linux systems
 This utility creates unique temporary files within the containing directory. By default, running mktemp with no arguments will create a temporary file in /tmp
+TMPFILE=$(mktemp /tmp/foo-XXXXX)
+echo "Hello world" >> $TMPFILE  # Append some text to the file
+cat $TMPFILE                    # Print the contents of the file
+rm $TMPFILE         
+
+TMPFILE=$(mktemp /tmp/foo-XXXXXX)
+trap "rm -f $TMPFILE" EXIT
+When keeping big temporary files, we might want to do some housekeeping in case our script fails.
+
+We can do this using the trap command, which allows us to run some code when an exit code is detected:
 
