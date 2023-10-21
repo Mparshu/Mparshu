@@ -2452,4 +2452,8 @@ runGraphs() {
 # Call the function to check the zip file and run .pset files
 checkZipFile
 -----------------------------------------------------
-
+for file in $(unzip -l archive.zip | awk '{print $NF}'); do
+  last_line=$(unzip -p archive.zip "$file" | tail -n 1)
+  echo "$file: $last_line"
+done
+---------------------------------------------------------
