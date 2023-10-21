@@ -2469,4 +2469,8 @@ trap "rm -f $TMPFILE" EXIT
 When keeping big temporary files, we might want to do some housekeeping in case our script fails.
 
 We can do this using the trap command, which allows us to run some code when an exit code is detected:
+$ FILENAME=$(mktemp --tmpdir=/tmp temp_file-XXXXXXXXXX.txt)
+$ echo $FILENAME
+/tmp/temp_file-HIitKZc0MT.txt
+-------------------------------------------------------------
 
