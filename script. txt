@@ -2303,13 +2303,153 @@ public class SparkSQLExample {
 ```
 
 Make sure to replace `"path/to/dataset.json"` with the actual path to your dataset. This code reads a JSON file and performs a simple SQL query to filter the data based on the age column. You can modify the SQL query to suit your needs.
+------------------------------------------------------------------
 
-Citations:
-[1] Spark SQL, DataFrames and Datasets Guide https://spark.apache.org/docs/2.1.3/sql-programming-guide.html
-[2] Querying database data using Apache Spark™ SQL in Java - DataStax Documentation https://docs.datastax.com/en/dse/5.1/docs/spark/sql-java.html
-[3] How to query in Apache Spark that has Dataset with JSONObject - Stack Overflow https://stackoverflow.com/questions/67636462/how-to-query-in-apache-spark-that-has-dataset-with-jsonobject
-[4] Spark DataFrame - Baeldung https://www.baeldung.com/spark-dataframes
-[5] org.apache.spark.sql.Dataset.show java code examples - Tabnine https://www.tabnine.com/code/java/methods/org.apache.spark.sql.Dataset/show
-[6] 4. Spark SQL and DataFrames: Introduction to Built-in Data Sources - Learning Spark, 2nd Edition [Book] - O'Reilly https://www.oreilly.com/library/view/learning-spark-2nd/9781492050032/ch04.html
+#!/bin/bash
 
-By Perplexity at https://www.perplexity.ai/search/8f0e50e8-d70a-4237-a20b-0d71e6411ceb?s=m
+# Function to check the zip file and its contents
+checkZipFile() {
+    local directory="/path/to/your/directory"
+    local log_file="/path/to/your/logfile.log"
+    local graph_count=0
+    
+    
+
+    # Call the function to run .pset files
+    runGraphs "$directory" "$log_file" graph_count
+    
+    # Log the total number of graphs processed along with the directory path
+    echo "$(date) - Total graphs processed from $directory : $graph_count" >> "$log_file"
+}
+
+# Function to run .pset files
+runGraphs() {
+    local dir="$1"
+    local log_file="$2"
+    local -n count_ref="$3"
+    
+    # Loop through .pset files and run 'air run {path}'
+    for pset_file in "$dir"/*.pset; do
+        if [ -e "$pset_file" ]; then
+            echo "Running air run for file: $pset_file"
+            
+            # Run the graph and capture the output in a variable
+            graph_output=$(air run "$pset_file")
+            
+            # Check if the last line contains '+++++COMPLETE+++++'
+            if [[ "$graph_output" == *'+++++COMPLETE+++++'* ]]; then
+                echo "Graph execution successful."
+            else
+                echo "Graph execution failed."
+                # Log the message
+                echo "$(date) - Graph execution failed for file: $pset_file" >> "$log_file"
+            fi
+            
+            # Increment the graph count
+            ((count_ref++))
+        else
+            echo "No .pset files found in the directory."
+            # Log the message
+            echo "$(date) - No .pset files found in the directory." >> "$log_file"
+        fi
+    done
+}
+
+# Call the function to check the zip file and run .pset files
+checkZipFile
+--------------------------------------------------------------
+#!/bin/bash
+
+# Specify the location to check for zip file
+file_location="/path/to/your/directory"
+
+# Log function to store messages in a log file
+log() {
+    local log_file="/path/to/your/logfile.log"
+    echo "$(date) - $1" >> "$log_file"
+}
+
+# Check if zip file exists
+if [ -e "$file_location/abc-$(date +"%d-%m-%Y").zip" ]; then
+    echo "Zip file found: abc-$(date +"%d-%m-%Y").zip"
+    
+    # Extract date from zip file name
+    zip_date=$(date -d "$(date +"%d-%m-%Y")" +"%d-%m-%Y")
+
+    # Extract text files from the zip and check their names for the same date
+    unzip -l "$file_location/abc-$zip_date.zip" '*.txt' | awk '{print $4}' | while read -r filename; do
+        # Extract date from text file name
+        text_file_date=$(echo "$filename" | grep -oP '\d{2}-\d{2}-\d{4}')
+        if [ "$text_file_date" == "$zip_date" ]; then
+            echo "Text file $filename has the correct date."
+        else
+            echo "Error: Text file $filename does not have the correct date."
+            # Log the message
+            log "Error: Text file $filename does not have the correct date."
+        fi
+    done
+
+else
+    echo "Zip file not found: abc-$(date +"%d-%m-%Y").zip"
+    # Log the message
+    log "Zip file not found: abc-$(date +"%d-%m-%Y").zip"
+fi
+--------------------------------------------------------
+#!/bin/bash
+
+# Function to log messages
+log() {
+    local log_file="/path/to/your/logfile.log"
+    echo "$(date) - $1" >> "$log_file"
+}
+
+# Function to check the zip file and its contents
+checkZipFile() {
+    local directory="/path/to/your/directory"
+    local graph_count=0
+    
+    # ... (your existing code for checking zip files)
+
+    # Call the function to run .pset files
+    runGraphs "$directory" graph_count
+    
+    # Log the total number of graphs processed along with the directory path
+    log "Total graphs processed from $directory: $graph_count"
+}
+
+# Function to run .pset files
+runGraphs() {
+    local dir="$1"
+    local -n count_ref="$2"
+    
+    # Loop through .pset files and run 'air run {path}'
+    for pset_file in "$dir"/*.pset; do
+        if [ -e "$pset_file" ]; then
+            echo "Running air run for file: $pset_file"
+            
+            # Run the graph and capture the output in a variable
+            graph_output=$(air run "$pset_file")
+            
+            # Check if the last line contains '+++++COMPLETE+++++'
+            if [[ "$graph_output" == *'+++++COMPLETE+++++'* ]]; then
+                echo "Graph execution successful."
+            else
+                echo "Graph execution failed."
+                # Log the message
+                log "Graph execution failed for file: $pset_file"
+            fi
+            
+            # Increment the graph count
+            ((count_ref++))
+        else
+            echo "No .pset files found in the directory."
+            # Log the message
+            log "No .pset files found in the directory."
+        fi
+    done
+}
+
+# Call the function to check the zip file and run .pset files
+checkZipFile
+-----------------------------------------------------
+
