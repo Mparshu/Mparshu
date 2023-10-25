@@ -2475,4 +2475,23 @@ $ echo $FILENAME
 -------------------------------------------------------------
 extracted_date=$(echo "$filename" | sed -n 's/.*_\([0-9]\{4\}-[0-9]\{2\}-[0-9]\{2\}\)_.*/\1/p')
 
+-------------------------------------------------------------
+#!/bin/bash
+
+# Record start time
+start_time=$(date "+%Y-%m-%d %H:%M:%S")
+
+# Your existing shell script commands here
+# For example:
+# command1
+# command2
+# ...
+
+# Record end time
+end_time=$(date "+%Y-%m-%d %H:%M:%S")
+
+# Find files generated between start and end time
+find /path/to/your/directory -type f -newermt "$start_time" ! -newermt "$end_time"
+
+
 
