@@ -2515,6 +2515,126 @@ echo -e "Name: $name\nRating: $rating\nComments: $comments" | mail -s "Training 
 # Thank you message
 echo "Thank you, $name, for participating in the training! Your feedback has been submitted."
 ----------------------------------------------------------------
+better_compare(){
+    echo -e "give me some sunshine :filename: \c"
+    read -r filename
+    read -n1 -p "Press any key to continue..."
 
+    # Ask the user for source query type
+    echo -e "\nChoose the source query type:"
+    echo "1. Hive"
+    echo "2. Oracle"
+    echo "3. File Path"
+    read -r -p "Enter your choice: " source_query_type
+
+    case $source_query_type in
+        1) 
+            source_query_command="bline --outputformat=csv2 -f source_query.hql > source_data.csv"
+            ;;
+        2) 
+            source_query_command="m_db unload 'source_query' > source_data.csv"
+            ;;
+        3) 
+            read -r -p "Enter the file path for the source query: " source_query_path
+            source_query_command="cat '$source_query_path' > source_data.csv"
+            ;;
+        *)
+            echo "Invalid choice for source query type. Exiting."
+            exit 1
+            ;;
+    esac
+
+    # Ask the user for target query type
+    echo -e "\nChoose the target query type:"
+    echo "1. Hive"
+    echo "2. Oracle"
+    echo "3. File Path"
+    read -r -p "Enter your choice: " target_query_type
+
+    case $target_query_type in
+        1) 
+            target_query_command="bline --outputformat=csv2 -f target_query.hql > target_data.csv"
+            ;;
+        2) 
+            target_query_command="m_db unload 'target_query' > target_data.csv"
+            ;;
+        3) 
+            read -r -p "Enter the file path for the target query: " target_query_path
+            target_query_command="cat '$target_query_path' > target_data.csv"
+            ;;
+        *)
+            echo "Invalid choice for target query type. Exiting."
+            exit 1
+            ;;
+    esac
+
+    # Execute the source and target query commands
+    eval "$source_query_command"
+    eval "$target_query_command"
+
+    # Call the second part of the function for comparison and HTML report creation
+    run_query_create_evidence_part2
+}
+-------------------------------------------------------------------------
+better_compare(){
+    echo -e "give me some sunshine :filename: \c"
+    read -r filename
+    read -n1 -p "Press any key to continue..."
+
+    # Ask the user for source query type
+    echo -e "\nChoose the source query type:"
+    echo "1. Oracle"
+    echo "2. Hive"
+    echo "3. File Path"
+    read -r -p "Enter your choice: " source_query_type
+
+    case $source_query_type in
+        1) 
+            echo "Enter your Oracle source query.Press Cntrl + D after writing the query."
+            cat > source_query.hql
+            ;;
+        2) 
+            echo "Enter your Hive source query.Press Cntrl + D after writing the query."
+            cat > source_query.hql
+            ;;
+        3) 
+            read -r -p "Enter the file path for the source query: " source_query_path
+            cat "$source_query_path" > source_query.hql
+            ;;
+        *)
+            echo "Invalid choice. Exiting."
+            exit 1
+            ;;
+    esac
+
+    # Ask the user for target query type
+    echo -e "\nChoose the target query type:"
+    echo "1. Oracle"
+    echo "2. Hive"
+    echo "3. File Path"
+    read -r -p "Enter your choice: " target_query_type
+
+    case $target_query_type in
+        1) 
+            echo "Enter your Oracle target query.Press Cntrl + D after writing the query."
+            cat > target_query.hql
+            ;;
+        2) 
+            echo "Enter your Hive target query.Press Cntrl + D after writing the query."
+            cat > target_query.hql
+            ;;
+        3) 
+            read -r -p "Enter the file path for the target query: " target_query_path
+            cat "$target_query_path" > target_query.hql
+            ;;
+        *)
+            echo "Invalid choice. Exiting."
+            exit 1
+            ;;
+    esac
+
+    run_query_create_evidence
+}
+--------------------------------------------------------------------
 
 
