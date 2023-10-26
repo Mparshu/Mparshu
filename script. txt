@@ -2492,6 +2492,29 @@ end_time=$(date "+%Y-%m-%d %H:%M:%S")
 
 # Find files generated between start and end time
 find /path/to/your/directory -type f -newermt "$start_time" ! -newermt "$end_time"
+------------------------------------------------------------------
+#!/bin/bash
+
+# Prompt user for name
+read -p "Enter your name: " name
+
+# Prompt user for rating
+read -p "Please rate our training out of 5: " rating
+
+# Check if rating is less than 2.5 and double it
+if (( $(awk 'BEGIN {print ("'$rating'" < 2.5)}') )); then
+    rating=$(awk 'BEGIN {print "'$rating'" * 2}')
+fi
+
+# Prompt user for comments
+read -p "Please provide your comments (Press Enter to skip): " comments
+
+# Send feedback via email
+echo -e "Name: $name\nRating: $rating\nComments: $comments" | mail -s "Training Feedback" -a "From: your_email@example.com" your_email@example.com
+
+# Thank you message
+echo "Thank you, $name, for participating in the training! Your feedback has been submitted."
+----------------------------------------------------------------
 
 
 
