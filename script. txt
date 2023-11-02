@@ -2637,4 +2637,12 @@ better_compare(){
 }
 --------------------------------------------------------------------
 
-
+SELECT
+  CASE
+    WHEN SUM(CASE WHEN element = 1 THEN 1 ELSE 0 END) >= 9 THEN 'customer is adverse'
+    ELSE 'customer is not adverse'
+  END AS customer_status
+FROM
+  your_table_name
+LATERAL VIEW EXPLODE(numbers_array) exploded_table AS element;
+-------------------------------------------------------------------
