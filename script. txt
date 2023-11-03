@@ -2646,3 +2646,26 @@ FROM
   your_table_name
 LATERAL VIEW EXPLODE(numbers_array) exploded_table AS element;
 -------------------------------------------------------------------
+#!/bin/bash
+
+# Input file path
+input_file="input.csv"
+
+# Process the input file and generate the output
+while IFS='|' read -r customer_id shopping_data; do
+    # Count the number of zero shopping months using awk
+    zero_months_count=$(echo "$shopping_data" | awk -F',' '{count=0; for(i=1;i<=NF;i++) if($i==0) count++; print count}')
+    
+    # Determine if the number of zero shopping months is at least 9
+    if [ "$zero_months_count" -ge 9 ]; then
+        has_at_least_nine_zeros=1
+        additional_column_value=1331
+    else
+        has_at_least_nine_zeros=0
+        additional_column_value=0
+    fi
+    
+    # Output format: customer_id|number_of_zero_shopping_months|has_at_least_nine_zeros|additional_column_value
+    echo "$customer_id|$zero_months_count|$has_at_least_nine_zeros|$additional_column_value"
+done < "$input_file"
+--------------------------------------------------------------------
