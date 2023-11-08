@@ -2669,3 +2669,17 @@ while IFS='|' read -r customer_id shopping_data; do
     echo "$customer_id|$zero_months_count|$has_at_least_nine_zeros|$additional_column_value"
 done < "$input_file"
 --------------------------------------------------------------------
+#!/bin/bash
+
+# Check if the user provided a file containing hostnames
+if [ -z "$1" ]; then
+    echo "Please provide a file containing hostnames."
+    exit 1
+fi
+
+# Read hostnames from the provided file and resolve them to IP addresses
+while IFS= read -r hostname; do
+    ip=$(nslookup "$hostname" | awk '/^Address: / { print $2 }')
+    echo "Hostname: $hostname, IP Address: $ip"
+done < "$1"
+--------+------------
