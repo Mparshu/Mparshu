@@ -2721,3 +2721,17 @@ done
 
 # Delete the files generated in the given time period
 rm $files_to_be_removed
+# Count the number of files
+file_count=$(echo "$files_to_zip" | wc -l)
+
+# Zip the files
+zip -n "abc$USER.zip" $files_to_zip
+
+# Store filename and line count in /tmp/downstream_files_count.txt
+echo "Number of files generated in the given time period: $file_count" > /tmp/downstream_files_count.txt
+
+for file in $files_to_be_removed; do
+    basename_file=$(basename "$file")
+    line_count=$(wc -l < "$file")
+    echo "Filename: $basename_file, Line Count: $line_count" >> /tmp/downstream_files_count.txt
+done
