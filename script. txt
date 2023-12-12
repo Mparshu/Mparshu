@@ -2735,3 +2735,18 @@ for file in $files_to_be_removed; do
     line_count=$(wc -l < "$file")
     echo "Filename: $basename_file, Line Count: $line_count" >> /tmp/downstream_files_count.txt
 done
+------------------------------------------------------------------------
+from itertools import product
+
+# Define the possible values for each variable
+New_Marker_values = [0, 1]
+Code_values = ['0762', '4208', '4199', '9876', '6546', '2354', '1295']
+Limit_values = [-1000, -1001, -1002, -1003, -1004, -1005, -1006, -1007, -1008, -1009, -2000]
+
+# Generate the Cartesian product of the possible values
+sample_space = list(product(New_Marker_values, Code_values, Limit_values))
+
+# Print all scenarios
+for idx, scenario in enumerate(sample_space, start=1):
+    New_Marker, Code, Limit = scenario
+    print(f"{idx}. New_Marker={New_Marker}, Code={Code}, Limit={Limit}")
