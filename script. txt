@@ -2750,3 +2750,15 @@ sample_space = list(product(New_Marker_values, Code_values, Limit_values))
 for idx, scenario in enumerate(sample_space, start=1):
     New_Marker, Code, Limit = scenario
     print(f"{idx}. New_Marker={New_Marker}, Code={Code}, Limit={Limit}")
+
+
+---------------------------
+number=12.65
+
+if [[ $number == *.* ]]; then
+    integer_part=$(echo "$number" | awk -F'.' '{print $1}')
+    decimal_part=$(echo "$number" | awk -F'.' '{print $2}')
+else
+    integer_part=$number
+    decimal_part=""
+fi
