@@ -1,6 +1,23 @@
 huList Content Comparison.
 
+#!/bin/bash
 
+# Additional condition
+if [ "$New_Marker" -eq 1 ] && [[ ! "0762 4208 4199" =~ $Code ]]; then
+    # If Limit is a decimal value, replace the last digit before the decimal with '1'
+    Limit_str=$(echo "$Limit" | tr -d '\n')
+    if [[ "$Limit_str" == *.* ]]; then
+        decimal_part=$(echo "$Limit_str" | cut -d'.' -f1)
+        fractional_part=$(echo "$Limit_str" | cut -d'.' -f2)
+        Limit="${decimal_part%?}1${fractional_part:+.$fractional_part}"
+    else
+        # If Limit is a natural number, use "${Limit%?}1"
+        Limit="${Limit%?}1"
+    fi
+fi
+
+
+------------------------------++
 prasadswami76@gmail.com
 Create a shell script to check whether Content from one list is present in another list or not
 
