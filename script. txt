@@ -2,6 +2,26 @@ huList Content Comparison.
 
 #!/bin/bash
 
+key="nram_od"
+value="3"
+
+if [ "$key" = "nram_od" ]; then
+    if [ "$value" = "1" ]; then
+        echo "some_line"
+    elif [ "$value" = "2" ]; then
+        echo "some_line"
+    elif [ "$value" = "3" ]; then
+        echo "some_line1"
+        echo "some_line2"
+    fi
+elif [ "$key" = "Nuk" ]; then
+    if [ "$value" != "-999.0" ]; then
+        echo "some_line"
+    fi
+fi
+---------------------------
+#!/bin/bash
+
 # Additional condition
 if [ "$New_Marker" -eq 1 ] && [[ ! "0762 4208 4199" =~ $Code ]]; then
     # If Limit is a decimal value, replace the last digit before the decimal with '1'
