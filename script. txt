@@ -1,5 +1,24 @@
 huList Content Comparison.
+import pandas as pd
 
+csv_file_path = 'your_input_file.csv'
+json_file_path = 'output.json'
+
+# Read CSV file into a pandas DataFrame
+df = pd.read_csv(csv_file_path)
+
+# Convert DataFrame to JSON and save to a file
+df.to_json(json_file_path, orient='records', indent=2)
+
+print(f'Conversion successful. JSON file saved at {json_file_path}')
+
+
+
+
+
+
+
+-----+----------+-+
 #!/bin/bash
 
 key="nram_od"
