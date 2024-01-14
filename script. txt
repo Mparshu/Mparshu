@@ -1,4 +1,9 @@
 huList Content Comparison.
+list_sum = 0
+for num in mylist:
+	list_sum = list_sum + num
+print(list_sum)
+----------------------------------------------
 import pandas as pd
 
 csv_file_path = 'your_input_file.csv'
