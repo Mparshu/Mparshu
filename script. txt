@@ -1,4 +1,74 @@
 huList Content Comparison.
+"""from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def hello():
+    return 'Hello, World!'
+
+if __name__ == '__main__':
+    app.run(debug=True, port=8080)"""
+
+# app.py
+import streamlit as st
+import subprocess
+
+def print_message(message):
+    st.write(message)
+
+def run_os_commands():
+    commands = [
+        'start "" "C:\\Program Files (x86)\\Cisco\\Cisco AnyConnect Secure Mobility Client\\vpnui.exe"',
+        'start "" "C:\\Program Files (x86)\\Ping Identity\\PingID\\PingID.exe"',
+        'start "" "C:\\Program Files\\Google\\Chrome\\Application\\chrome_proxy.exe" --profile-directory=Default --app-id=kloeccplkmphhfhfkkmjnnbopencohcp'
+    ]
+    
+    for command in commands:
+        try:
+            subprocess.run(command, shell=True)
+        except Exception as e:
+            st.error(f"Error running command: {e}")
+
+def open_notepad():
+    try:
+        subprocess.run(['notepad.exe'])
+    except Exception as e:
+        st.error(f"Error: {e}")
+
+def main():
+    st.title("Hello, Streamlit!")
+    st.write("This is a simple Streamlit app.")
+    st.write("Bhakalya")
+    st.title("Streamlit Button Example")
+
+    # Add a button to the app
+    button_clicked = st.button("Open Notepad")
+
+    # Check if the button is clicked
+    if button_clicked:
+        st.write("Button clicked!")
+        open_notepad()
+        run_os_commands()
+    
+    st.title("Streamlit Sidebar Buttons Example")
+
+    # Sidebar options
+    option1_button = st.sidebar.button("Option 1")
+    option2_button = st.sidebar.button("Option 2")
+    option3_button = st.sidebar.button("Option 3")
+
+    # Handle button clicks
+    if option1_button:
+        print_message("You clicked Option 1!")
+    elif option2_button:
+        print_message("You clicked Option 2!")
+    elif option3_button:
+        print_message("You clicked Option 3!")
+
+if __name__ == '__main__':
+    main()
+---------------------------------------------
 Query for NUC 
 SELECT
   column_name,
