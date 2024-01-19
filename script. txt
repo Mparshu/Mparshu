@@ -1,4 +1,37 @@
 huList Content Comparison.
+-------------------------------
+import pyarrow as pa
+import pyarrow.parquet as pq
+import json
+
+# Assuming your JSON file is named 'input.json'
+json_file_path = 'input.json'
+
+# Read JSON file into a Python dict
+with open(json_file_path, 'r') as json_file:
+    json_data = json.load(json_file)
+
+# Convert the dict to a pyarrow Table
+table = pa.Table.from_pandas(pd.DataFrame(json_data))
+
+# Assuming you want to convert to a Parquet file named 'output.parquet'
+parquet_file_path = 'output.parquet'
+
+# Write the pyarrow Table to Parquet file
+pq.write_table(table, parquet_file_path)
+
+print(f"Conversion complete. JSON file '{json_file_path}' converted to Parquet file '{parquet_file_path}'.")
+
+# Show Schema
+print("\nSchema:")
+print(table.schema)
+
+# Show Data
+parquet_table = pq.read_table(parquet_file_path)
+parquet_data = parquet_table.to_pandas()
+print("\nData:")
+print(parquet_data)
+----------++++----------------------
 """from flask import Flask
 
 app = Flask(__name__)
