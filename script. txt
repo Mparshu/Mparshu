@@ -1,5 +1,17 @@
 huList Content Comparison.
 -------------------------------
+#!/bin/bash
+
+# Run your command and capture the output
+output=$(your_command_here)
+
+# Check if the output is empty or not
+if [ -n "$output" ]; then
+    echo "Command successful"
+else
+    echo "Command failed"
+fi
+-------------------------------
 import pyarrow as pa
 import pyarrow.parquet as pq
 import json
