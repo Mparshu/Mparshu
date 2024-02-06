@@ -1,4 +1,20 @@
 huList Content Comparison.
+
+import json
+
+def analyze_json(json_file, key):
+    with open(json_file, 'r') as f:
+        data = json.load(f)
+        if key in data:
+            return data[key]
+        else:
+            return "Key not found in JSON."
+
+# Example usage:
+json_file = 'data.json'
+key_to_find = 'example_key'
+value = analyze_json(json_file, key_to_find)
+print("Value for key '{}': {}".format(key_to_find, value))
 -------------------------------
 #!/bin/bash
 
