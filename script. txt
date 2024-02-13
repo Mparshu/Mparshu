@@ -1,4 +1,27 @@
 huList Content Comparison.
+import json
+
+# Read JSON data from a file
+with open('data.json') as f:
+    data = json.load(f)
+
+# Update the value associated with the key 'key_to_update'
+data['key_to_update'] = 'new_value'
+
+# Write the updated JSON data back to the file
+with open('data.json', 'w') as f:
+    json.dump(data, f, indent=4)  # Use indent for pretty printing (optional)
+--------------------
+import json
+
+# Open the JSON file
+with open('data.json') as f:
+    # Load JSON data
+    data = json.load(f)
+
+# Now you can work with the 'data' variable which contains your JSON data
+print(data)
+-----++----------------------
 import os
 from datetime import datetime
 from pyspark.sql import SparkSession
