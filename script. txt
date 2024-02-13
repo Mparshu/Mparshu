@@ -1,4 +1,46 @@
 huList Content Comparison.
+import os
+from datetime import datetime
+from pyspark.sql import SparkSession
+
+# Create a SparkSession
+spark = SparkSession.builder \
+    .appName("DataFrameToJson") \
+    .getOrCreate()
+
+def write_df_to_json(df, output_path):
+    """
+    Write DataFrame to a JSON file with the current date and time in the file name
+    at the specified path.
+
+    Parameters:
+        df (DataFrame): The DataFrame to write to the JSON file.
+        output_path (str): The directory path where the JSON file will be saved.
+    """
+    # Get the current date and time
+    current_datetime = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    
+    # Generate the file name with the current date and time
+    file_name = f"{current_datetime}.json"
+    
+    # Concatenate the output path with the file name
+    json_file_path = os.path.join(output_path, file_name)
+    
+    # Write DataFrame to JSON file
+    df.write.json(json_file_path)
+
+# Example usage:
+# Assuming 'df' is your DataFrame
+# Path where the JSON file will be saved
+output_path = "path/to/save/json"
+
+# Write DataFrame to JSON file with current date and time in the file name
+write_df_to_json(df, output_path)
+
+# Stop the SparkSession
+spark.stop()
+-----------------------
+
 data = [("Java", "20000"), ("Python", "100000"), ("Scala", "3000")]
 >>> df = spark.createDataFrame(data)
 >>> df.show()
