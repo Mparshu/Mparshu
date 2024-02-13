@@ -2,6 +2,26 @@ huList Content Comparison.
 import json
 
 # Read JSON data from a file
+with open('data.json', 'r+') as f:
+    data = json.load(f)
+
+    # Loop through each record (assuming data is a list)
+    for record in data:
+        # Update the value associated with the key 'joindate' for each record
+        record['joindate'] = 'new_value'
+
+    # Go to the beginning of the file
+    f.seek(0)
+
+    # Write the updated JSON data back to the file
+    json.dump(data, f, indent=4)  # Use indent for pretty printing (optional)
+
+    # Truncate any remaining content (in case the new data is shorter than the original)
+    f.truncate()
+--------------------------
+import json
+
+# Read JSON data from a file
 with open('data.json') as f:
     data = json.load(f)
 
