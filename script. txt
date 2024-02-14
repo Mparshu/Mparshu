@@ -2,6 +2,44 @@ huList Content Comparison.
 import json
 
 # Read JSON data from a file
+with open('data.json') as f:
+    data = json.load(f)
+#if 'key_to_update' not in data or data['key_to_update'] is None:
+# Check if the value associated with the key 'key_to_update' is "NULL"
+if data.get('key_to_update') == "NULL":
+    # Update the value associated with the key 'key_to_update'
+    data['key_to_update'] = 'new_value'
+
+    # Write the updated JSON data back to the file
+    with open('data.json', 'w') as f:
+        json.dump(data, f, indent=4)  # Use indent for pretty printing (optional)
+-----------------------------------
+#!/bin/bash
+
+# Step 1: Define the Beeline connection string
+beeline_connection="jdbc:hive2://your_hive_server:10000/default"
+
+# Step 2: Run the beeline command to execute new.hql and save output to results.csv
+beeline_command="beeline -u $beeline_connection -f new.hql > results.csv"
+
+# Execute the beeline command
+$beeline_command
+
+# Step 3: Check if results.csv filesize is less than 3mb
+filesize=$(stat -c %s results.csv)
+filesize_mb=$((filesize / 1024 / 1024))
+
+if [ $filesize_mb -lt 3 ]; then
+    # If filesize is less than 3mb, send the file via mail using mailx
+    mailx -s "Results File" your_email@example.com < results.csv
+else
+    # If filesize is greater than or equal to 3mb, send mail notification
+    mailx -s "Results File Size Warning" your_email@example.com <<< "The results file size is large. Please collect it from location."
+fi
+--------------------------------------------
+import json
+
+# Read JSON data from a file
 with open('data.json', 'r+') as f:
     data = json.load(f)
 
