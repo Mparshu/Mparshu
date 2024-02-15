@@ -1,4 +1,26 @@
 huList Content Comparison.
+import json
+
+# Read JSON data from a file
+with open('data.json') as f:
+    data = json.load(f)
+
+# Assuming 'callcredit' is the column containing the struct data as a string
+if 'callcredit' in data:
+    try:
+        # Parse the string representation into a Python dictionary
+        callcredit_dict = json.loads(data['callcredit'])
+        
+        # Update the value associated with 'callcredit' to be the parsed dictionary
+        data['callcredit'] = callcredit_dict
+    except json.JSONDecodeError:
+        # Handle the case where the value is not a valid JSON string
+        print("Value in 'callcredit' is not a valid JSON string.")
+
+    # Write the updated JSON data back to the file
+    with open('data.json', 'w') as f:
+        json.dump(data, f, indent=4)  # Use indent for pretty printing (optional)
+---------------------------------------
 import csv
 
 # Define your scoring function here
