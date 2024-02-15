@@ -1,4 +1,29 @@
 huList Content Comparison.
+import pandas as pd
+import json
+
+# Define a function to convert the JSON string to a JSON object
+def parse_json(json_str):
+    try:
+        return json.loads(json_str)
+    except (json.JSONDecodeError, TypeError):
+        return {}
+
+# Read the CSV file, specifying the converter function for the columns with JSON structures
+columns_with_json = ['callcredit', 'other_column1', 'other_column2', ..., 'other_column10']
+converters = {col: parse_json for col in columns_with_json}
+df = pd.read_csv('your_csv_file.csv', converters=converters)
+
+# Convert DataFrame to JSON
+json_data = df.to_json(orient='records')
+
+# Write JSON data to a file
+with open('output.json', 'w') as json_file:
+    json_file.write(json_data)
+
+# Now json_data contains the JSON representation of your DataFrame
+# and it's saved in a file named 'output.json'
+-----------------------------
 import json
 
 # Read JSON data from a file
