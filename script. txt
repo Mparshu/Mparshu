@@ -1,4 +1,17 @@
 huList Content Comparison.
+def parse_json(json_str):
+    try:
+        if not json_str:
+            return ""
+        parsed_json = json.loads(json_str)
+        # Convert numeric values back to strings
+        for key, value in parsed_json.items():
+            if isinstance(value, (int, float)) and str(value).isdigit():
+                parsed_json[key] = str(value)
+        return parsed_json
+    except (json.JSONDecodeError, TypeError):
+        return {}
+-----------------
 import pandas as pd
 import json
 
