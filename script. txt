@@ -1,4 +1,53 @@
 huList Content Comparison.
+from pyspark.sql.functions import rand, when
+from pyspark.sql.types import DateType
+from datetime import datetime, timedelta
+
+# Generate random customerid between 300000 and 400000
+df = df.withColumn("customerid", (rand() * 100000).cast("int") + 300000)
+
+# Generate random values for Empstatus (either '05' or '04')
+df = df.withColumn("Empstatus", when(rand() < 0.5, '05').otherwise('04'))
+
+# Generate random values for BACS (either 1 or 0)
+df = df.withColumn("BACS", (rand() < 0.5).cast("int"))
+
+# Generate random values for Howner (either 1 or 0)
+df = df.withColumn("Howner", (rand() < 0.5).cast("int"))
+
+# Generate random dates for Joindate between '2004-01-01' and '2020-06-02'
+start_date = datetime(2004, 1, 1)
+end_date = datetime(2020, 6, 2)
+date_range = end_date - start_date
+df = df.withColumn("Joindate", (rand() * date_range.days).cast("int")) \
+       .withColumn("Joindate", (start_date + col("Joindate").cast("int")).cast(DateType()))
+----+-+-----------------
+from pyspark.sql.functions import rand, when
+from pyspark.sql.types import DateType
+from datetime import datetime, timedelta
+
+# Generate random customerid between 300000 and 400000
+df = df.withColumn("customerid", (rand() * 100000).cast("int") + 300000)
+
+# Generate random values for Empstatus (either '05' or '04')
+df = df.withColumn("Empstatus", when(rand() < 0.5, '05').otherwise('04'))
+
+# Generate random values for BACS (either 1 or 0)
+df = df.withColumn("BACS", (rand() < 0.5).cast("int"))
+
+# Generate random values for Howner (either 1 or 0)
+df = df.withColumn("Howner", (rand() < 0.5).cast("int"))
+
+# Generate random dates for Joindate between '2004-01-01' and '2020-06-02'
+start_date = datetime(2004, 1, 1)
+end_date = datetime(2020, 6, 2)
+date_range = end_date - start_date
+
+# Generate random dates for Joindate between '2004-01-01' and '2020-06-02'
+df = df.withColumn("Joindate", (rand() * date_range.days).cast("int")) \
+       .withColumn("Joindate", from_unixtime(unix_timestamp("Joindate", "yyyy-MM-dd") + col("Joindate").cast("int"))) \
+       .withColumn("Joindate", to_date("Joindate"))
+-----------------------------
 To update the joindate column for all records in a DataFrame, you can use the withColumn() function to create a new DataFrame with the updated joindate values. Here's how you can do it:from pyspark.sql import SparkSession
 from pyspark.sql.functions import lit
 
