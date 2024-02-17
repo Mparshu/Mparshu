@@ -1,6 +1,5 @@
-huList Content Comparison.
-Toggle Sidebar
-Toggle Sidebar
+huList Content Comparisons
+df_dc.withColumn('report_date_10', F.date_add(df_dc['report_date'], 10)).show()
 from pyspark.sql.functions import col
 
 # Assuming BACS is an array of structs and you want to update the value of BACS[50].value
