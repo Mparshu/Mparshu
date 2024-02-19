@@ -1,4 +1,16 @@
 huList Content Comparisons
+
+from pyspark.sql.functions import expr, col
+
+index = 50
+df1 = df.withColumn("foo", 
+  expr("transform(foo, x -> 
+    case when array_index(x, "+str(index)+") is null 
+         then struct(10 as value, x.value2 as value2) 
+         else struct(x.value as value, x.value2 as value2) end)")
+)
+
+---++--++++++++++++
 df_dc.withColumn('report_date_10', F.date_add(df_dc['report_date'], 10)).show()
 from pyspark.sql.functions import col
 
