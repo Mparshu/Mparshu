@@ -1,6 +1,6 @@
 huList Content Comparisons
 
-
+new_df = new_df.filter(~col("array_column")[66]["value"].isin(estimator_df["scenarioID"]))
 new_df = new_df.filter(~array_contains(col("array_column")[66]["value"], estimator_df["scenarioID"]))
 
 new_df = new_df.filter(~col("array_column66][""].isin(imator_df["scenarioID"]))
