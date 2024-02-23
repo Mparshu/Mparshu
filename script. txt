@@ -1,4 +1,45 @@
 huList Content Comparisons
+from pyspark.sql.window import Window
+from pyspark.sql.functions import col, row_number
+
+result_df = new_df.join(spark_df, new_df["customerid"] == spark_df["customerid"], "inner")
+
+result_df = result_df.drop(*[col for col in new_df.columns if col not in ["customerid"]])
+
+result_df.show()
+
+
+
+dfWithRowNumber.unpersist()
+
+result_df = new_df.join(spark_df, new_df["customerid"] == spark_df["customerid"], "inner")
+
+result_df.show()
+
+
+from pyspark.sql.window import Window
+from pyspark.sql.functions import col, row_number
+
+windowSpec = Window.partitionBy(col("array_column")[66]["value"]).orderBy("salary")
+
+dfWithRowNumber = df.withColumn("row_number", row_number().over(windowSpec))
+
+new_df = dfWithRowNumber.filter(col("row_number") == 1).select(col("array_column")[66]["value"].alias("partition_column"), "customerid", "row_number")
+
+new_df.show()
+
+from pyspark.sql.window import Window
+from pyspark.sql.functions import col,_number
+
+windowSpec = Window.By("array_column")[66]["value"]).orderBy("salary")
+
+dfWithRowNumber = df.withColumn("row_number", row_number().over(windowSpec))
+
+dfWithRowNumber.where(col("row_number") == 1).select(col("array_column")[66]["value"], "row_number").show()
+
+
+
+
 import json
 
 # Open the JSON file in read mode
