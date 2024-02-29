@@ -1,5 +1,97 @@
 huList Content Comparisons
 
+df = df.withColumn("joindate", 
+                   when(df["customer_id"].isin("300001", "300002"), "12022023")
+                   .otherwise(df["joindate"]))
+
+# Show the updated DataFrame
+df.show()
+---------------------------------------------------------
+def write_dataframe_to_csv(df, file_path, mode="overwrite", header=True):
+    """
+    Write DataFrame to CSV file.
+
+    Args:
+        df (pyspark.sql.DataFrame): DataFrame to write.
+        file_path (str): Path to the CSV file.
+        mode (str, optional): Specify the mode for saving data. 
+            Can be one of "append", "overwrite", "ignore", "error". Defaults to "overwrite".
+        header (bool, optional): Whether to write the header in the CSV file. Defaults to True.
+    """
+    df.write.mode(mode).option("header", header).csv(file_path)
+
+def write_dataframe_to_json(df, file_path, mode="overwrite"):
+    """
+    Write DataFrame to JSON file.
+
+    Args:
+        df (pyspark.sql.DataFrame): DataFrame to write.
+        file_path (str): Path to the JSON file.
+        mode (str, optional): Specify the mode for saving data. 
+            Can be one of "append", "overwrite", "ignore", "error". Defaults to "overwrite".
+    """
+    df.write.mode(mode).json(file_path)
+
+def write_dataframe_to_parquet(df, file_path, mode="overwrite"):
+    """
+    Write DataFrame to Parquet file.
+
+    Args:
+        df (pyspark.sql.DataFrame): DataFrame to write.
+        file_path (str): Path to the Parquet file.
+        mode (str, optional): Specify the mode for saving data. 
+            Can be one of "append", "overwrite", "ignore", "error". Defaults to "overwrite".
+    """
+    df.write.mode(mode).parquet(file_path)
+
+# Stop SparkSession
+spark.stop()
+
+def load_csv_with_schema(file_path, schema):
+    """
+    Load CSV file with specified schema.
+
+    Args:
+        file_path (str): Path to the CSV file.
+        schema (pyspark.sql.types.StructType): Schema to apply.
+
+    Returns:
+        pyspark.sql.DataFrame: Loaded DataFrame.
+    """
+    return spark.read.schema(schema).csv(file_path)
+
+def load_json_with_schema(file_path, schema):
+    """
+    Load JSON file with specified schema.
+
+    Args:
+        file_path (str): Path to the JSON file.
+        schema (pyspark.sql.types.StructType): Schema to apply.
+
+    Returns:
+        pyspark.sql.DataFrame: Loaded DataFrame.
+    """
+    return spark.read.schema(schema).json(file_path)
+
+def load_parquet_with_schema(file_path, schema, mode="append"):
+    """
+    Load Parquet file with specified schema and mode.
+
+    Args:
+        file_path (str): Path to the Parquet file.
+        schema (pyspark.sql.types.StructType): Schema to apply.
+        mode (str, optional): Specify the mode for saving data. 
+            Can be one of "append" or "overwrite". Defaults to "append".
+
+    Returns:
+        pyspark.sql.DataFrame: Loaded DataFrame.
+    """
+    return spark.read.schema(schema).parquet(file_path, mode=mode)
+
+# Stop SparkSession
+spark.stop()
+--------------------------------------------------------------------------
+
 new_df = new_df.filter(~col("array_column")[66]["value"].isin(estimator_df["scenarioID"]))
 new_df = new_df.filter(~array_contains(col("array_column")[66]["value"], estimator_df["scenarioID"]))
 
