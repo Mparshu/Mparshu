@@ -1,5 +1,43 @@
 huList Content Comparisons
 
+import pytest
+from your_module import compare_versions
+
+@pytest.mark.parametrize("path, expected_result", [
+    ("/path/to/sandbox1", True),  # Example where latest version and sandbox version are the same
+    ("/path/to/sandbox2", False), # Example where latest version and sandbox version are different
+])
+def test_compare_versions(path, expected_result):
+    result = compare_versions(path)
+    assert result == expected_result, f"Unexpected result for path '{path}'. Expected: {expected_result}, Actual: {result}"
+
+
+import subprocess
+
+def compare_versions(path):
+    # Execute the command "air sandbox info" and capture the output
+    command = f"air sandbox info {path}"
+    process = subprocess.Popen(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+    stdout, stderr = process.communicate()
+
+    # Extract the values of "latest version" and "sandbox version" from the output
+    latest_version = None
+    sandbox_version = None
+    for line in stdout.splitlines():
+        if line.startswith("latest version:"):
+            latest_version = line.split(":")[1].strip()
+        elif line.startswith("sandbox version:"):
+            sandbox_version = line.split(":")[1].strip()
+
+    # Compare the values and return True if they are the same, False otherwise
+    return latest_version == sandbox_version
+
+# Example usage:
+path = "/path/to/sandbox"
+result = compare_versions(path)
+print(result)
+--------------------------------------
+
 df = df.withColumn("joindate", 
                    when(df["customer_id"].isin("300001", "300002"), "12022023")
                    .otherwise(df["joindate"]))
