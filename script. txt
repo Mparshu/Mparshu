@@ -1,4 +1,16 @@
 huList Content Comparisons
+def test_file_exists(file_path):
+    assert os.path.exists(file_path)
+
+def test_file_content(file_path):
+    with open(file_path, "r") as f:
+        content = f.read()
+    assert "pytest-html" in content
+
+def test_file_size(file_path):
+    size = os.path.getsize(file_path)
+    assert size > 0
+--------------------------------------------------
 
 import pytest
 from your_module import compare_versions
