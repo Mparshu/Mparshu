@@ -1,5 +1,11 @@
 huList Content Comparisons
 
+def append_to_list(*args):
+    result_list = []
+    for arg in args:
+        result_list.append(arg)
+    return result_list
+
 import csv
 
 # Open the file
