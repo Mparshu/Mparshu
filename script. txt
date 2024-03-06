@@ -1,4 +1,23 @@
 huList Content Comparisons
+
+import csv
+
+# Open the file
+with open('your_file.txt', 'r') as file:
+    # Create a CSV reader object with tab delimiter
+    reader = csv.reader(file, delimiter='\t')
+    
+    # Iterate over each row
+    for row in reader:
+        # Check if the second column is '64'
+        if len(row) > 1 and row[1] == '64':
+            # If it is, do something with the row
+            print(row)
+
+
+
+
+
 def test_file_exists(file_path):
     assert os.path.exists(file_path)
 
