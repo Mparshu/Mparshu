@@ -5,6 +5,57 @@ from pyspark.sql import SparkSession, functions as F
 spark = SparkSession.builder.getOrCreate()
 
 # Sample DataFrames (replace with your actual data)
+df1 = spark.createDataFrame([("A1", 10, True), ("A2", 20, False), ("A3", 30, True)], 
+                           ["customerid", "value1", "condition1"])
+df2 = spark.createDataFrame([("A1", "X"), ("A2", "Y"), ("B1", "Z")], ["customerid", "col_B"])
+
+# Join DataFrames on customerid
+joined_df = df1.join(df2, on="customerid", how="left")
+
+# Define validation conditions (replace with your actual conditions)
+validation_1 = joined_df["value1"] > 25
+validation_2 = joined_df["condition1"] == True
+
+# Filter rows where all validation conditions are met
+valid_df = joined_df.where(validation_1 & validation_2) \
+                  .select("customerid", "col_B")  # Select relevant columns
+
+# Check if any rows meet the criteria and have the expected value in col_B
+expected_value = "specific_value"  # Replace with your desired value
+if valid_df.filter(F.col("col_B") == expected_value).count() > 0:
+  print(f"Validation successful: col_B has '{expected_value}' for customers meeting all conditions")
+else:
+  print("Validation failed: No rows meet all conditions and have the expected value in col_B")
+
+
+
+from pyspark.sql import SparkSession, functions as F
+
+spark = SparkSession.builder.getOrCreate()
+
+# Sample DataFrame (replace with your actual data)
+data = [("A", 0), ("B", 10), ("C", 5), ("D", 0), ("E", 2)]
+df = spark.createDataFrame(data, ["col_A", "col_B"])
+
+# Define the list of valid values for col_A
+valid_values = ["A", "B", "C"]
+
+# Filter rows where col_A is not in the valid list
+invalid_df = df.where(~F.col("col_A").isin(valid_values))
+
+# Check if there are any invalid rows
+if invalid_df.isEmpty():
+  print("Validation successful: All rows with A, B, or C in col_A have 0 in col_B")
+else:
+  print("Validation failed:")
+  invalid_df.show()  # Display rows that failed validation
+
+
+from pyspark.sql import SparkSession, functions as F
+
+spark = SparkSession.builder.getOrCreate()
+
+# Sample DataFrames (replace with your actual data)
 df1 = spark.createDataFrame([("A", 10), ("B", 20), ("C", 30)], ["id", "value"])
 df2 = spark.createDataFrame([("A", 10), ("B", 25), ("D", 40)], ["id", "value"])
 
