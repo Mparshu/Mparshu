@@ -1,5 +1,21 @@
 huList Content Comparisons
 
+
+
+import os
+import subprocess
+
+def get_file_listing(file_path):
+    assert os.path.exists(file_path), f"{file_path} does not exist"
+    ls_output = subprocess.run(["ls", "-lrt", file_path], capture_output=True, text=True)
+    return ls_output.stdout
+
+def test_file_listing():
+    file_path = "example.txt"  # Change to your file path
+    listing = get_file_listing(file_path)
+    print(f"Listing of {file_path}:\n{listing}")
+------++---------
+
 def append_to_list(*args):
     result_list = []
     for arg in args:
