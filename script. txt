@@ -1,5 +1,18 @@
 huList Content Comparisons
 
+
+pytest --log-cli-format="%(asctime)s %(levelname)s %(message)s" --log-file-format="%(asctime)s %(levelname)s %(message)s"
+
+
+import logging
+
+custom_formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+handler = logging.StreamHandler()
+handler.setFormatter(custom_formatter)
+logging.getLogger().addHandler(handler)
+
+
+
 from pyspark.sql import SparkSession, functions as F
 
 spark = SparkSession.builder.getOrCreate()
