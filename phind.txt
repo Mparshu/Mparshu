@@ -1,4 +1,53 @@
 
+To modify the function to return the differences between two files instead of just a boolean value, you can use the `unified_diff` function from the `difflib` module. This function compares two lists of strings (lines from two files) and returns a generator that produces the differences in a unified diff format. Here's how you can modify the function:
+
+```python
+import difflib
+
+def get_file_differences(file1, file2):
+    with open(file1, 'r') as f1, open(file2, 'r') as f2:
+        file1_lines = f1.readlines()
+        file2_lines = f2.readlines()
+
+    diff = difflib.unified_diff(file1_lines, file2_lines, fromfile=file1, tofile=file2)
+    return ''.join(diff)
+```
+
+This function reads the contents of both files, compares them using `difflib.unified_diff`, and returns a string containing the differences in a unified diff format. If there are no differences, the function will return an empty string.
+
+To create a pytest test case based on this function, you can use the `assert` statement to check if the function returns an empty string (indicating that the files are identical) or a non-empty string (indicating that there are differences). Here's an example of how you can write a pytest test case:
+
+```python
+import pytest
+
+def test_file_comparison():
+    differences = get_file_differences('file1.txt', 'file2.txt')
+    assert differences == "", "Files are not identical"
+```
+
+In this test case, `get_file_differences` is called with the paths to two files that are expected to be identical. If the function returns an empty string, the test passes. If it returns a non-empty string, the test fails, and the message "Files are not identical" is displayed.
+
+Remember to replace `'file1.txt'` and `'file2.txt'` with the actual paths to the files you want to compare.
+
+Citations:
+[1] https://stackoverflow.com/questions/977491/comparing-two-txt-files-using-difflib-in-python
+[2] https://docs.python.org/3/library/difflib.html
+[3] https://www.pythonforbeginners.com/basics/how-to-compare-two-files-in-python-line-by-line
+[4] https://coderzcolumn.com/tutorials/python/difflib-simple-way-to-find-out-differences-between-sequences-file-contents-using-python
+[5] https://medium.com/@zhangkd5/a-tutorial-for-difflib-a-powerful-python-standard-library-to-compare-textual-sequences-096d52b4c843
+[6] https://sureshdsk.dev/check-diff-between-two-files-in-python
+[7] https://docs.python.org/3/library/filecmp.html
+[8] https://iq.opengenus.org/difflib-module-in-python/
+[9] https://towardsdatascience.com/find-the-difference-in-python-68bbd000e513
+[10] https://stackoverflow.com/questions/33050816/comparing-two-files-using-difflib-in-python
+[11] https://pymotw.com/3/difflib/index.html
+[12] https://documentation.help/Python-3.7/difflib.html
+[13] https://www.pythonpool.com/pythons-difflib/
+[14] https://hatchjs.com/python-compare-two-xml-files-and-return-the-difference/
+[15] https://tedboy.github.io/python_stdlib/generated/difflib.html
+
+
+
 Birgitta is a Python ETL test and schema framework designed to facilitate automated testing for PySpark notebooks and recipes. It aims to support a DataOps way of working, allowing for solid ETL and ML processes while still accommodating imperfect notebook code. This approach balances the need for robust testing with the flexibility required for agile development practices. Birgitta can be used in conjunction with CI/CD pipelines and supports running tests as Dataiku DSS Scenarios, offering a versatile testing environment for ETL processes [1][2].
 
 ### Key Components of Birgitta for ETL Testing
