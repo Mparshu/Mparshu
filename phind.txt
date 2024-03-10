@@ -1,3 +1,59 @@
+To read a CSV file with struct type columns, especially when each column contains an array with struct type values, you need to define a schema that accurately represents the structure of your data. This involves using `StructType` and `StructField` from PySpark's SQL types to define the schema, including nested structures like arrays and maps.
+
+Here's a step-by-step guide on how to define and apply a schema for reading a CSV file with struct type columns containing arrays:
+
+1. **Import Necessary Modules**: First, import the necessary modules from PySpark.
+
+```python
+from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, ArrayType
+```
+
+2. **Define the Schema**: Define the schema for your DataFrame. This includes specifying the structure of each column, including any nested structures like arrays or maps. For columns with struct type values inside an array, you'll use `ArrayType` with a `StructType` as its element type.
+
+Assuming you have a CSV file with a column named `items` that contains an array of structs, each with fields `id` and `name`, your schema definition might look like this:
+
+```python
+# Define the schema for the struct inside the array
+struct_schema = StructType([
+    StructField("id", IntegerType(), True),
+    StructField("name", StringType(), True)
+])
+
+# Define the schema for the DataFrame, including the array column
+df_schema = StructType([
+    StructField("items", ArrayType(struct_schema), True)
+])
+```
+
+3. **Read the CSV File with the Defined Schema**: Use the `spark.read.csv` method to read the CSV file, specifying the schema with the `schema` option.
+
+```python
+spark = SparkSession.builder.appName("Read CSV with Schema").getOrCreate()
+
+# Read the CSV file with the defined schema
+df = spark.read.format("csv").schema(df_schema).load("path/to/your/file.csv")
+
+# Show the DataFrame to verify the schema
+df.show()
+```
+
+This approach allows you to read a CSV file into a DataFrame with a complex schema, including columns that contain arrays of structs. By defining the schema explicitly, you ensure that PySpark correctly interprets the data structure, allowing for accurate data manipulation and analysis.
+
+Citations:
+[1] https://stackoverflow.com/questions/71969652/read-csv-that-contains-array-of-string-in-pyspark
+[2] https://users.scala-lang.org/t/need-to-read-a-csv-file-having-nested-structure-for-a-column-using-scala/8948
+[3] https://medium.com/@uzzaman.ahmed/tk-tk-understanding-pysparks-structtype-and-structfield-for-complex-data-structures-98cdb2ab242b
+[4] https://www.projectpro.io/recipes/read-csv-files-pyspark-databricks
+[5] https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.types.StructType.html
+[6] https://sparkbyexamples.com/pyspark/pyspark-arraytype-column-with-examples/
+[7] https://medium.com/@uzzaman.ahmed/pyspark-collection-functions-a-comprehensive-guide-3fae233d7f52
+[8] https://spark.apache.org/docs/latest/api/python/reference/pyspark.sql/api/pyspark.sql.DataFrameReader.csv.html
+[9] https://community.cloudera.com/t5/Support-Questions/Pyspark-can-t-show-a-CSV-with-an-array/m-p/229618
+[10] https://mungingdata.com/pyspark/array-arraytype-list/
+
+---------------------
+
 To create a DataFrame from a CSV file for testing purposes in PySpark, you can use the `read.csv` method provided by the `SparkSession` class. This method allows you to specify various options such as the delimiter used in the CSV file, whether the first row contains column names (header), and whether to infer the schema from the data. Here are two examples demonstrating how to do this:
 
 ### Example 1: Using `read.csv` with Options
