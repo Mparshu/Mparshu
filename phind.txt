@@ -1,4 +1,9 @@
 
+
+
+
+
+
 To define a schema for a CSV file with nested arrays of structs in PySpark, you need to use `StructType` and `StructField` to specify the structure of your data, including any nested arrays and structs. Here's how you can do it based on the examples provided in the sources:
 
 ### Step 1: Import Necessary Modules
