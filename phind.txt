@@ -1,3 +1,69 @@
+
+To define a schema for a CSV file with nested arrays of structs in PySpark, you need to use `StructType` and `StructField` to specify the structure of your data, including any nested arrays and structs. Here's how you can do it based on the examples provided in the sources:
+
+### Step 1: Import Necessary Modules
+
+First, import the necessary modules from PySpark.
+
+```python
+from pyspark.sql.types import StructType, StructField, StringType, IntegerType, ArrayType, MapType, DoubleType
+```
+
+### Step 2: Define the Nested Schema
+
+Define the schema for the nested structures. For example, if you have a dataset of orders, where each order has an order ID, a customer ID, and a list of line items, and each line item consists of a product ID, a quantity, and a price (which is a map of currency codes and amounts), you can define the schema as follows:
+
+```python
+# Define the schema for the price map
+price_schema = MapType(StringType(), DoubleType())
+
+# Define the schema for the line item
+line_item_schema = StructType([
+    StructField("product_id", StringType(), True),
+    StructField("quantity", IntegerType(), True),
+    StructField("price", price_schema, True)
+])
+
+# Define the schema for the order
+order_schema = StructType([
+    StructField("order_id", StringType(), True),
+    StructField("customer_id", StringType(), True),
+    StructField("line_items", ArrayType(line_item_schema), True)
+])
+```
+
+### Step 3: Read the CSV File with the Defined Schema
+
+Use the `spark.read.csv` method to read the CSV file, specifying the schema with the `schema` option.
+
+```python
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName("Read CSV with Nested Schema").getOrCreate()
+
+# Read the CSV file with the defined schema
+df = spark.read.format("csv").schema(order_schema).load("path/to/your/file.csv")
+
+# Show the DataFrame to verify the schema
+df.show()
+```
+
+This approach allows you to read a CSV file into a DataFrame with a complex schema, including nested arrays of structs. By defining the schema explicitly, you ensure that PySpark correctly interprets the data structure, allowing for accurate data manipulation and analysis [2][5].
+
+Citations:
+[1] https://stackoverflow.com/questions/66226281/read-nested-columns-from-csv-file-and-assign-a-schema-to-the-dataframe
+[2] https://medium.com/@uzzaman.ahmed/tk-tk-understanding-pysparks-structtype-and-structfield-for-complex-data-structures-98cdb2ab242b
+[3] https://users.scala-lang.org/t/need-to-read-a-csv-file-having-nested-structure-for-a-column-using-scala/8948
+[4] https://pwsiegel.github.io/tech/nested-spark/
+[5] https://mungingdata.com/pyspark/schema-structtype-structfield/
+[6] https://sparkbyexamples.com/pyspark/pyspark-structtype-and-structfield/
+[7] https://www.geeksforgeeks.org/pyspark-apply-custom-schema-to-a-dataframe/
+[8] https://www.youtube.com/watch?v=7ZTxZJ5Fkds
+[9] https://anindyacs.medium.com/working-with-nested-data-types-7d1228c09903
+[10] https://sparkbyexamples.com/pyspark/pyspark-select-nested-struct-columns/
+
+
+-----------------------
 To read a CSV file with struct type columns, especially when each column contains an array with struct type values, you need to define a schema that accurately represents the structure of your data. This involves using `StructType` and `StructField` from PySpark's SQL types to define the schema, including nested structures like arrays and maps.
 
 Here's a step-by-step guide on how to define and apply a schema for reading a CSV file with struct type columns containing arrays:
