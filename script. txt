@@ -1,6 +1,63 @@
 huList Content Comparisons
 
 
+To run pytest commands with Spark submit, you would typically not use Spark submit directly for pytest. Instead, you would run pytest as you normally would, and within your tests, you would configure and use SparkContext or SparkSession as needed. Pytest is a testing framework for Python, and it doesn't directly interact with Spark's submission mechanism. However, you can configure your tests to use Spark in a local or distributed mode, depending on your requirements.
+
+Here's a step-by-step guide on how to set up and run pytest for testing PySpark applications:
+
+1. **Install pytest and pytest-spark**: First, ensure you have pytest installed in your environment. You can install it using pip:
+   ```bash
+   pip install pytest
+   ```
+   Additionally, if you're working with PySpark, you might find the `pytest-spark` plugin useful. It provides fixtures for SparkContext and SparkSession, making it easier to test PySpark applications. Install it with:
+   ```bash
+   pip install pytest-spark
+   ```
+
+2. **Configure pytest for Spark**: If you're using `pytest-spark`, you can specify the `SPARK_HOME` directory in your `pytest.ini` file or via the command line using the `--spark_home` option. This is necessary for `pytest-spark` to locate Spark and make it available for your tests.
+
+3. **Write your tests**: Use pytest fixtures to create SparkContext or SparkSession instances for your tests. Here's an example of how to set up a fixture for SparkContext:
+   ```python
+   import pytest
+   from pyspark import SparkConf, SparkContext
+
+   @pytest.fixture(scope="session")
+   def spark_context(request):
+       conf = SparkConf().setMaster("local[3]").setAppName("pytest-pyspark-local-testing")
+       sc = SparkContext(conf=conf)
+       request.addfinalizer(lambda: sc.stop())
+       return sc
+   ```
+   This fixture can be used in your tests to get a SparkContext instance.
+
+4. **Run your tests**: Execute your tests using the `pytest` command. If you're using markers to differentiate between local and YARN mode tests, you can run them accordingly:
+   ```bash
+   pytest -m spark_local
+   ```
+   or
+   ```bash
+   pytest -m spark_yarn
+   ```
+   This will run tests marked with `@pytest.mark.spark_local` or `@pytest.mark.spark_yarn` depending on the mode you're targeting.
+
+5. **Mocking external dependencies**: If your PySpark code interacts with external systems (like databases or file systems), consider using mocking libraries like `unittest.mock` or `pytest-mock` to simulate these interactions in your tests. This helps in isolating the code being tested and makes your tests more reliable and faster.
+
+Remember, the key to testing PySpark applications with pytest is to set up your Spark environment within your tests using fixtures, and then write tests that interact with this environment. This approach allows you to test your PySpark code in a controlled environment, without needing to submit your tests to Spark.
+
+Citations:
+[1] https://stackoverflow.com/questions/40975360/testing-spark-with-pytest-cannot-run-spark-in-local-mode
+[2] https://pypi.org/project/pytest-spark/
+[3] https://spark.apache.org/docs/latest/api/python/getting_started/testing_pyspark.html
+[4] https://medium.com/@shuklaprashant9264/pytest-with-pyspark-70821cd778a9
+[5] https://levelup.gitconnected.com/4-tips-to-integrate-pytest-with-pyspark-applications-5a18835a6d3e
+[6] https://mikulskibartosz.name/use-one-spark-session-to-run-all-pytest-tests
+[7] https://medium.com/towards-data-engineering/how-to-write-pytest-for-pyspark-application-5d8497633c77
+[8] https://docs.gcp.databricks.com/en/dev-tools/vscode-ext/dev-tasks/pytest.html
+[9] https://docs.pytest.org/en/7.1.x/how-to/usage.html
+[10] https://garybake.com/pyspark_pytest.html
+
+
+
 pytest --log-cli-format="%(asctime)s %(levelname)s %(message)s" --log-file-format="%(asctime)s %(levelname)s %(message)s"
 
 
