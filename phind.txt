@@ -1,4 +1,51 @@
 
+
+To write a pytest that loops through a JSON file, checks if the `customerid` field equals `30001`, and fails the test if it does, you can follow these steps. This example assumes you have a JSON file named `data.json` with a structure similar to `[{"customerid": 12345}, {"customerid": 30001}, ...]`.
+
+1. **Read the JSON file**: Use Python's built-in `json` module to read the JSON file.
+2. **Loop through the records**: Iterate over each record in the JSON data.
+3. **Check the `customerid` field**: For each record, check if the `customerid` field equals `30001`.
+4. **Fail the test if `customerid` equals `30001`**: Use an `assert` statement to fail the test if the condition is met.
+
+Here's how you can implement this in a pytest test function:
+
+```python
+import json
+import pytest
+
+def test_customerid_not_30001():
+    # Step 1: Read the JSON file
+    with open('data.json', 'r') as file:
+        data = json.load(file)
+
+    # Step 2: Loop through the records
+    for record in data:
+        # Step 3: Check the `customerid` field
+        if record.get('customerid') == 30001:
+            # Step 4: Fail the test if `customerid` equals `30001`
+            pytest.fail(f"Found a record with customerid equal to 30001: {record}")
+```
+
+This test function reads the JSON file `data.json`, iterates over each record, and checks if the `customerid` field equals `30001`. If it finds such a record, it fails the test using `pytest.fail()`, providing a message that includes the problematic record.
+
+Remember to replace `'data.json'` with the actual path to your JSON file if it's located in a different directory.
+
+Citations:
+[1] https://stackoverflow.com/questions/68627340/for-looping-over-tests-in-python-using-pytest
+[2] https://github.com/microsoft/vscode-python/issues/22192
+[3] https://pytest-with-eric.com/pytest-best-practices/pytest-read-json/
+[4] https://docs-previous.pega.com/decision-management/87/configuring-data-transform-json-output-mapping
+[5] https://www.reddit.com/r/learnpython/comments/tpsxwh/code_throws_error_when_trying_to_loop_through/
+[6] https://pypi.org/project/pytest-json-report/
+[7] https://community.postman.com/t/for-loop-not-working-in-a-collection-run-against-a-json-data-file/25010
+[8] https://forum.inductiveautomation.com/t/looping-through-json/53900
+[9] https://docs.pytest.org/en/7.1.x/how-to/failures.html
+
+
+
+
+
+
 To modify the function to return the differences between two files instead of just a boolean value, you can use the `unified_diff` function from the `difflib` module. This function compares two lists of strings (lines from two files) and returns a generator that produces the differences in a unified diff format. Here's how you can modify the function:
 
 ```python
