@@ -1,3 +1,62 @@
+
+To create a function that checks if the size of a file is more than 152 KB and then use that function in a pytest test, you can follow these steps. This approach involves creating a utility function to check the file size and then writing a pytest test that uses this utility function.
+
+First, create a utility function that checks if a file's size is more than 152 KB. This function will use the `os.path.getsize` method to get the file size in bytes and then compare it with the size in KB.
+
+```python
+import os
+
+def is_file_size_greater_than_152kb(file_path):
+    # Get the file size in bytes
+    file_size_bytes = os.path.getsize(file_path)
+    
+    # Convert 152 KB to bytes
+    size_in_bytes = 152 * 1024
+    
+    # Check if the file size is more than 152 KB
+    return file_size_bytes > size_in_bytes
+```
+
+Next, write a pytest test that uses this utility function. This test will create a file, check its size using the utility function, and assert that the file size is indeed more than 152 KB.
+
+```python
+import pytest
+
+def test_file_size_greater_than_152kb():
+    # Create a file with content
+    with open('testfile.txt', 'w') as file:
+        file.write('This is a test file.')
+    
+    # Check if the file size is more than 152 KB
+    assert is_file_size_greater_than_152kb('testfile.txt')
+```
+
+To run the test, ensure you have pytest installed and then execute the following command in your terminal:
+
+```bash
+pytest test_file_size.py
+```
+
+This command will run the test and report the results. If the file size is indeed more than 152 KB, the test will pass; otherwise, it will fail.
+
+This approach separates the file size checking logic into a reusable function, making your code more modular and easier to maintain.
+
+Citations:
+[1] https://stackoverflow.com/questions/3942820/how-to-do-unit-testing-of-functions-writing-files-using-pythons-unittest
+[2] https://pynative.com/python-get-file-size/
+[3] https://docs.pytest.org/en/7.1.x/how-to/output.html
+[4] https://www.geeksforgeeks.org/how-to-get-file-size-in-python/
+[5] https://www.softwaretestinghelp.com/pytest-tutorial/
+[6] https://verdantfox.com/blog/9-pytest-tips-and-tricks-to-take-your-tests-to-the-next-level
+[7] https://semaphoreci.com/community/tutorials/testing-python-applications-with-pytest
+[8] https://pytest-pyfakefs.readthedocs.io/en/latest/usage.html
+[9] https://pytest-with-eric.com/introduction/pytest-generate-tests/
+[10] https://realpython.com/python-testing/
+
+
+
+
+
 To join on index basis after exploding a struct array in Hive, you can follow these steps:
 
 1. **Explode the Struct Array**: Use the `LATERAL VIEW explode()` function to transform each element of the struct array into a separate row. This step is crucial for preparing your data for the join operation.
