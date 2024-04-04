@@ -1,4 +1,62 @@
+To use pytest fixtures to share DataFrames across tests in PySpark, you can follow the example provided in Source 0. This approach involves creating a fixture that initializes a DataFrame and then using this fixture in multiple test functions. Here's a step-by-step guide based on the example:
 
+1. **Define a Fixture for the DataFrame**: First, create a fixture that initializes a DataFrame using a SparkSession. This fixture can be scoped to the module level if you want the DataFrame to be shared across all tests in the same module.
+
+```python
+import pytest
+from pyspark.sql import SparkSession
+
+@pytest.fixture(scope="module")
+def fixture_data_frame(spark: SparkSession) -> DataFrame:
+    data = # Your data here
+    schema = # Your schema here
+    df = spark.createDataFrame(data, schema)
+    df = df.filter( ... ) # data manipulation
+
+    yield df
+```
+
+2. **Use the Fixture in Test Functions**: Now, you can use this fixture in your test functions. Pytest will automatically inject the DataFrame created by the fixture into your test functions.
+
+```python
+def test_func1(spark, fixture_data_frame):
+    # Perform your tests here using the spark session and fixture_data_frame
+    assert 1 == 1 # Example assertion
+
+def test_func2(spark, fixture_data_frame):
+    # Perform other tests here 
+    assert 1 == 1 # Example assertion
+```
+
+3. **Advanced Usage - Chaining Fixtures**: If you need to perform additional manipulations on the DataFrame within one test and then use the manipulated DataFrame in another test, you can turn the first test into a fixture as well. This approach allows you to chain fixtures, but it's important to note that this goes against the principle of test independence and should be used judiciously.
+
+```python
+@pytest.fixture(scope="module")
+def test_func1(spark, fixture_data_frame):
+    # Perform your manipulations here
+    manipulated_df = fixture_data_frame.filter(...) # example manipulation
+    # Perform your tests here
+    assert manipulated_df.count() > 0
+    yield manipulated_df
+
+def test_func2(spark, test_func1):
+    # test_func1 is now both the manipulated data_frame and the test itself.
+    # You can perform additional tests here
+```
+
+This example demonstrates how to share a DataFrame across multiple tests using pytest fixtures. By defining a fixture that initializes the DataFrame, you can easily reuse this DataFrame in different test functions, ensuring that your tests are DRY (Don't Repeat Yourself) and maintainable.
+
+Citations:
+[1] https://stackoverflow.com/questions/76831670/how-can-i-share-spark-dataframe-across-different-pytest-test-functions-in-a-file
+[2] https://docs.pytest.org/en/7.1.x/how-to/fixtures.html
+[3] https://mike-diaz006.medium.com/what-i-learned-at-work-this-week-pytest-fixtures-2d858059a31d
+[4] https://docs.pytest.org/en/4.6.x/fixture.html
+[5] https://www.janmeppe.com/blog/tip-use-pytest-fixtures-instead-of-test-data/
+[6] https://earthly.dev/blog/pytest-fixtures/
+[7] https://www.testim.io/blog/using-pytest-fixtures/
+[8] https://www.lambdatest.com/blog/end-to-end-tutorial-for-pytest-fixtures-with-examples/
+[9] https://pytest-with-eric.com/fixtures/pytest-fixture-with-arguments/
+[10] https://docs.pytest.org/en/6.2.x/fixture.html
 
 
 Organizing test files and test data when using PySpark and pytest involves several best practices to ensure your tests are effective, maintainable, and scalable. Here are some key practices based on the provided sources:
