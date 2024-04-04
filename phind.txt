@@ -1,4 +1,97 @@
 
+To provide examples of testing using PySpark and pytest, let's focus on a couple of scenarios based on the information provided in the sources. These examples will demonstrate how to set up a SparkSession fixture, create test data, and write test functions to validate the behavior of your PySpark code.
+
+### Example 1: Testing Data Transformation Function
+
+This example demonstrates how to test a simple data transformation function that removes extra spaces from a column in a DataFrame.
+
+```python
+import pytest
+from pyspark.sql import SparkSession
+from pyspark.testing.utils import assertDataFrameEqual
+
+# Define a fixture to create a SparkSession
+@pytest.fixture
+def spark_fixture():
+    spark = SparkSession.builder.appName("Testing PySpark Example").getOrCreate()
+    yield spark
+    spark.stop()
+
+# Define a function to remove extra spaces from a column
+def remove_extra_spaces(df, column_name):
+    from pyspark.sql.functions import trim
+    return df.withColumn(column_name, trim(df[column_name]))
+
+# Test function
+def test_remove_extra_spaces(spark_fixture):
+    spark = spark_fixture
+    sample_data = [{"name": "John    D.", "age": 30},
+                   {"name": "Alice   G.", "age": 25},
+                   {"name": "Bob T.", "age": 35},
+                   {"name": "Eve   A.", "age": 28}]
+
+    original_df = spark.createDataFrame(sample_data)
+    transformed_df = remove_extra_spaces(original_df, "name")
+
+    expected_data = [{"name": "John D.", "age": 30},
+                     {"name": "Alice G.", "age": 25},
+                     {"name": "Bob T.", "age": 35},
+                     {"name": "Eve A.", "age": 28}]
+    expected_df = spark.createDataFrame(expected_data)
+
+    assertDataFrameEqual(transformed_df, expected_df)
+```
+
+### Example 2: Testing a Custom Function with SparkSession
+
+This example shows how to test a custom function that performs some operation on a DataFrame using a SparkSession fixture.
+
+```python
+from pyspark.sql import SparkSession
+import pytest
+
+# Define a fixture to create a SparkSession
+@pytest.fixture(scope='session')
+def spark():
+    return SparkSession.builder.appName('my_test_session').getOrCreate()
+
+# Define a custom function to test
+def my_function(df):
+    # Example function: double the value of a column
+    from pyspark.sql.functions import col
+    return df.withColumn("value", col("value") * 2)
+
+# Test function
+def test_my_function(spark):
+    input_data = [('foo', 10), ('bar', 20)]
+    expected_output = [('foo', 20), ('bar', 40)]
+
+    input_df = spark.createDataFrame(input_data, ['name', 'value'])
+    actual_output_df = my_function(input_df)
+    actual_output = [(r.name, r.value) for r in actual_output_df.collect()]
+
+    assert actual_output == expected_output
+```
+
+These examples illustrate how to set up a SparkSession for testing, create test data using SparkSession, and write test functions to validate the behavior of your PySpark code. Remember to use the `assert` statement or `assertDataFrameEqual` for comparison, and consider using fixtures to manage SparkSession instances across tests.
+
+Citations:
+[1] https://spark.apache.org/docs/latest/api/python/getting_started/testing_pyspark.html
+[2] https://medium.com/@shuklaprashant9264/pytest-with-pyspark-70821cd778a9
+[3] https://engineeringfordatascience.com/posts/pyspark_unit_testing_with_pytest/
+[4] https://blog.devgenius.io/pyspark-unit-test-cases-using-pytest-3199f78c3471
+[5] https://medium.com/towards-data-engineering/how-to-write-pytest-for-pyspark-application-5d8497633c77
+[6] https://garybake.com/pyspark_pytest.html
+[7] https://blog.cellenza.com/en/data/pyspark-unit-test-best-practices/
+[8] https://semaphoreci.com/community/tutorials/testing-python-applications-with-pytest
+[9] https://github.com/BoltMaud/Pyspark_pytest
+[10] https://www.linkedin.com/pulse/pyspark-unit-integration-testing-midhun-pottammal-ko6wf
+
+
+
+
+
+
 To create a function that checks if the size of a file is more than 152 KB and then use that function in a pytest test, you can follow these steps. This approach involves creating a utility function to check the file size and then writing a pytest test that uses this utility function.
 
 First, create a utility function that checks if a file's size is more than 152 KB. This function will use the `os.path.getsize` method to get the file size in bytes and then compare it with the size in KB.
