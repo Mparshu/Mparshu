@@ -1,3 +1,78 @@
+Yes, you can create a Python file and use it in your script if the `pyspark.testing.utils` package is not available. This approach allows you to manually implement the functionality you need from the package. Here's how you can do it with an example:
+
+### Step 1: Create a Python File for Utility Functions
+
+First, create a Python file, for example, `pyspark_test_utils.py`, where you will define your utility functions. If you're missing `assertDataFrameEqual` from `pyspark.testing.utils`, you can implement it yourself. This function is used to compare two DataFrames for equality.
+
+```python
+# pyspark_test_utils.py
+from pyspark.sql import DataFrame
+
+def assertDataFrameEqual(df1: DataFrame, df2: DataFrame, tol: float = 1e-6) -> None:
+    """
+    Assert that two DataFrames are equal.
+    
+    :param df1: First DataFrame
+    :param df2: Second DataFrame
+    :param tol: Tolerance for floating point comparison
+    """
+    assert df1.count() == df2.count(), "DataFrames have different row counts"
+    assert df1.columns == df2.columns, "DataFrames have different columns"
+    
+    # Compare each row
+    for row1, row2 in zip(df1.collect(), df2.collect()):
+        for col in df1.columns:
+            if isinstance(row1[col], float) and isinstance(row2[col], float):
+                assert abs(row1[col] - row2[col]) < tol, f"Values for column {col} differ: {row1[col]} vs {row2[col]}"
+            else:
+                assert row1[col] == row2[col], f"Values for column {col} differ: {row1[col]} vs {row2[col]}"
+```
+
+### Step 2: Use the Utility Function in Your Tests
+
+Now, you can use this utility function in your tests. First, ensure that your test file imports the utility function from the file you created.
+
+```python
+# test_my_spark_function.py
+import pytest
+from pyspark.sql import SparkSession
+from pyspark_test_utils import assertDataFrameEqual
+
+@pytest.fixture(scope="module")
+def spark_fixture():
+    spark = SparkSession.builder.appName("Testing PySpark Example").getOrCreate()
+    yield spark
+    spark.stop()
+
+def test_my_spark_function(spark_fixture):
+    spark = spark_fixture
+    # Your test setup and assertions here
+    # For example, comparing two DataFrames
+    df1 = spark.createDataFrame([(1, "foo"), (2, "bar")], ["id", "value"])
+    df2 = spark.createDataFrame([(1, "foo"), (2, "bar")], ["id", "value"])
+    assertDataFrameEqual(df1, df2)
+```
+
+### Explanation
+
+- **Creating a Utility File**: By creating a Python file (`pyspark_test_utils.py`), you can manually implement utility functions that you would normally import from `pyspark.testing.utils`. This is particularly useful when certain packages or modules are not available in your environment.
+- **Using the Utility Function**: In your test files, you import the utility function from your custom utility file. This allows you to use the functionality in your tests, just as you would with any other utility function.
+- **Example Functionality**: The `assertDataFrameEqual` function is a simple example of how you can implement a utility function to compare two DataFrames for equality. This function iterates over each row and column in the DataFrames, comparing the values. For floating-point numbers, it allows for a small tolerance to account for minor differences in precision.
+
+This approach provides a flexible way to include utility functions in your PySpark testing environment, even when certain packages are not available.
+
+Citations:
+[1] https://stackoverflow.com/questions/33811882/how-do-i-unit-test-pyspark-programs
+[2] https://spark.apache.org/docs/latest/api/python/getting_started/testing_pyspark.html
+[3] https://engineeringfordatascience.com/posts/pyspark_unit_testing_with_pytest/
+[4] https://docs.pytest.org/en/6.2.x/fixture.html
+[5] https://medium.com/towards-data-engineering/how-to-write-pytest-for-pyspark-application-5d8497633c77
+[6] https://engblog.nextdoor.com/unit-testing-apache-spark-with-py-test-3b8970dc013b
+[7] https://docs.databricks.com/en/dev-tools/vscode-ext/dev-tasks/pytest.html
+[8] https://medium.com/constructor-engineering/faster-pyspark-unit-tests-1cb7dfa6bdf6
+[9] https://www.janmeppe.com/blog/tip-use-pytest-fixtures-instead-of-test-data/
+[10] https://blog.cellenza.com/en/data/pyspark-unit-test-best-practices/
+
 To use pytest fixtures to share DataFrames across tests in PySpark, you can follow the example provided in Source 0. This approach involves creating a fixture that initializes a DataFrame and then using this fixture in multiple test functions. Here's a step-by-step guide based on the example:
 
 1. **Define a Fixture for the DataFrame**: First, create a fixture that initializes a DataFrame using a SparkSession. This fixture can be scoped to the module level if you want the DataFrame to be shared across all tests in the same module.
