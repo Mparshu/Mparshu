@@ -1,3 +1,80 @@
+Based on the information provided in the sources, here are some additional utility functions that might be useful to include in your `pyspark_test_utils.py` file for testing PySpark applications:
+
+### 1. `assertSchemaEqual`
+
+This function is useful for comparing the schemas of two DataFrames or two StructTypes. It can be particularly helpful when you want to ensure that the structure of your DataFrames matches the expected schema.
+
+```python
+from pyspark.sql.types import StructType
+
+def assertSchemaEqual(schema1: StructType, schema2: StructType) -> None:
+    """
+    Assert that two StructTypes are equal.
+    
+    :param schema1: First StructType
+    :param schema2: Second StructType
+    """
+    assert schema1 == schema2, f"Schemas are not equal: {schema1} vs {schema2}"
+```
+
+### 2. `assertPandasOnSparkEqual`
+
+Although mentioned as deprecated in Apache Spark 3.5.1 and scheduled for removal in Spark 4.0.0, this function was used for comparing Pandas DataFrames with PySpark DataFrames. If you're working with Pandas API on Spark and need to compare DataFrames, you might still find this function useful.
+
+```python
+import pandas as pd
+from pyspark.sql import DataFrame
+
+def assertPandasOnSparkEqual(df1: DataFrame, df2: pd.DataFrame) -> None:
+    """
+    Assert that a PySpark DataFrame is equal to a Pandas DataFrame.
+    
+    :param df1: PySpark DataFrame
+    :param df2: Pandas DataFrame
+    """
+    assert df1.toPandas().equals(df2), f"DataFrames are not equal: {df1.toPandas()} vs {df2}"
+```
+
+### 3. `assertDataFrameApproxEqual`
+
+For cases where you need to compare DataFrames with a tolerance for floating-point differences, this function can be useful. It's similar to `assertDataFrameEqual` but allows for a specified relative tolerance.
+
+```python
+def assertDataFrameApproxEqual(df1: DataFrame, df2: DataFrame, rtol: float = 1e-6) -> None:
+    """
+    Assert that two DataFrames are approximately equal, within a given relative tolerance.
+    
+    :param df1: First DataFrame
+    :param df2: Second DataFrame
+    :param rtol: Relative tolerance for floating point comparison
+    """
+    assert df1.count() == df2.count(), "DataFrames have different row counts"
+    assert df1.columns == df2.columns, "DataFrames have different columns"
+    
+    # Compare each row
+    for row1, row2 in zip(df1.collect(), df2.collect()):
+        for col in df1.columns:
+            if isinstance(row1[col], float) and isinstance(row2[col], float):
+                assert abs(row1[col] - row2[col]) <= rtol * max(abs(row1[col]), abs(row2[col])), f"Values for column {col} differ: {row1[col]} vs {row2[col]}"
+            else:
+                assert row1[col] == row2[col], f"Values for column {col} differ: {row1[col]} vs {row2[col]}"
+```
+
+These utility functions can be added to your `pyspark_test_utils.py` file and used across your PySpark testing suite to ensure that your DataFrames and schemas are as expected. Remember to import these functions into your test files as needed.
+
+Citations:
+[1] https://spark.apache.org/docs/latest/api/python/getting_started/testing_pyspark.html
+[2] https://www.databricks.com/blog/simplify-pyspark-testing-dataframe-equality-functions
+[3] https://medium.com/@davisjustin42/writing-pyspark-unit-tests-1e0ef6187f5e
+[4] https://blog.cellenza.com/en/data/pyspark-unit-test-best-practices/
+[5] https://medium.com/@deepa.account/pyspark-testing-utility-1c07aebaecc9
+[6] https://www.linkedin.com/pulse/pyspark-unit-integration-testing-midhun-pottammal-ko6wf
+[7] https://stackoverflow.com/questions/33811882/how-do-i-unit-test-pyspark-programs
+[8] https://engineeringfordatascience.com/posts/pyspark_unit_testing_with_pytest/
+[9] https://fugue-tutorials.readthedocs.io/tutorials/applications/use_cases/unit_testing.html
+[10] https://www.confessionsofadataguy.com/introduction-to-unit-testing-with-pyspark/
+
+
 Yes, you can create a Python file and use it in your script if the `pyspark.testing.utils` package is not available. This approach allows you to manually implement the functionality you need from the package. Here's how you can do it with an example:
 
 ### Step 1: Create a Python File for Utility Functions
