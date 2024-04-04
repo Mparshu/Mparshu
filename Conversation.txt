@@ -1,0 +1,591 @@
+## how to test etl test case with pyspark and pytest only
+To test ETL (Extract, Transform, Load) test cases with PySpark and pytest, you can follow these steps:
+
+1. **Set Up Pytest and SparkSession**: First, ensure you have pytest installed in your environment. You can install it using pip:
+   ```
+   pip install pytest
+   ```
+   Then, create a pytest fixture to manage the SparkSession. This fixture will initialize a SparkSession before each test and close it afterward, ensuring a clean environment for each test case.
+   ```python
+   import pytest
+   from pyspark.sql import SparkSession
+
+   @pytest.fixture(scope="module")
+   def spark_fixture():
+       spark = SparkSession.builder.appName("Testing PySpark ETL").getOrCreate()
+       yield spark
+       spark.stop()
+   ```
+
+2. **Write Test Cases**: Use the `spark_fixture` to write your test cases. For example, if you have a function `transform_data` that transforms your data as part of your ETL process, you can write a test case to verify its correctness.
+   ```python
+   def test_transform_data(spark_fixture):
+       spark = spark_fixture
+       # Prepare input data
+       input_data = [("John", 30), ("Alice", 25), ("Bob", 35), ("Eve", 28)]
+       input_df = spark.createDataFrame(input_data, ["name", "age"])
+
+       # Apply the transformation
+       transformed_df = transform_data(input_df)
+
+       # Prepare expected output
+       expected_data = [("John", 30), ("Alice", 25), ("Bob", 35), ("Eve", 28)]
+       expected_df = spark.createDataFrame(expected_data, ["name", "age"])
+
+       # Assert the transformed DataFrame matches the expected DataFrame
+       assert transformed_df.collect() == expected_df.collect()
+   ```
+
+3. **Run Tests**: Execute your tests using the pytest command in your terminal. Pytest will automatically discover and run all test functions in your test files.
+   ```
+   pytest
+   ```
+
+This approach allows you to write and run tests for your PySpark ETL processes efficiently. By using pytest fixtures, you can manage SparkSession resources effectively and ensure that each test runs in isolation. This setup is particularly useful for testing data transformations, aggregations, and other ETL operations where you need to verify the correctness of your PySpark code.
+
+Citations:
+[1] https://spark.apache.org/docs/latest/api/python/getting_started/testing_pyspark.html
+[2] https://medium.com/@xavier211192/how-to-write-pyspark-unit-tests-ci-with-pytest-61ad517f2027
+[3] https://medium.com/@davisjustin42/writing-pyspark-unit-tests-1e0ef6187f5e
+[4] https://stackoverflow.com/questions/33811882/how-do-i-unit-test-pyspark-programs
+[5] https://www.confessionsofadataguy.com/introduction-to-unit-testing-with-pyspark/
+[6] https://towardsdatascience.com/the-elephant-in-the-room-how-to-write-pyspark-unit-tests-a5073acabc34
+[7] http://kuanbutts.com/2020/08/07/pytest-faster-no-dwh-queries/
+[8] https://www.linkedin.com/pulse/simplifying-etl-testing-pyspark-sanyam-jain-pvouf?utm_source=rss&utm_campaign=articles_sitemaps&utm_medium=google_news
+
+## How do you handle dependencies or external data sources in your ETL tests?
+Handling dependencies or external data sources in your ETL tests, especially when using PySpark and pytest, involves a few key strategies to ensure your tests are reliable and maintainable. Here's how you can approach this:
+
+1. **Mock External Data Sources**: To isolate your tests from external dependencies, you can use mocking. This allows you to simulate the behavior of external data sources without actually needing to access them. Libraries like `unittest.mock` or `pytest-mock` can be very helpful for this purpose. By mocking external data sources, you can control the data that your tests receive, making your tests more predictable and easier to debug [1].
+
+2. **Use Test Data**: Instead of relying on real external data sources, create test data that mimics the structure and characteristics of your actual data. You can use SparkSession to create DataFrames from Python lists, tuples, or dictionaries for your tests. This approach ensures that your tests are not affected by the availability or state of external data sources [1].
+
+3. **Split Business Logic from Plumbing Code**: Focus your unit tests on the business logic of your ETL processes, rather than the "plumbing" code that handles data input and output. This separation makes it easier to test the core functionality of your ETL processes in isolation. For example, if you have a function that filters rows based on a condition, you can write unit tests that verify this condition is correctly applied, without needing to test the data reading or writing operations [5].
+
+4. **Write Specific Tests for Filters and Transformations**: When testing functions that perform filtering or transformations on data, write specific tests for each condition or transformation. This ensures that your tests cover all possible scenarios and edge cases. For example, if you have a function that filters rows based on a specific value in a column, write tests to verify that it correctly includes or excludes rows based on that value [5].
+
+5. **Document and Maintain Your Tests**: As your ETL processes evolve, it's important to keep your tests up-to-date and well-documented. This includes updating your mock data and test cases to reflect changes in your ETL processes. Good documentation helps other developers understand the purpose and expected outcomes of your tests, making it easier to maintain and extend your test suite over time [5].
+
+By following these strategies, you can effectively handle dependencies and external data sources in your ETL tests, ensuring that your tests are robust, reliable, and maintainable.
+
+Citations:
+[1] https://medium.com/@shuklaprashant9264/pytest-with-pyspark-70821cd778a9
+[2] https://stackoverflow.com/questions/75642260/pyspark-add-packages-dependencies-to-pytest
+[3] https://bytes.yingw787.com/posts/2018/12/10/data_driven_testing_three
+[4] https://medium.com/@GeekTrainer/unit-testing-in-data-a711d2053f7e
+[5] https://the.agilesql.club/2019/07/how-do-we-test-etl-pipelines-part-one-unit-tests/
+[6] https://pytest-with-eric.com/pytest-advanced/pytest-improve-runtime/
+[7] https://www.databricks.com/blog/2020/12/22/how-to-manage-python-dependencies-in-pyspark.html
+[8] https://engineeringfordatascience.com/posts/pyspark_unit_testing_with_pytest/
+[9] https://github.com/pytest-dev/pytest/issues/2317
+[10] https://www.linkedin.com/pulse/pyspark-unit-integration-testing-midhun-pottammal-ko6wf
+
+## Are there any best practices for organizing unit tests for ETL processes?
+Organizing unit tests for ETL processes involves several best practices to ensure that your tests are effective, maintainable, and scalable. Here are some key practices based on the provided sources:
+
+1. **Separate Business Logic from Plumbing Code**: Focus your unit tests on the business logic of your ETL processes, which typically resides in the "T" (Transform) phase of ETL. This separation allows you to test the core functionality of your ETL processes in isolation, without being affected by the data input/output operations. By doing so, you can ensure that your tests are focused and meaningful, verifying that the transformations and logic within your ETL processes are correct [2].
+
+2. **Use Mocking for External Dependencies**: When your ETL processes depend on external data sources or services, use mocking to simulate these dependencies in your tests. This approach allows you to test your ETL processes in a controlled environment, without needing to access real external data sources. Mocking can help you isolate your tests from external factors and ensure that your tests are reliable and repeatable [1].
+
+3. **Automate Test Execution**: Integrate your unit tests into your development and deployment pipelines. This can be achieved by using tools like AWS CodePipeline, which can automatically run your unit tests as part of the build and deployment process. Automating test execution ensures that your ETL processes are continuously tested and validated, helping to catch issues early in the development cycle [1].
+
+4. **Document Your Tests**: Clearly document the purpose and expected outcomes of each test. This documentation helps other developers understand the tests and their importance, making it easier to maintain and extend the test suite over time. Good documentation also aids in troubleshooting and debugging when issues arise [2].
+
+5. **Use a Consistent Naming Convention for Tests**: Adopt a consistent naming convention for your test files and test functions. This convention should clearly indicate the component or functionality being tested. For example, you might name your test files after the ETL process they test, and name your test functions to describe the specific scenario or condition being tested. A consistent naming convention makes it easier to navigate and understand your test suite [2].
+
+6. **Leverage Test Frameworks and Libraries**: Utilize testing frameworks and libraries that are well-suited for your programming language and environment. For Python ETL processes, pytest is a popular choice due to its simplicity and flexibility. These tools provide features like fixtures for setup and teardown, parameterized tests, and powerful assertion capabilities, which can help you write effective and efficient unit tests [1].
+
+By following these best practices, you can create a robust and maintainable test suite for your ETL processes, ensuring that your data transformations are accurate, reliable, and well-documented.
+
+Citations:
+[1] https://docs.aws.amazon.com/prescriptive-guidance/latest/patterns/run-unit-tests-for-python-etl-jobs-in-aws-glue-using-the-pytest-framework.html
+[2] https://the.agilesql.club/2019/07/how-do-we-test-etl-pipelines-part-one-unit-tests/
+[3] https://www.linkedin.com/pulse/pyspark-unit-integration-testing-midhun-pottammal-ko6wf
+[4] https://medium.com/@suffyan.asad1/pyspark-writing-unit-tests-for-spark-sql-transformations-c8cf336a98bc
+[5] https://blog.cellenza.com/en/data/pyspark-unit-test-best-practices/
+[6] https://medium.com/credera-engineering/how-to-write-unit-tests-for-spark-f8ea22cf6448
+[7] https://www.linkedin.com/pulse/simplifying-etl-testing-pyspark-sanyam-jain-pvouf?utm_source=rss&utm_campaign=articles_sitemaps&utm_medium=google_news
+[8] http://kuanbutts.com/2020/08/07/pytest-faster-no-dwh-queries/
+[9] https://towardsdatascience.com/forget-about-the-new-data-trends-in-2023-d2756add3317
+[10] https://stackoverflow.com/questions/33811882/how-do-i-unit-test-pyspark-programs
+
+## can you provide examples of testing using pyspark and pytest
+To provide examples of testing using PySpark and pytest, let's focus on a couple of scenarios based on the information provided in the sources. These examples will demonstrate how to set up a SparkSession fixture, create test data, and write test functions to validate the behavior of your PySpark code.
+
+### Example 1: Testing Data Transformation Function
+
+This example demonstrates how to test a simple data transformation function that removes extra spaces from a column in a DataFrame.
+
+```python
+import pytest
+from pyspark.sql import SparkSession
+from pyspark.testing.utils import assertDataFrameEqual
+
+# Define a fixture to create a SparkSession
+@pytest.fixture
+def spark_fixture():
+    spark = SparkSession.builder.appName("Testing PySpark Example").getOrCreate()
+    yield spark
+    spark.stop()
+
+# Define a function to remove extra spaces from a column
+def remove_extra_spaces(df, column_name):
+    from pyspark.sql.functions import trim
+    return df.withColumn(column_name, trim(df[column_name]))
+
+# Test function
+def test_remove_extra_spaces(spark_fixture):
+    spark = spark_fixture
+    sample_data = [{"name": "John    D.", "age": 30},
+                   {"name": "Alice   G.", "age": 25},
+                   {"name": "Bob T.", "age": 35},
+                   {"name": "Eve   A.", "age": 28}]
+
+    original_df = spark.createDataFrame(sample_data)
+    transformed_df = remove_extra_spaces(original_df, "name")
+
+    expected_data = [{"name": "John D.", "age": 30},
+                     {"name": "Alice G.", "age": 25},
+                     {"name": "Bob T.", "age": 35},
+                     {"name": "Eve A.", "age": 28}]
+    expected_df = spark.createDataFrame(expected_data)
+
+    assertDataFrameEqual(transformed_df, expected_df)
+```
+
+### Example 2: Testing a Custom Function with SparkSession
+
+This example shows how to test a custom function that performs some operation on a DataFrame using a SparkSession fixture.
+
+```python
+from pyspark.sql import SparkSession
+import pytest
+
+# Define a fixture to create a SparkSession
+@pytest.fixture(scope='session')
+def spark():
+    return SparkSession.builder.appName('my_test_session').getOrCreate()
+
+# Define a custom function to test
+def my_function(df):
+    # Example function: double the value of a column
+    from pyspark.sql.functions import col
+    return df.withColumn("value", col("value") * 2)
+
+# Test function
+def test_my_function(spark):
+    input_data = [('foo', 10), ('bar', 20)]
+    expected_output = [('foo', 20), ('bar', 40)]
+
+    input_df = spark.createDataFrame(input_data, ['name', 'value'])
+    actual_output_df = my_function(input_df)
+    actual_output = [(r.name, r.value) for r in actual_output_df.collect()]
+
+    assert actual_output == expected_output
+```
+
+These examples illustrate how to set up a SparkSession for testing, create test data using SparkSession, and write test functions to validate the behavior of your PySpark code. Remember to use the `assert` statement or `assertDataFrameEqual` for comparison, and consider using fixtures to manage SparkSession instances across tests.
+
+Citations:
+[1] https://spark.apache.org/docs/latest/api/python/getting_started/testing_pyspark.html
+[2] https://medium.com/@shuklaprashant9264/pytest-with-pyspark-70821cd778a9
+[3] https://engineeringfordatascience.com/posts/pyspark_unit_testing_with_pytest/
+[4] https://blog.devgenius.io/pyspark-unit-test-cases-using-pytest-3199f78c3471
+[5] https://medium.com/towards-data-engineering/how-to-write-pytest-for-pyspark-application-5d8497633c77
+[6] https://garybake.com/pyspark_pytest.html
+[7] https://blog.cellenza.com/en/data/pyspark-unit-test-best-practices/
+[8] https://semaphoreci.com/community/tutorials/testing-python-applications-with-pytest
+[9] https://github.com/BoltMaud/Pyspark_pytest
+[10] https://www.linkedin.com/pulse/pyspark-unit-integration-testing-midhun-pottammal-ko6wf
+
+## Are there any best practices for organizing test files and test data when using PySpark and pytest?
+Organizing test files and test data when using PySpark and pytest involves several best practices to ensure your tests are effective, maintainable, and scalable. Here are some key practices based on the provided sources:
+
+1. **Keep Data Creation Close to Usage**: Try to create test data as close to where it is used in the test. This approach makes your tests more readable and maintainable. It also helps in keeping the test data minimal and relevant to the specific test case [1].
+
+2. **Use Fixtures for DataFrames**: Utilize pytest fixtures to share DataFrames across tests. This can be particularly useful for setting up common test data that is used in multiple tests. However, for most cases, creating data as required for each individual test is recommended for clarity and simplicity [1].
+
+3. **Load Test Data from Files**: If your test data is complex or large, consider loading it from CSV files or other formats. This can make your tests more manageable and allow you to reuse the same test data across different tests or test suites [1].
+
+4. **Create Test DataFrames with Minimum Required Information**: When creating DataFrames for testing, only include columns that are relevant to the transformation or function being tested. This practice helps in writing concise and readable tests, as it's clear which columns are required and impacted by the function [1].
+
+5. **Trigger PySpark Computation**: Remember that PySpark uses lazy evaluation. You need to call an action (e.g., `collect`, `count`) during your test to compute a result that you can compare to the expected output. This is crucial for ensuring that your tests actually execute the transformations and computations they are supposed to test [1].
+
+6. **Organize Tests Efficiently**: Organize your PySpark unit tests by creating the input DataFrame, applying the function to test, specifying the expected output values, and comparing the results. This structure helps in clearly defining what each test is supposed to verify and makes it easier to understand and maintain the tests [1].
+
+7. **Cover Both Positive and Negative Test Cases**: Ensure your tests cover both positive test cases (where the function behaves as expected) and at least one negative test case (where the function is expected to fail or produce unexpected results). This comprehensive approach helps in validating the robustness of your ETL processes [1].
+
+8. **Use Pytest Features for Development**: During development, make use of pytest’s features such as the `-k` flag to run single tests or just run tests in a single file. This can help in quickly iterating and debugging your tests without having to run the entire test suite every time [1].
+
+By following these best practices, you can effectively organize your test files and test data when using PySpark and pytest, ensuring that your tests are well-structured, efficient, and effective in verifying the correctness of your ETL processes.
+
+Citations:
+[1] https://engineeringfordatascience.com/posts/pyspark_unit_testing_with_pytest/
+[2] https://spark.apache.org/docs/latest/api/python/getting_started/testing_pyspark.html
+[3] https://raja-pathanjali.medium.com/unit-testing-pyspark-with-pytest-in-databricks-f193377d25e5
+[4] https://medium.com/towards-data-engineering/how-to-write-pytest-for-pyspark-application-5d8497633c77
+[5] https://medium.com/plumbersofdatascience/introduction-to-creating-unit-tests-for-pyspark-applications-using-unittest-and-pytest-libraries-1fcc0feec945
+[6] https://blog.devgenius.io/pyspark-unit-test-cases-using-pytest-3199f78c3471
+[7] https://towardsdatascience.com/the-elephant-in-the-room-how-to-write-pyspark-unit-tests-a5073acabc34
+[8] https://medium.com/@xavier211192/how-to-write-pyspark-unit-tests-ci-with-pytest-61ad517f2027
+[9] https://docs.pytest.org/en/7.1.x/explanation/goodpractices.html
+[10] https://www.sicara.fr/blog-technique/2019-01-14-tutorial-test-pyspark-project-pytest
+[11] https://blog.cellenza.com/en/data/pyspark-unit-test-best-practices/
+[12] https://stackoverflow.com/questions/54330834/what-is-a-correct-approach-to-manage-test-data-using-pytest
+[13] https://best-practice-and-impact.github.io/ons-spark/testing-debugging/unit-testing.html
+[14] https://pytest-with-eric.com/pytest-best-practices/pytest-conftest/
+[15] https://python.plainenglish.io/master-test-driven-development-in-pyspark-a-practical-guide-ea3f5e2ffab7
+
+## Can you provide an example of how to use pytest fixtures to share DataFrames across tests?
+To use pytest fixtures to share DataFrames across tests in PySpark, you can follow the example provided in Source 0. This approach involves creating a fixture that initializes a DataFrame and then using this fixture in multiple test functions. Here's a step-by-step guide based on the example:
+
+1. **Define a Fixture for the DataFrame**: First, create a fixture that initializes a DataFrame using a SparkSession. This fixture can be scoped to the module level if you want the DataFrame to be shared across all tests in the same module.
+
+```python
+import pytest
+from pyspark.sql import SparkSession
+
+@pytest.fixture(scope="module")
+def fixture_data_frame(spark: SparkSession) -> DataFrame:
+    data = # Your data here
+    schema = # Your schema here
+    df = spark.createDataFrame(data, schema)
+    df = df.filter( ... ) # data manipulation
+
+    yield df
+```
+
+2. **Use the Fixture in Test Functions**: Now, you can use this fixture in your test functions. Pytest will automatically inject the DataFrame created by the fixture into your test functions.
+
+```python
+def test_func1(spark, fixture_data_frame):
+    # Perform your tests here using the spark session and fixture_data_frame
+    assert 1 == 1 # Example assertion
+
+def test_func2(spark, fixture_data_frame):
+    # Perform other tests here 
+    assert 1 == 1 # Example assertion
+```
+
+3. **Advanced Usage - Chaining Fixtures**: If you need to perform additional manipulations on the DataFrame within one test and then use the manipulated DataFrame in another test, you can turn the first test into a fixture as well. This approach allows you to chain fixtures, but it's important to note that this goes against the principle of test independence and should be used judiciously.
+
+```python
+@pytest.fixture(scope="module")
+def test_func1(spark, fixture_data_frame):
+    # Perform your manipulations here
+    manipulated_df = fixture_data_frame.filter(...) # example manipulation
+    # Perform your tests here
+    assert manipulated_df.count() > 0
+    yield manipulated_df
+
+def test_func2(spark, test_func1):
+    # test_func1 is now both the manipulated data_frame and the test itself.
+    # You can perform additional tests here
+```
+
+This example demonstrates how to share a DataFrame across multiple tests using pytest fixtures. By defining a fixture that initializes the DataFrame, you can easily reuse this DataFrame in different test functions, ensuring that your tests are DRY (Don't Repeat Yourself) and maintainable.
+
+Citations:
+[1] https://stackoverflow.com/questions/76831670/how-can-i-share-spark-dataframe-across-different-pytest-test-functions-in-a-file
+[2] https://docs.pytest.org/en/7.1.x/how-to/fixtures.html
+[3] https://mike-diaz006.medium.com/what-i-learned-at-work-this-week-pytest-fixtures-2d858059a31d
+[4] https://docs.pytest.org/en/4.6.x/fixture.html
+[5] https://www.janmeppe.com/blog/tip-use-pytest-fixtures-instead-of-test-data/
+[6] https://earthly.dev/blog/pytest-fixtures/
+[7] https://www.testim.io/blog/using-pytest-fixtures/
+[8] https://www.lambdatest.com/blog/end-to-end-tutorial-for-pytest-fixtures-with-examples/
+[9] https://pytest-with-eric.com/fixtures/pytest-fixture-with-arguments/
+[10] https://docs.pytest.org/en/6.2.x/fixture.html
+
+## I dont have pyspark.testing.utils package available. But the code is available on apache website so can I create py file and use that in my script. If yes how explain with example
+Yes, you can create a Python file and use it in your script if the `pyspark.testing.utils` package is not available. This approach allows you to manually implement the functionality you need from the package. Here's how you can do it with an example:
+
+### Step 1: Create a Python File for Utility Functions
+
+First, create a Python file, for example, `pyspark_test_utils.py`, where you will define your utility functions. If you're missing `assertDataFrameEqual` from `pyspark.testing.utils`, you can implement it yourself. This function is used to compare two DataFrames for equality.
+
+```python
+# pyspark_test_utils.py
+from pyspark.sql import DataFrame
+
+def assertDataFrameEqual(df1: DataFrame, df2: DataFrame, tol: float = 1e-6) -> None:
+    """
+    Assert that two DataFrames are equal.
+    
+    :param df1: First DataFrame
+    :param df2: Second DataFrame
+    :param tol: Tolerance for floating point comparison
+    """
+    assert df1.count() == df2.count(), "DataFrames have different row counts"
+    assert df1.columns == df2.columns, "DataFrames have different columns"
+    
+    # Compare each row
+    for row1, row2 in zip(df1.collect(), df2.collect()):
+        for col in df1.columns:
+            if isinstance(row1[col], float) and isinstance(row2[col], float):
+                assert abs(row1[col] - row2[col]) < tol, f"Values for column {col} differ: {row1[col]} vs {row2[col]}"
+            else:
+                assert row1[col] == row2[col], f"Values for column {col} differ: {row1[col]} vs {row2[col]}"
+```
+
+### Step 2: Use the Utility Function in Your Tests
+
+Now, you can use this utility function in your tests. First, ensure that your test file imports the utility function from the file you created.
+
+```python
+# test_my_spark_function.py
+import pytest
+from pyspark.sql import SparkSession
+from pyspark_test_utils import assertDataFrameEqual
+
+@pytest.fixture(scope="module")
+def spark_fixture():
+    spark = SparkSession.builder.appName("Testing PySpark Example").getOrCreate()
+    yield spark
+    spark.stop()
+
+def test_my_spark_function(spark_fixture):
+    spark = spark_fixture
+    # Your test setup and assertions here
+    # For example, comparing two DataFrames
+    df1 = spark.createDataFrame([(1, "foo"), (2, "bar")], ["id", "value"])
+    df2 = spark.createDataFrame([(1, "foo"), (2, "bar")], ["id", "value"])
+    assertDataFrameEqual(df1, df2)
+```
+
+### Explanation
+
+- **Creating a Utility File**: By creating a Python file (`pyspark_test_utils.py`), you can manually implement utility functions that you would normally import from `pyspark.testing.utils`. This is particularly useful when certain packages or modules are not available in your environment.
+- **Using the Utility Function**: In your test files, you import the utility function from your custom utility file. This allows you to use the functionality in your tests, just as you would with any other utility function.
+- **Example Functionality**: The `assertDataFrameEqual` function is a simple example of how you can implement a utility function to compare two DataFrames for equality. This function iterates over each row and column in the DataFrames, comparing the values. For floating-point numbers, it allows for a small tolerance to account for minor differences in precision.
+
+This approach provides a flexible way to include utility functions in your PySpark testing environment, even when certain packages are not available.
+
+Citations:
+[1] https://stackoverflow.com/questions/33811882/how-do-i-unit-test-pyspark-programs
+[2] https://spark.apache.org/docs/latest/api/python/getting_started/testing_pyspark.html
+[3] https://engineeringfordatascience.com/posts/pyspark_unit_testing_with_pytest/
+[4] https://docs.pytest.org/en/6.2.x/fixture.html
+[5] https://medium.com/towards-data-engineering/how-to-write-pytest-for-pyspark-application-5d8497633c77
+[6] https://engblog.nextdoor.com/unit-testing-apache-spark-with-py-test-3b8970dc013b
+[7] https://docs.databricks.com/en/dev-tools/vscode-ext/dev-tasks/pytest.html
+[8] https://medium.com/constructor-engineering/faster-pyspark-unit-tests-1cb7dfa6bdf6
+[9] https://www.janmeppe.com/blog/tip-use-pytest-fixtures-instead-of-test-data/
+[10] https://blog.cellenza.com/en/data/pyspark-unit-test-best-practices/
+
+## Are there any other utility functions that might be useful to include in the `pyspark_test_utils.py` file?
+Based on the information provided in the sources, here are some additional utility functions that might be useful to include in your `pyspark_test_utils.py` file for testing PySpark applications:
+
+### 1. `assertSchemaEqual`
+
+This function is useful for comparing the schemas of two DataFrames or two StructTypes. It can be particularly helpful when you want to ensure that the structure of your DataFrames matches the expected schema.
+
+```python
+from pyspark.sql.types import StructType
+
+def assertSchemaEqual(schema1: StructType, schema2: StructType) -> None:
+    """
+    Assert that two StructTypes are equal.
+    
+    :param schema1: First StructType
+    :param schema2: Second StructType
+    """
+    assert schema1 == schema2, f"Schemas are not equal: {schema1} vs {schema2}"
+```
+
+### 2. `assertPandasOnSparkEqual`
+
+Although mentioned as deprecated in Apache Spark 3.5.1 and scheduled for removal in Spark 4.0.0, this function was used for comparing Pandas DataFrames with PySpark DataFrames. If you're working with Pandas API on Spark and need to compare DataFrames, you might still find this function useful.
+
+```python
+import pandas as pd
+from pyspark.sql import DataFrame
+
+def assertPandasOnSparkEqual(df1: DataFrame, df2: pd.DataFrame) -> None:
+    """
+    Assert that a PySpark DataFrame is equal to a Pandas DataFrame.
+    
+    :param df1: PySpark DataFrame
+    :param df2: Pandas DataFrame
+    """
+    assert df1.toPandas().equals(df2), f"DataFrames are not equal: {df1.toPandas()} vs {df2}"
+```
+
+### 3. `assertDataFrameApproxEqual`
+
+For cases where you need to compare DataFrames with a tolerance for floating-point differences, this function can be useful. It's similar to `assertDataFrameEqual` but allows for a specified relative tolerance.
+
+```python
+def assertDataFrameApproxEqual(df1: DataFrame, df2: DataFrame, rtol: float = 1e-6) -> None:
+    """
+    Assert that two DataFrames are approximately equal, within a given relative tolerance.
+    
+    :param df1: First DataFrame
+    :param df2: Second DataFrame
+    :param rtol: Relative tolerance for floating point comparison
+    """
+    assert df1.count() == df2.count(), "DataFrames have different row counts"
+    assert df1.columns == df2.columns, "DataFrames have different columns"
+    
+    # Compare each row
+    for row1, row2 in zip(df1.collect(), df2.collect()):
+        for col in df1.columns:
+            if isinstance(row1[col], float) and isinstance(row2[col], float):
+                assert abs(row1[col] - row2[col]) <= rtol * max(abs(row1[col]), abs(row2[col])), f"Values for column {col} differ: {row1[col]} vs {row2[col]}"
+            else:
+                assert row1[col] == row2[col], f"Values for column {col} differ: {row1[col]} vs {row2[col]}"
+```
+
+These utility functions can be added to your `pyspark_test_utils.py` file and used across your PySpark testing suite to ensure that your DataFrames and schemas are as expected. Remember to import these functions into your test files as needed.
+
+Citations:
+[1] https://spark.apache.org/docs/latest/api/python/getting_started/testing_pyspark.html
+[2] https://www.databricks.com/blog/simplify-pyspark-testing-dataframe-equality-functions
+[3] https://medium.com/@davisjustin42/writing-pyspark-unit-tests-1e0ef6187f5e
+[4] https://blog.cellenza.com/en/data/pyspark-unit-test-best-practices/
+[5] https://medium.com/@deepa.account/pyspark-testing-utility-1c07aebaecc9
+[6] https://www.linkedin.com/pulse/pyspark-unit-integration-testing-midhun-pottammal-ko6wf
+[7] https://stackoverflow.com/questions/33811882/how-do-i-unit-test-pyspark-programs
+[8] https://engineeringfordatascience.com/posts/pyspark_unit_testing_with_pytest/
+[9] https://fugue-tutorials.readthedocs.io/tutorials/applications/use_cases/unit_testing.html
+[10] https://www.confessionsofadataguy.com/introduction-to-unit-testing-with-pyspark/
+
+## Can you give examples on how we can use assertDataFrameEqual in actual scenario. I have source dataframe and based on 1 column I am expecting some value in target dataframe How we can validate
+To use `assertDataFrameEqual` in an actual scenario where you have a source DataFrame and you're expecting some values in a target DataFrame based on one column, you can follow these steps. This example will demonstrate how to validate the transformation of a DataFrame based on a specific condition.
+
+### Step 1: Define Your Source and Target DataFrames
+
+First, let's define the source DataFrame and the expected target DataFrame. The source DataFrame contains the original data, and the target DataFrame contains the expected results after applying some transformation.
+
+```python
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName("Testing PySpark Example").getOrCreate()
+
+# Source DataFrame
+source_data = [("John", 30), ("Alice", 25), ("Bob", 35), ("Eve", 28)]
+source_df = spark.createDataFrame(source_data, ["name", "age"])
+
+# Target DataFrame with expected results
+target_data = [("John", 30), ("Alice", 25), ("Bob", 35), ("Eve", 28)]
+target_df = spark.createDataFrame(target_data, ["name", "age"])
+```
+
+### Step 2: Apply Your Transformation
+
+Next, apply the transformation to the source DataFrame. This could be any operation that modifies the DataFrame, such as filtering, adding columns, or modifying existing columns.
+
+```python
+# Example transformation: Add 5 years to the age of each person
+from pyspark.sql.functions import col
+
+transformed_df = source_df.withColumn("age", col("age") + 5)
+```
+
+### Step 3: Use `assertDataFrameEqual` to Validate the Transformation
+
+Finally, use `assertDataFrameEqual` to validate that the transformed DataFrame matches the expected target DataFrame. This function checks that the two DataFrames are equal, considering the order of rows and the values in each column.
+
+```python
+from pyspark.testing import assertDataFrameEqual
+
+try:
+    assertDataFrameEqual(transformed_df, target_df, checkRowOrder=True)
+except AssertionError as e:
+    print("The DataFrames are not equal.")
+    print(e)
+```
+
+### Explanation
+
+- **Source and Target DataFrames**: You start by defining the source DataFrame, which contains the original data, and the target DataFrame, which contains the expected results after applying a transformation.
+- **Transformation**: You then apply a transformation to the source DataFrame. This could be any operation that modifies the DataFrame.
+- **Validation**: Finally, you use `assertDataFrameEqual` to validate that the transformed DataFrame matches the expected target DataFrame. This function checks that the two DataFrames are equal, considering the order of rows and the values in each column.
+
+This example demonstrates how to use `assertDataFrameEqual` to validate the results of a transformation applied to a DataFrame. By comparing the transformed DataFrame to the expected target DataFrame, you can ensure that your transformation is working as expected.
+
+Citations:
+[1] https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.testing.assertDataFrameEqual.html
+[2] https://www.databricks.com/blog/simplify-pyspark-testing-dataframe-equality-functions
+[3] https://stackoverflow.com/questions/52619099/pytest-assert-for-pyspark-dataframe-comparison
+[4] https://spark.apache.org/docs/latest/api/python/getting_started/testing_pyspark.html
+[5] https://python.plainenglish.io/pyspark-dataframe-comparison-a-must-know-skill-for-data-scientists-engineers-afe7541f9b15
+[6] https://justinmatters.co.uk/wp/checking-dataframe-equality-in-pyspark/
+[7] https://trutechinsight.com/simplify-pyspark-testing-with-dataframe-equality-functions/
+[8] https://dzone.com/articles/many-ways-of-validating-data-in-a-spark-dataframe
+[9] https://stackoverflow.com/questions/51881686/data-type-validation-in-pyspark
+[10] https://spark.apache.org/docs/latest/api/python/_modules/pyspark/testing/utils.html
+[11] https://sparkbyexamples.com/pyspark/pyspark-check-if-column-exists-in-dataframe/
+[12] https://api-docs.databricks.com/python/pyspark/latest/pyspark.sql/api/pyspark.sql.functions.assert_true.html
+[13] https://stackoverflow.com/questions/70269735/how-to-use-assert-frame-equal-for-asserting-all-the-values-in-the-dataframe-wi
+[14] https://sparkbyexamples.com/pyspark/pyspark-filter-using-contains-examples/
+[15] https://stackoverflow.com/questions/70862644/assert-a-value-of-a-specific-cell-in-spark-df-in-python
+
+## How do you handle cases where the expected target DataFrame has additional columns not present in the source DataFrame?
+When the expected target DataFrame has additional columns not present in the source DataFrame, you can still use `assertDataFrameEqual` to validate the transformation by focusing on the columns that are present in both DataFrames. However, you need to ensure that the additional columns in the target DataFrame either have default values or are not critical to the test's outcome.
+
+Here's an example scenario where the source DataFrame has two columns (`name` and `age`), and the target DataFrame has an additional column (`status`). The test focuses on validating the `name` and `age` columns, ignoring the `status` column in the target DataFrame.
+
+### Step 1: Define Your Source and Target DataFrames
+
+```python
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName("Testing PySpark Example").getOrCreate()
+
+# Source DataFrame
+source_data = [("John", 30), ("Alice", 25), ("Bob", 35), ("Eve", 28)]
+source_df = spark.createDataFrame(source_data, ["name", "age"])
+
+# Target DataFrame with expected results and an additional column
+target_data = [("John", 30, "active"), ("Alice", 25, "inactive"), ("Bob", 35, "active"), ("Eve", 28, "inactive")]
+target_df = spark.createDataFrame(target_data, ["name", "age", "status"])
+```
+
+### Step 2: Apply Your Transformation
+
+Assume you have a transformation that adds a `status` column based on some condition. For simplicity, let's assume the transformation adds a `status` column with a default value of "active" for all rows.
+
+```python
+from pyspark.sql.functions import lit
+
+# Example transformation: Add a 'status' column with a default value
+transformed_df = source_df.withColumn("status", lit("active"))
+```
+
+### Step 3: Use `assertDataFrameEqual` to Validate the Transformation
+
+To validate the transformation, you can select only the columns that are present in both the source and target DataFrames. This way, you're not comparing the additional columns in the target DataFrame.
+
+```python
+from pyspark.testing import assertDataFrameEqual
+
+# Select only the columns present in both DataFrames
+transformed_df_selected = transformed_df.select("name", "age")
+target_df_selected = target_df.select("name", "age")
+
+try:
+    assertDataFrameEqual(transformed_df_selected, target_df_selected, checkRowOrder=True)
+except AssertionError as e:
+    print("The DataFrames are not equal.")
+    print(e)
+```
+
+### Explanation
+
+- **Selecting Relevant Columns**: By selecting only the columns that are present in both the source and target DataFrames, you focus the comparison on the relevant data. This approach allows you to validate the transformation without being affected by additional columns in the target DataFrame.
+- **Ignoring Additional Columns**: The additional columns in the target DataFrame are not considered in the comparison, allowing you to test the transformation logic without needing to account for these columns.
+
+This method ensures that your tests remain focused on the transformation logic and the data that is critical to the test's outcome, while ignoring any additional columns that are not relevant to the validation.
+
+Citations:
+[1] https://www.databricks.com/blog/simplify-pyspark-testing-dataframe-equality-functions
+[2] https://stackoverflow.com/questions/49651049/pyspark-best-practice-to-add-more-columns-to-a-dataframe
+[3] https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.testing.assertDataFrameEqual.html
+[4] https://spark.apache.org/docs/latest/api/python/_modules/pyspark/testing/utils.html
+[5] https://www.geeksforgeeks.org/how-to-add-a-new-column-to-a-pyspark-dataframe/
+[6] https://justinmatters.co.uk/wp/checking-dataframe-equality-in-pyspark/
+[7] https://medium.com/@uzzaman.ahmed/a-comprehensive-guide-on-using-withcolumn-9cf428470d7
+[8] https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-crawler-pyspark-extensions-dynamic-frame.html
+[9] https://saturncloud.io/blog/comparing-two-dataframes-in-pyspark-a-comprehensive-guide/
+[10] https://www.aporia.com/resources/how-to/get-list-dataframe-column-names/
