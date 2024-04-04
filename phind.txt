@@ -1,4 +1,77 @@
 
+When the expected target DataFrame has additional columns not present in the source DataFrame, you can still use `assertDataFrameEqual` to validate the transformation by focusing on the columns that are present in both DataFrames. However, you need to ensure that the additional columns in the target DataFrame either have default values or are not critical to the test's outcome.
+
+Here's an example scenario where the source DataFrame has two columns (`name` and `age`), and the target DataFrame has an additional column (`status`). The test focuses on validating the `name` and `age` columns, ignoring the `status` column in the target DataFrame.
+
+### Step 1: Define Your Source and Target DataFrames
+
+```python
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName("Testing PySpark Example").getOrCreate()
+
+# Source DataFrame
+source_data = [("John", 30), ("Alice", 25), ("Bob", 35), ("Eve", 28)]
+source_df = spark.createDataFrame(source_data, ["name", "age"])
+
+# Target DataFrame with expected results and an additional column
+target_data = [("John", 30, "active"), ("Alice", 25, "inactive"), ("Bob", 35, "active"), ("Eve", 28, "inactive")]
+target_df = spark.createDataFrame(target_data, ["name", "age", "status"])
+```
+
+### Step 2: Apply Your Transformation
+
+Assume you have a transformation that adds a `status` column based on some condition. For simplicity, let's assume the transformation adds a `status` column with a default value of "active" for all rows.
+
+```python
+from pyspark.sql.functions import lit
+
+# Example transformation: Add a 'status' column with a default value
+transformed_df = source_df.withColumn("status", lit("active"))
+```
+
+### Step 3: Use `assertDataFrameEqual` to Validate the Transformation
+
+To validate the transformation, you can select only the columns that are present in both the source and target DataFrames. This way, you're not comparing the additional columns in the target DataFrame.
+
+```python
+from pyspark.testing import assertDataFrameEqual
+
+# Select only the columns present in both DataFrames
+transformed_df_selected = transformed_df.select("name", "age")
+target_df_selected = target_df.select("name", "age")
+
+try:
+    assertDataFrameEqual(transformed_df_selected, target_df_selected, checkRowOrder=True)
+except AssertionError as e:
+    print("The DataFrames are not equal.")
+    print(e)
+```
+
+### Explanation
+
+- **Selecting Relevant Columns**: By selecting only the columns that are present in both the source and target DataFrames, you focus the comparison on the relevant data. This approach allows you to validate the transformation without being affected by additional columns in the target DataFrame.
+- **Ignoring Additional Columns**: The additional columns in the target DataFrame are not considered in the comparison, allowing you to test the transformation logic without needing to account for these columns.
+
+This method ensures that your tests remain focused on the transformation logic and the data that is critical to the test's outcome, while ignoring any additional columns that are not relevant to the validation.
+
+Citations:
+[1] https://www.databricks.com/blog/simplify-pyspark-testing-dataframe-equality-functions
+[2] https://stackoverflow.com/questions/49651049/pyspark-best-practice-to-add-more-columns-to-a-dataframe
+[3] https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.testing.assertDataFrameEqual.html
+[4] https://spark.apache.org/docs/latest/api/python/_modules/pyspark/testing/utils.html
+[5] https://www.geeksforgeeks.org/how-to-add-a-new-column-to-a-pyspark-dataframe/
+[6] https://justinmatters.co.uk/wp/checking-dataframe-equality-in-pyspark/
+[7] https://medium.com/@uzzaman.ahmed/a-comprehensive-guide-on-using-withcolumn-9cf428470d7
+[8] https://docs.aws.amazon.com/glue/latest/dg/aws-glue-api-crawler-pyspark-extensions-dynamic-frame.html
+[9] https://saturncloud.io/blog/comparing-two-dataframes-in-pyspark-a-comprehensive-guide/
+[10] https://www.aporia.com/resources/how-to/get-list-dataframe-column-names/
+
+
+
+
+
+
 To use `assertDataFrameEqual` in an actual scenario where you have a source DataFrame and you're expecting some values in a target DataFrame based on one column, you can follow these steps. This example will demonstrate how to validate the transformation of a DataFrame based on a specific condition.
 
 ### Step 1: Define Your Source and Target DataFrames
