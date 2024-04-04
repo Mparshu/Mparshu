@@ -1,3 +1,74 @@
+
+To use `assertDataFrameEqual` in an actual scenario where you have a source DataFrame and you're expecting some values in a target DataFrame based on one column, you can follow these steps. This example will demonstrate how to validate the transformation of a DataFrame based on a specific condition.
+
+### Step 1: Define Your Source and Target DataFrames
+
+First, let's define the source DataFrame and the expected target DataFrame. The source DataFrame contains the original data, and the target DataFrame contains the expected results after applying some transformation.
+
+```python
+from pyspark.sql import SparkSession
+
+spark = SparkSession.builder.appName("Testing PySpark Example").getOrCreate()
+
+# Source DataFrame
+source_data = [("John", 30), ("Alice", 25), ("Bob", 35), ("Eve", 28)]
+source_df = spark.createDataFrame(source_data, ["name", "age"])
+
+# Target DataFrame with expected results
+target_data = [("John", 30), ("Alice", 25), ("Bob", 35), ("Eve", 28)]
+target_df = spark.createDataFrame(target_data, ["name", "age"])
+```
+
+### Step 2: Apply Your Transformation
+
+Next, apply the transformation to the source DataFrame. This could be any operation that modifies the DataFrame, such as filtering, adding columns, or modifying existing columns.
+
+```python
+# Example transformation: Add 5 years to the age of each person
+from pyspark.sql.functions import col
+
+transformed_df = source_df.withColumn("age", col("age") + 5)
+```
+
+### Step 3: Use `assertDataFrameEqual` to Validate the Transformation
+
+Finally, use `assertDataFrameEqual` to validate that the transformed DataFrame matches the expected target DataFrame. This function checks that the two DataFrames are equal, considering the order of rows and the values in each column.
+
+```python
+from pyspark.testing import assertDataFrameEqual
+
+try:
+    assertDataFrameEqual(transformed_df, target_df, checkRowOrder=True)
+except AssertionError as e:
+    print("The DataFrames are not equal.")
+    print(e)
+```
+
+### Explanation
+
+- **Source and Target DataFrames**: You start by defining the source DataFrame, which contains the original data, and the target DataFrame, which contains the expected results after applying a transformation.
+- **Transformation**: You then apply a transformation to the source DataFrame. This could be any operation that modifies the DataFrame.
+- **Validation**: Finally, you use `assertDataFrameEqual` to validate that the transformed DataFrame matches the expected target DataFrame. This function checks that the two DataFrames are equal, considering the order of rows and the values in each column.
+
+This example demonstrates how to use `assertDataFrameEqual` to validate the results of a transformation applied to a DataFrame. By comparing the transformed DataFrame to the expected target DataFrame, you can ensure that your transformation is working as expected.
+
+Citations:
+[1] https://spark.apache.org/docs/latest/api/python/reference/api/pyspark.testing.assertDataFrameEqual.html
+[2] https://www.databricks.com/blog/simplify-pyspark-testing-dataframe-equality-functions
+[3] https://stackoverflow.com/questions/52619099/pytest-assert-for-pyspark-dataframe-comparison
+[4] https://spark.apache.org/docs/latest/api/python/getting_started/testing_pyspark.html
+[5] https://python.plainenglish.io/pyspark-dataframe-comparison-a-must-know-skill-for-data-scientists-engineers-afe7541f9b15
+[6] https://justinmatters.co.uk/wp/checking-dataframe-equality-in-pyspark/
+[7] https://trutechinsight.com/simplify-pyspark-testing-with-dataframe-equality-functions/
+[8] https://dzone.com/articles/many-ways-of-validating-data-in-a-spark-dataframe
+[9] https://stackoverflow.com/questions/51881686/data-type-validation-in-pyspark
+[10] https://spark.apache.org/docs/latest/api/python/_modules/pyspark/testing/utils.html
+[11] https://sparkbyexamples.com/pyspark/pyspark-check-if-column-exists-in-dataframe/
+[12] https://api-docs.databricks.com/python/pyspark/latest/pyspark.sql/api/pyspark.sql.functions.assert_true.html
+[13] https://stackoverflow.com/questions/70269735/how-to-use-assert-frame-equal-for-asserting-all-the-values-in-the-dataframe-wi
+[14] https://sparkbyexamples.com/pyspark/pyspark-filter-using-contains-examples/
+[15] https://stackoverflow.com/questions/70862644/assert-a-value-of-a-specific-cell-in-spark-df-in-python
+
 Based on the information provided in the sources, here are some additional utility functions that might be useful to include in your `pyspark_test_utils.py` file for testing PySpark applications:
 
 ### 1. `assertSchemaEqual`
