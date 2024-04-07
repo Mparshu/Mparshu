@@ -1,5 +1,23 @@
 huList Content Comparisons
 
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col
+
+# Create a Spark session
+spark = SparkSession.builder \
+    .appName("Fill Null Values") \
+    .getOrCreate()
+
+# Sample DataFrame
+data = [(1, None), (2, 3), (None, 4)]
+columns = ["a", "b"]
+df = spark.createDataFrame(data, columns)
+
+# Update column 'a' with value 0 where it is null
+df_filled = df.fillna(0, subset=["a"])
+
+# Show the updated DataFrame
+df_filled.show()
 
 To run pytest commands with Spark submit, you would typically not use Spark submit directly for pytest. Instead, you would run pytest as you normally would, and within your tests, you would configure and use SparkContext or SparkSession as needed. Pytest is a testing framework for Python, and it doesn't directly interact with Spark's submission mechanism. However, you can configure your tests to use Spark in a local or distributed mode, depending on your requirements.
 
