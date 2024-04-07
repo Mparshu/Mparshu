@@ -14,6 +14,76 @@ def edit_json_file(start_record, end_record, file_path, edit_fields):
 
             # Update the specified fields with the new values
             for field, new_value in edit_fields.items():
+                # Split the field name by dot to handle nested fields
+                nested_fields = field.split('.')
+                nested_record = record
+                for nested_field in nested_fields[:-1]:
+                    nested_record = nested_record.get(nested_field, {})
+                last_field = nested_fields[-1]
+
+                # Update the last nested field with the new value
+                if last_field in nested_record:
+                    nested_record[last_field] = new_value
+                else:
+                    print(f"Field '{last_field}' not found in record {i}. Skipping update.")
+
+        # Save the updated data back to the JSON file
+        with open(file_path, 'w') as file:
+            json.dump(data, file, indent=4)
+
+        print("JSON file updated successfully!")
+
+    except FileNotFoundError:
+        print("File not found. Please enter a valid file path.")
+    except IndexError:
+        print("Invalid record range. Please enter a valid range.")
+
+def main():
+    # Take input from the user about the range of records to edit
+    start_record = int(input("Enter the starting record number: "))
+    end_record = int(input("Enter the ending record number: "))
+
+    # Ask for the location of the JSON file
+    file_path = input("Enter the path of the JSON file: ")
+
+    edit_fields = {}
+    edit_more = True
+    while edit_more:
+        # Ask user for the field to edit and the new value
+        edit_field = input("Enter the field to edit: ")
+        new_value = input(f"Enter the new value for {edit_field}: ")
+
+        edit_fields[edit_field] = new_value
+
+        edit_more_input = input("Do you want to edit more fields? (yes/no): ")
+        edit_more = edit_more_input.lower() == 'yes'
+
+    # Call the function to edit the JSON file with multiple edit fields
+    edit_json_file(start_record, end_record, file_path, edit_fields)
+
+# Call the main function to start the script
+main()
+
+
+
+
+
+
+
+import json
+
+def edit_json_file(start_record, end_record, file_path, edit_fields):
+    try:
+        # Open the JSON file
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+
+        # Iterate through the specified range of records
+        for i in range(start_record, end_record + 1):
+            record = data[i - 1]  # Adjust index since records start from 1
+
+            # Update the specified fields with the new values
+            for field, new_value in edit_fields.items():
                 if field in record:
                     record[field] = new_value
                 else:
