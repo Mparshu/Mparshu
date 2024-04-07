@@ -1,5 +1,62 @@
 huList Content Comparisons
 
+import json
+
+def edit_json_file(start_record, end_record, file_path, edit_field, new_value):
+    try:
+        # Open the JSON file
+        with open(file_path, 'r') as file:
+            data = json.load(file)
+
+        # Check if the edit_field is present in the JSON data
+        if edit_field not in data[0]:
+            raise KeyError(edit_field)
+
+        # Iterate through the specified range of records
+        for i in range(start_record, end_record + 1):
+            record = data[i - 1]  # Adjust index since records start from 1
+
+            # Update the specified field with the new value
+            record[edit_field] = new_value
+
+        # Save the updated data back to the JSON file
+        with open(file_path, 'w') as file:
+            json.dump(data, file, indent=4)
+
+        print("JSON file updated successfully!")
+
+    except FileNotFoundError:
+        print("File not found. Please enter a valid file path.")
+    except IndexError:
+        print("Invalid record range. Please enter a valid range.")
+    except KeyError as e:
+        print(f"Field '{e.args[0]}' not found in the JSON records.")
+
+def main():
+    # Take input from the user about the range of records to edit
+    start_record = int(input("Enter the starting record number: "))
+    end_record = int(input("Enter the ending record number: "))
+
+    # Ask for the location of the JSON file
+    file_path = input("Enter the path of the JSON file: ")
+
+    # Ask user for the field to edit and the new value
+    edit_field = input("Enter the field to edit: ")
+    new_value = input(f"Enter the new value for {edit_field}: ")
+
+    # Call the function to edit the JSON file
+    edit_json_file(start_record, end_record, file_path, edit_field, new_value)
+
+# Call the main function to start the script
+main()
+
+
+
+
+
+
+
+----------++-++++--------------
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 
