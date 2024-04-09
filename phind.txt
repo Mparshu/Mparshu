@@ -1,4 +1,61 @@
 
+To connect PySpark to a Hive database and access tables, you need to follow these steps:
+
+1. **Enable Hive Support in SparkSession**: When creating your SparkSession, you need to enable Hive support. This is done by calling `.enableHiveSupport()` on the SparkSession builder. Additionally, you might need to add Hive dependencies to your Spark session configuration.
+
+    ```python
+    from pyspark.sql import SparkSession
+
+    spark = SparkSession.builder \
+        .appName("HiveTableExample") \
+        .config("spark.jars.packages", "org.apache.hive:hive-jdbc:2.3.4") \
+        .enableHiveSupport() \
+        .getOrCreate()
+    ```
+
+2. **Access Hive Tables**: Once Hive support is enabled, you can access Hive tables using either the `spark.sql()` method to execute SQL queries or the `spark.table()` method to directly access a table by name.
+
+    - **Using `spark.sql()`**: This method allows you to execute SQL queries on Hive tables.
+
+        ```python
+        df = spark.sql("SELECT * FROM my_hive_table")
+        df.show()
+        ```
+
+    - **Using `spark.table()`**: This method directly accesses a Hive table by its name and returns a DataFrame.
+
+        ```python
+        df = spark.table("my_hive_table")
+        df.show()
+        ```
+
+3. **Working with Hive External Tables**: If you need to access data stored outside of the Hive warehouse directory, you can use Hive external tables. Note that external tables are read-only.
+
+    ```python
+    df = spark.sql("SELECT * FROM external_table")
+    ```
+
+Remember, to successfully connect to Hive and access its tables, your Spark environment must be correctly configured, and you might need to include the necessary Hive dependencies in your Spark session configuration. This setup allows you to leverage the power of Hive's SQL capabilities within your PySpark applications [1][4].
+
+Citations:
+[1] https://sparkbyexamples.com/apache-hive/pyspark-sql-read-hive-table/
+[2] https://stackoverflow.com/questions/36051091/query-hive-table-in-pyspark
+[3] https://www.revisitclass.com/hadoop/how-to-access-a-hive-table-using-pyspark/
+[4] https://www.sparkcodehub.com/pyspark-working-with-hive-tables
+[5] https://www.geeksforgeeks.org/query-hive-table-in-pyspark/
+[6] https://kontext.tech/article/1073/pyspark-read-from-hive-tables
+[7] https://sqlrelease.com/read-and-write-data-into-hive-table-from-spark-using-pyspark
+[8] https://www.sobyte.net/post/2021-10/jpuyter-pyspark-hive/
+[9] https://spark.apache.org/docs/latest/sql-data-sources-hive-tables.html
+[10] https://sparkbyexamples.com/spark/how-to-connect-spark-to-remote-hive/
+[11] https://www.projectpro.io/recipes/read-table-of-data-from-hive-database-pyspark
+[12] https://www.analyticsvidhya.com/blog/2021/10/introduction-to-partitioned-hive-table-and-pyspark/
+[13] https://community.cloudera.com/t5/Support-Questions/how-to-access-hive-database-tables-through-spark-and-pyspark/m-p/89612
+[14] https://stackoverflow.com/questions/48382261/how-can-i-connect-to-hive-using-pyspark
+[15] https://kontext.tech/article/294/spark-save-dataframe-to-hive-table
+
+
+
 When the expected target DataFrame has additional columns not present in the source DataFrame, you can still use `assertDataFrameEqual` to validate the transformation by focusing on the columns that are present in both DataFrames. However, you need to ensure that the additional columns in the target DataFrame either have default values or are not critical to the test's outcome.
 
 Here's an example scenario where the source DataFrame has two columns (`name` and `age`), and the target DataFrame has an additional column (`status`). The test focuses on validating the `name` and `age` columns, ignoring the `status` column in the target DataFrame.
