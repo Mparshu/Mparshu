@@ -12,6 +12,63 @@ fi
 part_of_link="$1"
 mail_id="$2"
 
+# Remove the existing directory
+rm -r /home/sit_path
+
+# Download the tar file using curl
+curl -O $USER <link>/$part_of_link
+
+# Extract the contents of the tar file
+tar -xf <downloaded_file.tar>
+
+# Compare contents of Track1 folders in SIT and PROD
+diff_output=$(diff -rq /home/SIT/Track1 /home/PROD/Track1)
+
+# Extract specific lines from adbs files
+sed_sit=$(sed -n '7p' /home/SIT/Track1/adbs)
+sed_prod=$(sed -n '7p' /home/PROD/Track1/adbs)
+
+# Grep 'Inputfile' from wrapper.ksh files
+grep_sit=$(grep 'Inputfile' /home/SIT/Track1/wrapper.ksh)
+grep_prod=$(grep 'Inputfile' /home/PROD/Track1/wrapper.ksh)
+
+# Create HTML report
+html_report="/home/diff_report.html"
+echo "<html>
+<head><title>Folder Comparison Report</title></head>
+<body>
+<h1>Folder Comparison Report</h1>
+<h2>Folder Difference:</h2>
+<pre>$diff_output</pre>
+<h2>SIT adbs 7th Line:</h2>
+<pre>$sed_sit</pre>
+<h2>PROD adbs 7th Line:</h2>
+<pre>$sed_prod</pre>
+<h2>SIT wrapper.ksh Inputfile:</h2>
+<pre>$grep_sit</pre>
+<h2>PROD wrapper.ksh Inputfile:</h2>
+<pre>$grep_prod</pre>
+</body>
+</html>" > "$html_report"
+
+# Send the HTML report via email
+mailx -s "Folder Comparison Report" $mail_id < "$html_report"
+
+# Clean up temporary files
+rm "$html_report"
+
+#!/bin/bash
+
+# Check if correct number of arguments are provided
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <part_of_link> <mail_id>"
+    exit 1
+fi
+
+# Assign arguments to variables
+part_of_link="$1"
+mail_id="$2"
+
 # Define log file path
 log_file="/home/script_log_$(date +'%Y-%m-%d_%H-%M-%S').txt"
 
