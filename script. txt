@@ -1,5 +1,56 @@
 huList Content Comparisons
 
+#!/bin/bash
+
+# Check if correct number of arguments are provided
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <part_of_link> <mail_id>"
+    exit 1
+fi
+
+# Assign arguments to variables
+part_of_link="$1"
+mail_id="$2"
+
+# Define log file path
+log_file="/home/script_log_$(date +'%Y-%m-%d_%H-%M-%S').txt"
+
+# Function to log commands and their output
+log_command() {
+    local command="$1"
+    echo "### Running command: $command" >> "$log_file"
+    eval "$command" >> "$log_file" 2>&1
+    echo "### End of command output" >> "$log_file"
+}
+
+# Log start time
+echo "Script started at: $(date +'%Y-%m-%d %H:%M:%S')" > "$log_file"
+
+# Remove the existing directory
+log_command "rm -r /home/sit_path"
+
+# Download the tar file using curl
+log_command "curl -u username:password -O $USER <link>/$part_of_link"
+
+# Check if the downloaded file exists
+if [ ! -f "$part_of_link" ]; then
+    echo "Error: Downloaded file not found." >> "$log_file"
+    exit 1
+fi
+
+# Extract the contents of the tar file
+log_command "tar -xf $part_of_link"
+
+# Continue with the rest of the script...
+
+# Log end time
+echo "Script ended at: $(date +'%Y-%m-%d %H:%M:%S')" >> "$log_file"
+
+# Send the log file via email
+mailx -s "Script Execution Log" $mail_id < "$log_file"
+
+# Clean up temporary log file
+rm "$log_file"
 
 
 import json
