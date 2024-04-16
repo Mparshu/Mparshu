@@ -1,5 +1,26 @@
 huList Content Comparisons
 
+SELECT *
+FROM (
+    SELECT *
+    FROM (
+        SELECT *
+        FROM (
+            SELECT *
+            FROM tableA AS a
+            INNER JOIN tableB AS b ON a.cus_id = b.cus_id AND b.active = 1
+        ) AS flow_a
+        INNER JOIN tableC AS c ON flow_a.cus_id = c.cus_id AND c.active = 1
+        INNER JOIN tableD AS d ON flow_a.cus_id = d.cus_id AND d.active = 1
+    ) AS flow_b
+    LEFT OUTER JOIN tableE AS e ON flow_b.sortid = e.sortid AND flow_b.cus_acc_id = e.cus_acc_id AND e.active = 1
+) AS flow_c
+LEFT OUTER JOIN tableF AS f ON flow_c.stg_id = f.stg_id AND f.active = 1
+LEFT OUTER JOIN tableG AS g ON flow_c.stg_id = g.stg_id AND g.active = 1
+LEFT OUTER JOIN tableH AS h ON flow_c.stg_id = h.stg_id AND h.active = 1
+WHERE flow_c.active = 1;
+
+
 
 SELECT *
 FROM (
