@@ -1,5 +1,28 @@
 huList Content Comparisons
 
+
+SELECT *
+FROM (
+    SELECT *
+    FROM (
+        SELECT *
+        FROM (
+            SELECT *
+            FROM tableA AS a
+            INNER JOIN tableB AS b ON a.cus_id = b.cus_id
+        ) AS flow_a
+        INNER JOIN tableC AS c ON flow_a.cus_id = c.cus_id
+        INNER JOIN tableD AS d ON flow_a.cus_id = d.cus_id
+    ) AS flow_b
+    LEFT OUTER JOIN tableE AS e ON flow_b.sortid = e.sortid AND flow_b.cus_acc_id = e.cus_acc_id
+) AS flow_c
+LEFT OUTER JOIN tableF AS f ON flow_c.stg_id = f.stg_id
+LEFT OUTER JOIN tableG AS g ON flow_c.stg_id = g.stg_id
+LEFT OUTER JOIN tableH AS h ON flow_c.stg_id = h.stg_id;
+
+
+
+
 #!/bin/bash
 
 # Check if correct number of arguments are provided
