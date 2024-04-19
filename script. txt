@@ -1,5 +1,102 @@
 huList Content Comparisons
 
+
+
+
+
+
+#!/bin/bash
+
+# Check if correct number of arguments are provided
+if [ "$#" -ne 2 ]; then
+    echo "Usage: $0 <part_of_link> <mail_id>"
+    exit 1
+fi
+
+# Assign arguments to variables
+part_of_link="$1"
+mail_id="$2"
+
+# Define log file path
+log_file="/home/script_log_$(date +'%Y-%m-%d_%H-%M-%S').txt"
+
+# Define HTML report file path
+html_report="/home/diff_report_$(date +'%Y-%m-%d_%H-%M-%S').html"
+
+# Function to log commands and their output
+log_command() {
+    local command="$1"
+    echo "### Running command: $command" | tee -a "$log_file"
+    eval "$command" 2>&1 | tee -a "$log_file"
+    echo "### End of command output" | tee -a "$log_file"
+}
+
+# Log start time
+echo "Script started at: $(date +'%Y-%m-%d %H:%M:%S')" | tee "$log_file"
+
+# Check if any files or folders exist in /home/sit_path
+if [ "$(ls -A /home/sit_path)" ]; then
+    log_command "rm -r /home/sit_path"
+else
+    echo "No files or folders found in /home/sit_path. Skipping removal." | tee -a "$log_file"
+fi
+
+# Download the tar file using curl to a specific directory
+download_directory="/path/to/directory"  # Change this to your desired directory
+log_command "curl -u username:password -o $download_directory/$part_of_link <link>/$part_of_link"
+
+# Check if the downloaded file exists
+if [ ! -f "$download_directory/$part_of_link" ]; then
+    echo "Error: Downloaded file not found." | tee -a "$log_file"
+    exit 1
+fi
+
+# Extract the contents of the tar file
+log_command "tar -xf $download_directory/$part_of_link -C $download_directory"
+
+# Compare contents of Track1 folders in SIT and PROD
+diff_output=$(diff -rq /home/SIT/Track1 /home/PROD/Track1)
+
+# Log the diff output
+echo "### Directory Comparison Output:" | tee -a "$log_file"
+echo "$diff_output" | tee -a "$log_file"
+
+# Create HTML report
+echo "<html>
+<head><title>Folder Comparison Report</title></head>
+<body>
+<h1>Folder Comparison Report</h1>
+<h2>Directory Comparison Output:</h2>
+<pre>$diff_output</pre>
+<h2>File Differences:</h2>
+<ul>" > "$html_report"
+
+# Check if there are differences
+if [ -n "$diff_output" ]; then
+    # If differences exist, find and log differences in specific files
+    while IFS= read -r line; do
+        file=$(echo "$line" | awk '{print $2}')
+        log_command "diff /home/SIT/Track1/$file /home/PROD/Track1/$file"
+        echo "<li><b>File: $file</b><br><pre>" >> "$html_report"
+        diff /home/SIT/Track1/$file /home/PROD/Track1/$file >> "$html_report" 2>&1
+        echo "</pre></li>" >> "$html_report"
+    done < <(echo "$diff_output" | awk '{print $2}')
+fi
+
+# Complete the HTML report
+echo "</ul>
+</body>
+</html>" >> "$html_report"
+
+# Log end time
+echo "Script ended at: $(date +'%Y-%m-%d %H:%M:%S')" | tee -a "$log_file"
+
+# Send the log file and HTML report via email
+mailx -s "Script Execution Log" -a "$html_report" $mail_id < "$log_file"
+
+# Clean up temporary files
+rm "$log_file" "$html_report"
+
 SELECT *
 FROM (
     SELECT *
