@@ -1,6 +1,57 @@
 huList Content Comparisons
 
+from pyspark.sql import SparkSession
+import pandas as pd
 
+# Initialize Spark session
+spark = SparkSession.builder \
+    .appName("Save to Excel") \
+    .getOrCreate()
+
+# Sample SQL query and PySpark DataFrame creation
+sql_query = """
+SELECT Name, Age
+FROM (
+    VALUES 
+        ('Alice', 1),
+        ('Bob', 2),
+        ('Charlie', 3)
+) AS tempTable(Name, Age)
+"""
+
+# Count the number of lines in the SQL query
+sql_lines_count = len(sql_query.strip().split('\n'))
+
+# Add 2 to the SQL lines count to determine the starting row for DataFrame in Excel
+start_row_df = sql_lines_count + 2
+
+# Print the SQL lines count
+print(f"Number of lines in SQL code: {sql_lines_count}")
+
+# Execute the SQL query and create a PySpark DataFrame
+df = spark.sql(sql_query)
+
+# Convert PySpark DataFrame to Pandas DataFrame
+pandas_df = df.toPandas()
+
+# Define the path to save the Excel file
+excel_file_path = "path_to_save/sql_and_dataframe.xlsx"
+
+# Create Excel writer object
+writer = pd.ExcelWriter(excel_file_path, engine='xlsxwriter')
+
+# Add SQL query as header in the same sheet
+sql_query_df = pd.DataFrame({"SQL Query": [sql_query]})
+sql_query_df.to_excel(writer, sheet_name='Sheet1', startrow=0, index=False, header=False)
+
+# Write the Pandas DataFrame to the same sheet, starting from the calculated start row
+pandas_df.to_excel(writer, sheet_name='Sheet1', startrow=start_row_df, index=False)
+
+# Save the Excel file
+writer.save()
+
+# Stop Spark session
+spark.stop()
 
 
 
