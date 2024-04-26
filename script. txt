@@ -1,5 +1,16 @@
 huList Content Comparisons
 
+
+# conftest.py
+
+def pytest_addoption(parser):
+    parser.addoption("--email", action="store", default=None, help="Email address for sending reports")
+
+def pytest_configure(config):
+    email = config.getoption("--email")
+    if email:
+        config.email_address = email
+
 from pyspark.sql import SparkSession
 import pandas as pd
 
