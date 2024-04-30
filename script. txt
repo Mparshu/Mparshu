@@ -1,5 +1,103 @@
 huList Content Comparisons
 
+
+
+To include the `evidences` variable from each test case in your custom HTML report, you need to modify the `pytest_runtest_makereport` hook in your `conftest.py` to capture and store this variable. Since the `evidences` variable is specific to each test case, you'll need to ensure it's accessible within the scope of the hook. One way to achieve this is by attaching the `evidences` variable to the test item (`item`) object, which is then accessible in the `pytest_runtest_makereport` hook.
+
+Here's how you can modify the `conftest.py` to include the `evidences` variable:
+
+```python
+# conftest.py
+
+import pytest
+from datetime import datetime
+
+# This list will store test results and evidence
+test_results = []
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    rep = outcome.get_result()
+    if rep.when == "call":
+        # Assuming the test case sets an 'evidences' attribute on the item
+        evidence = getattr(item, 'evidences', 'No evidence provided')
+        # Collect test results and evidence here
+        test_results.append({
+            'class_name': item.parent.name,
+            'test_name': item.name,
+            'outcome': rep.outcome,
+            'evidence': evidence
+        })
+
+def pytest_sessionfinish(session, exitstatus):
+    # Generate the HTML report here
+    generate_html_report(test_results)
+
+def generate_html_report(results):
+    # This function generates the HTML report
+    html_content = """
+    <html>
+    <head>
+        <title>Test Report</title>
+    </head>
+    <body>
+        <h1>Test Report</h1>
+        <p>Generated on: {}</p>
+        <table border="1">
+            <tr>
+                <th>Test Class Name</th>
+                <th>Test Case Name</th>
+                <th>Outcome</th>
+                <th>Evidence</th>
+            </tr>
+    """.format(datetime.now())
+
+    for result in results:
+        html_content += """
+            <tr>
+                <td>{}</td>
+                <td>{}</td>
+                <td>{}</td>
+                <td>{}</td>
+            </tr>
+        """.format(result['class_name'], result['test_name'], result['outcome'], result['evidence'])
+
+    html_content += """
+        </table>
+    </body>
+    </html>
+    """
+
+    # Write the HTML content to a file
+    with open('test_report.html', 'w') as f:
+        f.write(html_content)
+```
+
+In your test cases, you need to set the `evidences` attribute on the test item (`item`). You can do this by using the `pytest.mark.parametrize` decorator or by setting the attribute directly in your test functions. Here's an example of how to set the `evidences` attribute in a test function:
+
+```python
+def test_example(item):
+    # Your test code here
+    item.evidences = "Your collected evidence here"
+    # Your assertions here
+```
+
+Remember, the `evidences` variable should be set within each test case before the test outcome is determined, so it's captured and included in the report. This approach allows you to include any relevant information from each test case in your custom HTML report, providing a comprehensive overview of your test results and the evidence supporting those results.
+
+Citations:
+[1] https://stackoverflow.com/questions/29597972/collecting-and-reporting-pytest-results
+[2] https://www.youtube.com/watch?v=DpfLjB84EQU
+[3] https://pytest-html.readthedocs.io/en/latest/user_guide.html
+[4] https://docs.pytest.org/en/latest/reference/plugin_list.html
+[5] https://github.com/pytest-dev/pytest-html/issues/508
+[6] https://docs.pytest.org/en/7.1.x/reference/plugin_list.html
+[7] https://github.com/pytest-dev/pytest-html/issues/176
+[8] https://pytest-with-eric.com/pytest-best-practices/pytest-plugins/
+[9] https://docs.pytest.org/en/6.2.x/usage.html
+
+
+
 ⚔️ Arena (battle)
 ⚔️ Arena (side-by-side)
 💬 Direct Chat
