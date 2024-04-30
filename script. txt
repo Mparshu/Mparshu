@@ -1,6 +1,26 @@
 huList Content Comparisons
 
 
+
+Sure, here's an example to illustrate `${2-1}` in a shell script:
+
+```bash
+#!/bin/bash
+
+# Check if the second positional parameter is set, otherwise default to 1
+second_param=${2-1}
+
+echo "Second parameter is: $second_param"
+```
+
+Now, let's say you run this script with different arguments:
+
+1. If you run `./script.sh arg1`, the output will be `Second parameter is: 1` because the second positional parameter is not set, so it defaults to `1`.
+2. If you run `./script.sh arg1 arg2`, the output will be `Second parameter is: arg2` because the second positional parameter is set to `arg2`.
+
+In summary, `${2-1}` checks if the second positional parameter is set, and if it's not set, it defaults to `1`.
+
+
 # conftest.py
 
 def pytest_addoption(parser):
