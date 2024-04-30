@@ -1,5 +1,614 @@
 huList Content Comparisons
 
+⚔️ Arena (battle)
+⚔️ Arena (side-by-side)
+💬 Direct Chat
+👀 Vision Direct Chat
+🏆 Leaderboard
+ℹ️ About Us
+⚔️  LMSYS Chatbot Arena: Benchmarking LLMs in the Wild
+| Blog | GitHub | Paper | Dataset | Twitter | Discord |
+
+📜 Rules
+Ask any question to two anonymous models (e.g., ChatGPT, Claude, Llama) and vote for the better one!
+You can continue chatting until you identify a winner.
+Vote won't be counted if model identity is revealed during conversation.
+🏆 LMSYS Arena 
+Leaderboard
+We've collected 700,000+ human votes to compute an LLM Elo leaderboard. Find out who is the 🥇LLM Champion!
+
+👇 Chat now!
+
+🔍 Expand to see the descriptions of 41 models
+▼
+Model A
+
+I am a ETL tester. Create a test suite with pytest.I cant use pytest-html plugin. Create a custom html report in conftest.py. In which we will have test class name, test case name, outcome pass or fail and evidence in table format. My Usual tests include checking graph file exists, run graph file, check data in source and target hive table using pyspark.
+
+
+
+Here's an example of how you can create a test suite with Pytest and a custom HTML report in conftest.py:
+
+conftest.py
+
+
+import pytest
+from datetime import datetime
+from jinja2 import Environment, FileSystemLoader
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    # execute all other hooks to obtain the report object
+    outcome = yield
+    rep = outcome.get_result()
+
+    # we only look at actual failing test calls, not setup/teardown
+    if rep.when == "call" and rep.failed:
+        mode = "a" if os.path.exists("failures") else "w"
+        with open("failures", mode) as f:
+            # let's also access the test function object
+            if "tmpdir" in item.fixturenames:
+                extra = " (%s)" % item.funcargs["tmpdir"]
+            else:
+                extra = ""
+            f.write(rep.nodeid + extra + "\n")
+
+# Create a custom HTML report
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_terminal_summary(terminalreporter, exitstatus, config):
+    if exitstatus == 0:
+        return
+
+    # Get the test results
+    results = terminalreporter.stats.get('passed', []) + terminalreporter.stats.get('failed', [])
+
+    # Create a Jinja2 environment
+    env = Environment(loader=FileSystemLoader(''))
+
+    # Render the HTML template
+    template = env.get_template('report_template.html')
+    html = template.render(results=results)
+
+    # Write the HTML report to a file
+    with open('report.html', 'w') as f:
+        f.write(html)
+
+# Define the HTML template
+REPORT_TEMPLATE = '''
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ETL Test Report</title>
+    <style>
+      table {
+        border-collapse: collapse;
+      }
+      th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ETL Test Report</h1>
+    <table>
+      <tr>
+        <th>Test Class</th>
+        <th>Test Case</th>
+        <th>Outcome</th>
+        <th>Evidence</th>
+      </tr>
+      {% for result in results %}
+      <tr>
+        <td>{{ result.nodeid.split('::')[-2] }}</td>
+        <td>{{ result.nodeid.split('::')[-1] }}</td>
+        <td>{{ 'Passed' if result.passed else 'Failed' }}</td>
+        <td>{{ result.longreprtext if not result.passed else '' }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>
+'''
+
+# Create a report_template.html file
+with open('report_template.html', 'w') as f:
+    f.write(REPORT_TEMPLATE)
+test_etl.py
+
+
+import pytest
+from pyspark.sql import SparkSession
+
+@pytest.fixture
+def spark():
+    return SparkSession.builder.appName("ETL Test").getOrCreate()
+
+class TestETL:
+    def test_graph_file_exists(self, spark):
+        # Check if graph file exists
+        assert os.path.exists('path/to/graph/file')
+
+    def test_run_graph_file(self, spark):
+        # Run the graph file
+        spark.sql('RUN GRAPH path/to/graph/file')
+
+    def test_source_data(self, spark):
+        # Check data in source hive table
+        df = spark.sql('SELECT * FROM source_table')
+        assert df.count() > 0
+
+    def test_target_data(self, spark):
+        # Check data in target hive table
+        df = spark.sql('SELECT * FROM target_table')
+        assert df.count() > 0
+How to run the tests:
+
+Save the conftest.py and test_etl.py files in the same directory.
+Run the tests using pytest command.
+The HTML report will be generated in the same directory as report.html.
+How the custom HTML report works:
+
+The conftest.py file defines two hooks: pytest_runtest_makereport and pytest_terminal_summary.
+The pytest_runtest_makereport hook captures the test results and stores them in a results list.
+The pytest_terminal_summary hook renders the HTML template using Jinja2 and writes the report to a file named report.html.
+The HTML template is defined in the REPORT_TEMPLATE variable and uses a simple table format to display the test results.
+The test_etl.py file contains the actual test cases,
+
+
+I am a ETL tester. Create a test suite with pytest.I cant use pytest-html plugin. Create a custom html report in conftest.py.Also collect evidences when we run tests. In which we will have test class name, test case name, outcome pass or fail and evidence in table format. My Usual tests include checking graph file exists, run graph file, check data in source and target hive table using pyspark.
+
+
+
+Here's an example of how you can create a test suite with Pytest and a custom HTML report in conftest.py that collects evidence:
+
+conftest.py
+
+
+import pytest
+import os
+from datetime import datetime
+from jinja2 import Environment, FileSystemLoader
+
+evidences = []
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    rep = outcome.get_result()
+
+    if rep.when == "call":
+        test_class_name = item.cls.__name__
+        test_case_name = item.name
+        outcome_text = "Passed" if rep.passed else "Failed"
+        evidence = ""
+
+        if not rep.passed:
+            if "tmpdir" in item.fixturenames:
+                evidence = item.funcargs["tmpdir"]
+            else:
+                evidence = rep.longreprtext
+
+        evidences.append({
+            "test_class_name": test_class_name,
+            "test_case_name": test_case_name,
+            "outcome": outcome_text,
+            "evidence": evidence
+        })
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_terminal_summary(terminalreporter, exitstatus, config):
+    if exitstatus == 0:
+        return
+
+    # Create a Jinja2 environment
+    env = Environment(loader=FileSystemLoader(''))
+
+    # Render the HTML template
+    template = env.get_template('report_template.html')
+    html = template.render(evidences=evidences)
+
+    # Write the HTML report to a file
+    with open('report.html', 'w') as f:
+        f.write(html)
+
+# Define the HTML template
+REPORT_TEMPLATE = '''
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ETL Test Report</title>
+    <style>
+      table {
+        border-collapse: collapse;
+      }
+      th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ETL Test Report</h1>
+    <table>
+      <tr>
+        <th>Test Class</th>
+        <th>Test Case</th>
+        <th>Outcome</th>
+        <th>Evidence</th>
+      </tr>
+      {% for evidence in evidences %}
+      <tr>
+        <td>{{ evidence.test_class_name }}</td>
+        <td>{{ evidence.test_case_name }}</td>
+        <td>{{ evidence.outcome }}</td>
+        <td>{{ evidence.evidence }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>
+'''
+
+# Create a report_template.html file
+with open('report_template.html', 'w') as f:
+    f.write(REPORT_TEMPLATE)
+test_etl.py
+
+
+import pytest
+from pyspark.sql import SparkSession
+
+@pytest.fixture
+def spark():
+    return SparkSession.builder.appName("ETL Test").getOrCreate()
+
+class TestETL:
+    def test_graph_file_exists(self, spark, tmpdir):
+        # Check if graph file exists
+        graph_file = 'path/to/graph/file'
+        assert os.path.exists(graph_file)
+        # Collect evidence
+        with open(os.path.join(tmpdir, 'graph_file_exists.txt'), 'w') as f:
+            f.write(f"Graph file exists: {graph_file}")
+
+    def test_run_graph_file(self, spark, tmpdir):
+        # Run the graph file
+        spark.sql('RUN GRAPH path/to/graph/file')
+        # Collect evidence
+        with open(os.path.join(tmpdir, 'graph_file_run.txt'), 'w') as f:
+            f.write("Graph file run successfully")
+
+    def test_source_data(self, spark, tmpdir):
+        # Check data in source hive table
+        df = spark.sql('SELECT * FROM source_table')
+        assert df.count() > 0
+        # Collect evidence
+        with open(os.path.join(tmpdir, 'source_data.txt'), 'w') as f:
+            f.write(f"Source data count: {df.count()}")
+
+    def test_target_data(self, spark, tmpdir):
+        # Check data in target hive table
+        df = spark.sql('SELECT * FROM target_table')
+        assert df.count() > 0
+        # Collect evidence
+        with open(os.path.join(tmpdir, 'target_data.txt'), 'w') as f:
+            f.write(f"Target data count: {df.count()}")
+How to run the tests:
+
+Save the conftest.py and test_etl.py files in the same directory.
+Run the tests using pytest command.
+The HTML report will be generated in the same directory as report.html.
+How the custom HTML report works:
+
+The `conftest
+
+
+I am a ETL tester. Create a test suite with pytest.I cant use pytest-html plugin. Create a custom html report in conftest.py. In which we will have test class name, test case name, outcome pass or fail and evidence in table format. My Usual tests include checking graph file exists, run graph file, check data in source and target hive table using pyspark. Evidences ahould get collected in variable in test case and these evidences should be displayed in html report also.
+
+
+
+Here's an example of how you can create a test suite with Pytest and a custom HTML report in conftest.py that collects evidence in a variable and displays it in the HTML report:
+
+conftest.py
+
+
+import pytest
+import os
+from datetime import datetime
+from jinja2 import Environment, FileSystemLoader
+
+evidences = []
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    outcome = yield
+    rep = outcome.get_result()
+
+    if rep.when == "call":
+        test_class_name = item.cls.__name__
+        test_case_name = item.name
+        outcome_text = "Passed" if rep.passed else "Failed"
+        evidence = item.funcargs.get('evidence', '')
+
+        evidences.append({
+            "test_class_name": test_class_name,
+            "test_case_name": test_case_name,
+            "outcome": outcome_text,
+            "evidence": evidence
+        })
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_terminal_summary(terminalreporter, exitstatus, config):
+    if exitstatus == 0:
+        return
+
+    # Create a Jinja2 environment
+    env = Environment(loader=FileSystemLoader(''))
+
+    # Render the HTML template
+    template = env.get_template('report_template.html')
+    html = template.render(evidences=evidences)
+
+    # Write the HTML report to a file
+    with open('report.html', 'w') as f:
+        f.write(html)
+
+# Define the HTML template
+REPORT_TEMPLATE = '''
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ETL Test Report</title>
+    <style>
+      table {
+        border-collapse: collapse;
+      }
+      th, td {
+        border: 1px solid #ddd;
+        padding: 8px;
+        text-align: left;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>ETL Test Report</h1>
+    <table>
+      <tr>
+        <th>Test Class</th>
+        <th>Test Case</th>
+        <th>Outcome</th>
+        <th>Evidence</th>
+      </tr>
+      {% for evidence in evidences %}
+      <tr>
+        <td>{{ evidence.test_class_name }}</td>
+        <td>{{ evidence.test_case_name }}</td>
+        <td>{{ evidence.outcome }}</td>
+        <td>{{ evidence.evidence }}</td>
+      </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>
+'''
+
+# Create a report_template.html file
+with open('report_template.html', 'w') as f:
+    f.write(REPORT_TEMPLATE)
+test_etl.py
+
+
+import pytest
+from pyspark.sql import SparkSession
+
+@pytest.fixture
+def spark():
+    return SparkSession.builder.appName("ETL Test").getOrCreate()
+
+class TestETL:
+    def test_graph_file_exists(self, spark):
+        evidence = ""
+        graph_file = 'path/to/graph/file'
+        if os.path.exists(graph_file):
+            evidence = f"Graph file exists: {graph_file}"
+        else:
+            evidence = f"Graph file does not exist: {graph_file}"
+        assert os.path.exists(graph_file), evidence
+        pytest.request.node.funcargs['evidence'] = evidence
+
+    def test_run_graph_file(self, spark):
+        evidence = ""
+        try:
+            spark.sql('RUN GRAPH path/to/graph/file')
+            evidence = "Graph file run successfully"
+        except Exception as e:
+            evidence = f"Error running graph file: {str(e)}"
+        assert evidence == "Graph file run successfully", evidence
+        pytest.request.node.funcargs['evidence'] = evidence
+
+    def test_source_data(self, spark):
+        evidence = ""
+        df = spark.sql('SELECT * FROM source_table')
+        if df.count() > 0:
+            evidence = f"Source data count: {df.count()}"
+        else:
+            evidence = "No data found in source table"
+        assert df.count() > 0, evidence
+        pytest.request.node.funcargs['evidence'] = evidence
+
+    def test_target_data(self, spark):
+        evidence = ""
+        df = spark.sql('SELECT * FROM target_table')
+        if df.count() > 0:
+            evidence = f"Target data count: {df.count()}"
+        else:
+            evidence = "No data found in target table"
+        assert df.count() > 0, evidence
+        pytest.request.node.funcargs['evidence'] = evidence
+How to run the tests:
+
+Save the conftest.py and test_etl.py files in the same directory.
+Run the tests using pytest command.
+The HTML report will be generated in the same directory as report.html.
+**How the
+
+
+Model B
+
+I am a ETL tester. Create a test suite with pytest.I cant use pytest-html plugin. Create a custom html report in conftest.py. In which we will have test class name, test case name, outcome pass or fail and evidence in table format. My Usual tests include checking graph file exists, run graph file, check data in source and target hive table using pyspark.
+
+
+
+Creating a custom HTML report for a pytest test suite without using the pytest-html plugin requires modifying the conftest.py file to handle test session starts, test case collection, and the preparation of the final report. I will guide you through setting up a simple test environment, including writing basic tests and configuring conftest.py to generate an HTML report.
+
+Step 1: Setup Your Environment
+First, ensure you have Python and pytest installed, along with pyspark if you need to interact with Hive tables.
+
+
+pip install pytest pyspark
+Step 2: Organize Your Project
+Organize your project with the following structure:
+
+
+etl_testing/
+│
+├── tests/
+│   ├── test_data_checks.py
+│
+└── conftest.py
+Step 3: Writing Basic Tests
+Here's how you might write some basic tests in test_data_checks.py:
+
+
+import os
+import pytest
+from pyspark.sql import SparkSession
+
+# Initialize Spark session
+spark = SparkSession.builder \
+    .appName("ETL Test Suite") \
+    .enableHiveSupport() \
+    .getOrCreate()
+
+class TestGraphFiles:
+    def test_graph_file_exists(self):
+        assert os.path.exists("path/to/graph/file"), "Graph file does not exist."
+
+    def test_run_graph_file(self):
+        result = os.system("run graph file command")
+        assert result == 0, "Graph file did not run successfully."
+
+class TestDataIntegrity:
+    def test_source_table(self):
+        df = spark.sql("SELECT * FROM source_table")
+        assert df.count() > 0, "Source table is empty."
+
+    def test_target_table(self):
+        df = spark.sql("SELECT * FROM target_table")
+        assert df.count() > 0, "Target table is empty."
+Step 4: Configuring 
+conftest.py
+Now, configure conftest.py to capture test results and generate an HTML report:
+
+
+import pytest
+from datetime import datetime
+import html
+
+# Initialize a list to collect test results
+test_results = []
+
+def pytest_configure(config):
+    config._metadata = None
+
+@pytest.hookimpl(tryfirst=True, hookwrapper=True)
+def pytest_runtest_makereport(item, call):
+    # Execute all other hooks to obtain the report object
+    outcome = yield
+    report = outcome.get_result()
+    
+    if report.when == 'call':
+        test_result = {
+            "class": str(item.cls.__name__),
+            "name": str(item.originalname),
+            "outcome": report.outcome,
+            "evidence": "Path to evidence file or details"
+        }
+        test_results.append(test_result)
+
+def pytest_sessionfinish(session, exitstatus):
+    report_file = open('pytest_report.html', 'w')
+    html_report = f"<html><head><title>ETL Test Report</title></head><body>"
+    html_report += f"<h1>ETL Test Report - {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}</h1>"
+    html_report += "<table border='1'><tr><th>Test Class</th><th>Test Case</th><th>Outcome</th><th>Evidence</th></tr>"
+    
+    for result in test_results:
+        html_report += f"<tr><td>{html.escape(result['class'])}</td>" \
+                       f"<td>{html.escape(result['name'])}</td>" \
+                       f"<td>{html.escape(result['outcome'])}</td>" \
+                       f"<td>{html.escape(result['evidence'])}</td></tr>"
+    
+    html_report += "</table></body></html>"
+    report_file.write(html_report)
+    report_file.close()
+Explanation
+Test Setup: Tests are defined in test_data_checks.py with two classes checking various file and data integrity conditions.
+
+Configuration in conftest.py: This file is set up to:
+
+Collect results from each test case execution.
+Append test class name, method name, outcome, and a placeholder for evidence to the test_results list.
+Generate an HTML report at the end of the session, listing all test results in a table format.
+Step 5: Running Tests
+Run your tests using the command:
+
+
+pytest etl_testing/tests
+After executing, you should find an pytest_report.html in your project directory with a detailed report of the test outcomes.
+
+Additional Notes
+Evidence Handling: The evidence field is a placeholder. You might want to automate screenshot capture or log retrieval, storing these files in a known location and linking them in this report.
+Enhancing Reports: You can enhance report generation with CSS for styling or JavaScript for interactive elements, depending on your needs.
+**Security
+
+
+I am a ETL tester. Create a test suite with pytest.I cant use pytest-html plugin. Create a custom html report in conftest.py.Also collect evidences when we run tests. In which we will have test class name, test case name, outcome pass or fail and evidence in table format. My Usual tests include checking graph file exists, run graph file, check data in source and target hive table using pyspark.
+
+
+
+Certainly! To create a custom HTML report in conftest.py for a pytest test suite without using the pytest-html plugin, and to collect evidences during the tests, we'll need to setup your tests to capture and log the necessary information. This will include paths to evidences such as log files or output data snapshots, particularly useful in ETL testing.
+
+Step-by-Step Implementation
+Step 1: Environment Setup
+First, ensure Python, pytest, and pyspark are installed along with any other necessary packages:
+
+
+pip install pytest pyspark
+Step 2: Project Structure
+Set up your project directory as follows:
+
+
+etl_testing/
+│
+├── tests/
+│   ├── test_data_checks.py
+│
+├── evidences/
+│
+└── conftest.py
+Step 3: Writing Tests
+In test_data_checks.py, implement tests for checking graph files and data validation in Hive tables:
+
+
+import os
+import subprocess
+from pyspark.sql import SparkSession
+
+# Initialize Spark ses
+
 
 ⚔️ Arena (battle)
 ⚔️ Arena (side-by-side)
