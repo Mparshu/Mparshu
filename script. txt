@@ -11,6 +11,100 @@ file_path = 'C:\\Users\\pravisha\\Downloads\\pandas_practise.xlsx'
 df = pd.read_excel(file_path, sheet_name='run_sequence')
 
 # Initialize an empty DataFrame to store the results
+results_df = pd.DataFrame(columns=['graph_path', 'results', 'last_line'])
+
+def run_command_and_get_output(command):
+    """
+    Runs a command and returns the last line of the output and the return code.
+
+    Parameters:
+    - command: A list of strings representing the command to run.
+
+    Returns:
+    - A tuple containing the last line of the output and the return code.
+    """
+    # Run the command and capture the output and stderr
+    output, stderr = subprocess.run(command, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+
+    # Decode the output to UTF-8 and strip leading/trailing whitespace
+    output_decoded = output.decode('utf-8').strip()
+
+    # Get the last line of the output
+    last_line = output_decoded.split('\n')[-1]
+
+    # Return the last line and the return code
+    return last_line, output.returncode
+
+# Example usage within your existing code
+for index, row in df.iterrows():
+    command = ["air", "sandbox", "run"]
+    graph_path = row['sandbox_name'] + row['path']
+    command.append(graph_path)
+
+    for col in df.columns:
+        if col in ['variable1', 'variable2', 'variable3']:
+            if pd.notna(row[col]):
+                variable_name, value = row[col].split()
+                command.append(variable_name)
+                command.append(value)
+
+    if 'Stop_Execution_If_Fails' in df.columns:
+        execution_stops_decision = row['Stop_Execution_If_Fails'].lower()
+
+    # Run the command and get the last line and return code
+    last_line, return_code = run_command_and_get_output(command)
+
+    # Check if the command was successful
+    if return_code!= 0 or "command successful" not in last_line:
+        results = 'Failed'
+    else:
+        results = 'Passed'
+
+    # Append the results to the results_df DataFrame
+    results_df = results_df.append({'graph_path': graph_path, 'results': results, 'last_line': last_line}, ignore_index=True)
+
+    # Check if execution should stop
+    if execution_stops_decision == 'yes' and return_code!= 0:
+        break
+
+# Generate an HTML table from the results_df DataFrame
+html_table = results_df.to_html(index=False)
+
+# Prepare the email content
+email_subject = "Command Execution Results"
+email_body = f"""
+<html>
+<head>
+<title>Command Execution Results</title>
+</head>
+<body>
+<h2>Command Execution Results</h2>
+{html_table}
+</body>
+</html>
+"""
+
+# Prepare the email headers
+email_headers = "From: sender@example.com\r\nTo: recipient@example.com\r\nSubject: {}\r\n".format(email_subject)
+
+# Send the email using sendmail
+import os
+os.system(f'sendmail -t < /dev/stdin', input=email_headers + email_body)
+
+print("Email has been sent.")
+
+
+import pandas as pd
+import subprocess  # Import the subprocess module
+
+# Define execution_stops_decision if needed
+execution_stops_decision = False  # Example value, adjust as necessary
+
+# Step 1: Read the 'run_sequence' sheet from the Excel file
+file_path = 'C:\\Users\\pravisha\\Downloads\\pandas_practise.xlsx'
+df = pd.read_excel(file_path, sheet_name='run_sequence')
+
+# Initialize an empty DataFrame to store the results
 results_df = pd.DataFrame(columns=['last_line', 'results'])
 
 
