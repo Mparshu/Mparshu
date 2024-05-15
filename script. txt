@@ -1,5 +1,52 @@
 huList Content Comparisons
 
+
+#!/bin/bash
+
+# Initialize variables
+htmlOutput="output.html"
+tempFile=$(mktemp)
+
+# Start HTML content
+echo "<html><body>" > $htmlOutput
+echo "<h2>HDFS Size Report</h2>" >> $htmlOutput
+echo "<table border='1'>" >> $htmlOutput
+echo "<tr><th>Table Name</th><th>HDFS Location</th><th>Size</th></tr>" >> $htmlOutput
+
+# Assuming the list of tables is stored in a file called 'table_list.txt'
+# Replace 'table_list.txt' with the path to your actual file containing table names
+while IFS= read -r tableName; do
+    echo "$tableName" >> $tempFile
+done < table_list.txt
+
+# Read the temporary file and process each table
+while IFS= read -r tableName; do
+    # Get the HDFS location of the table
+    hdfsLocation=$(hive -e "DESCRIBE FORMATTED $tableName;" | grep "Location:" | awk '{print $NF}')
+
+    # Check if HDFS location exists
+    if [! -z "$hdfsLocation" ]; then
+        # Get the size of the HDFS location
+        size=$(hadoop fs -du -h "$hdfsLocation" | tail -n 1 | awk '{print $1}')
+        
+        # Append the result to the HTML file
+        echo "<tr><td>$tableName</td><td>$hdfsLocation</td><td>$size</td></tr>" >> $htmlOutput
+    else
+        echo "No HDFS location found for table $tableName."
+    fi
+done < $tempFile
+
+# End HTML content
+echo "</table></body></html>" >> $htmlOutput
+
+# Clean up: Remove the temporary file
+rm $tempFile
+
+# Display completion message
+echo "Report saved to $htmlOutput"
+
+
+
 import pandas as pd
 import subprocess  # Import the subprocess module
 
