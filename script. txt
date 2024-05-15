@@ -1,5 +1,31 @@
 huList Content Comparisons
 
+#!/bin/bash
+
+# Specify the database name
+dbName="new_db"
+
+# Temporary file to store table names
+tempFile=$(mktemp)
+
+# Use Hive to list tables in the specified database and filter them using grep
+hive -e "USE $dbName; SHOW TABLES;" | grep -E '^*' > $tempFile
+
+# Loop through each table listed in the temporary file
+while IFS= read -r tableName; do
+    echo "Processing table: $tableName"
+    
+    # Example operation: Describe the table
+    # Replace this with your desired operation
+    hive -e "DESCRIBE $tableName;"
+done < $tempFile
+
+# Clean up: Remove the temporary file
+rm $tempFile
+
+echo "Finished processing tables."
+
+
 
 #!/bin/bash
 
