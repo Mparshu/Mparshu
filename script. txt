@@ -1,5 +1,35 @@
 huList Content Comparisons
 
+
+#!/bin/bash
+
+# Define the command to run
+COMMAND="your_command_here"
+
+# Define the Hive query to run
+HIVE_QUERY="your_hive_query_here"
+
+# Number of repetitions
+REPEAT=10
+
+for i in $(seq 1 $REPEAT); do
+    echo "Iteration: $i"
+
+    # Create a log file name with a current timestamp
+    LOG_FILE="log_$(date +%Y%m%d_%H%M%S).log"
+
+    # Run the command and save the output to the log file and terminal
+    $COMMAND | tee -a "$LOG_FILE"
+
+    # Extract the last 30 lines from the log file into a new txt file
+    tail -n 30 "$LOG_FILE" > "last_30_lines.txt"
+
+    # Run the Hive query and save the result to a txt file
+    hive -e "$HIVE_QUERY" > "output.txt"
+done
+
+
+
 import os
 import shutil
 from datetime import datetime
