@@ -1,5 +1,42 @@
 huList Content Comparisons
 
+import os
+import shutil
+from datetime import datetime
+
+def copy_files_in_time_range(start_time_str, end_time_str, source_path, target_path):
+    # Convert start and end times to datetime objects
+    start_time = datetime.strptime(start_time_str, "%Y-%m-%d %H:%M:%S")
+    end_time = datetime.strptime(end_time_str, "%Y-%m-%d %H:%M:%S")
+    
+    # Ensure target directory exists
+    if not os.path.exists(target_path):
+        os.makedirs(target_path)
+    
+    # Iterate over files in the source directory
+    for filename in os.listdir(source_path):
+        file_path = os.path.join(source_path, filename)
+        
+        # Check if it is a file
+        if os.path.isfile(file_path):
+            # Get the creation time of the file
+            creation_time = datetime.fromtimestamp(os.path.getctime(file_path))
+            
+            # Check if the file's creation time is within the specified range
+            if start_time <= creation_time <= end_time:
+                # Copy the file to the target directory
+                shutil.copy(file_path, target_path)
+                print(f"Copied: {filename}")
+
+# Example usage
+start_time = "2023-01-01 00:00:00"
+end_time = "2023-12-31 23:59:59"
+source_path = "/path/to/source"
+target_path = "/path/to/target"
+
+copy_files_in_time_range(start_time, end_time, source_path, target_path)
+
+
 
 Subject: Apology for Access Card Violation
 
