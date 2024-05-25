@@ -3,6 +3,279 @@ huList Content Comparisons
 
 #!/bin/bash
 
+# Initialize variables
+LOGFILE="logfile.log"
+IMP_INFO="imp_info.txt"
+REPORT="report.html"
+
+# Create or truncate the log file
+> "$LOGFILE"
+
+# Create the HTML report header
+echo "<html><body><table>" > "$REPORT"
+echo "<tr><th>Iteration no.</th><th>Log filename</th><th>Total Processed</th><th>Total Success</th><th>Total Error</th><th>Beeline Output</th></tr>" >> "$REPORT"
+
+# Loop 10 times
+for i in {1..10}; do
+    # Run ksh script and log output with timestamp
+    {
+        echo "Iteration $i: $(date)"
+        # Your ksh script commands go here
+        # Example:
+        # command1 arg1
+        # command2 arg2
+    } 2>&1 | tee -a "$LOGFILE"
+
+    # Extract relevant information from log file (you'll need to adjust this)
+    processed=$(grep "Total Processed" "$LOGFILE" | tail -n 1)
+    success=$(grep "Total Success" "$LOGFILE" | tail -n 1)
+    error=$(grep "Total Error" "$LOGFILE" | tail -n 1)
+
+    # Run Hive query using Beeline and append results
+    beeline_output=$(beeline -u jdbc:hive2://your_hive_server:port -e "your_query")
+
+    # Append data to the HTML report
+    echo "<tr><td>$i</td><td>$LOGFILE</td><td>$processed</td><td>$success</td><td>$error</td><td>$beeline_output</td></tr>" >> "$REPORT"
+done
+
+# Add ksh script lines to the HTML report
+echo "<p>Lines from ksh script:</p>" >> "$REPORT"
+sed -n '7,9p' "$LOGFILE" >> "$REPORT"
+
+# Close the HTML table
+echo "</table></body></html>" >> "$REPORT"
+
+# Display the last 20 lines from the log file
+tail -n 20 "$LOGFILE" > "$IMP_INFO"
+
+
+
+
+#!/bin/bash
+
+# Define the ksh script path
+ksh_script_path="/path/to/your/ksh_script.ksh"
+
+# Define the log file path
+log_file="logfile.log"
+
+# Define the iterations
+iterations=10
+
+# Function to run the ksh script, store output, and display on terminal
+run_ksh_script() {
+  timestamp=$(date +"%Y-%m-%d_%H-%M-%S")
+  ksh_output=$(ksh "$ksh_script_path")
+
+  # Write output with timestamp to log file
+  echo "$timestamp: $ksh_output" >> "$log_file"
+
+  # Display output on terminal
+  echo "$ksh_output"
+
+  # Extract lines 7, 8, and 9 from ksh_output for HTML report
+  ksh_report_lines=$(echo "$ksh_output" | sed -n '7,9p')
+}
+
+# Create the HTML report header
+echo "<html>
+<body>
+<table>
+  <tr>
+    <th>Iteration No.</th>
+    <th>Log Filename</th>
+    <th>Total Processed</th>
+    <th>Total Success</th>
+    <th>Total Error</th>
+    <th>Beeline Query Output</th>
+    <th>Ksh Script Lines (7, 8, 9)</th>
+  </tr>" > report.html
+
+# Loop for the iterations
+for ((i=1; i<=$iterations; i++)); do
+  # Run the ksh script and capture output
+  run_ksh_script
+
+  # Extract relevant information from log file
+  total_processed=$(grep -c "Total Processed" "$log_file")
+  total_success=$(grep -c "Total Success" "$log_file")
+  total_error=$(grep -c "Total Error" "$log_file")
+
+  # Get last 20 lines of log file and store in imp_info.txt
+  tail -n 20 "$log_file" > imp_info.txt
+
+  # Run beeline query and append output to imp_info.txt
+  # Replace 'your_beeline_query' with your actual query
+  beeline -e "your_beeline_query" >> imp_info.txt
+
+  # Extract beeline query output from imp_info.txt
+  beeline_output=$(tail -n 10 imp_info.txt)
+
+  # Add information to HTML report table
+  echo "<tr>
+    <td>$i</td>
+    <td>$log_file</td>
+    <td>$total_processed</td>
+    <td>$total_success</td>
+    <td>$total_error</td>
+    <td>$beeline_output</td>
+    <td>$ksh_report_lines</td>
+  </tr>" >> report.html
+
+  # Clear imp_info.txt for next iteration
+  > imp_info.txt
+done
+
+# Close the HTML report
+echo "</table>
+</body>
+</html>" >> report.html
+
+echo "HTML report generated: report.html"
+
+
+#!/bin/bash
+
+# Define variables
+KSH_SCRIPT="your_script.ksh"
+LOG_PREFIX="script_output"
+IMP_INFO_FILE="imp_info.txt"
+HTML_REPORT="report.html"
+HIVE_QUERY="YOUR_HIVE_QUERY"
+HIVE_SERVER="your_hive_server"
+HIVE_USER="your_username"
+HIVE_PASSWORD="your_password"
+
+# Initialize the HTML report
+echo "<html><head><title>Script Execution Report</title></head><body>" > $HTML_REPORT
+echo "<h1>Script Execution Report</h1>" >> $HTML_REPORT
+
+# Extract lines 7, 8, 9 from the ksh script and add to HTML report
+echo "<h2>Lines 7, 8, 9 from KSH script</h2>" >> $HTML_REPORT
+echo "<pre>" >> $HTML_REPORT
+sed -n '7,9p' $KSH_SCRIPT >> $HTML_REPORT
+echo "</pre>" >> $HTML_REPORT
+
+# Start the table in the HTML report
+echo "<table border='1'>" >> $HTML_REPORT
+echo "<tr><th>Iteration No.</th><th>Log Filename</th><th>Total Processed</th><th>Total Success</th><th>Total Error</th><th>Beeline Query Output</th></tr>" >> $HTML_REPORT
+
+# Clear the imp_info.txt file before starting the loop
+> $IMP_INFO_FILE
+
+# Loop to run the process 10 times
+for i in {1..10}; do
+    TIMESTAMP=$(date +'%Y-%m-%d_%H-%M-%S')
+    LOG_FILE="${LOG_PREFIX}_${TIMESTAMP}.log"
+
+    # Run the ksh script and store the output in a log file with a timestamp
+    ksh $KSH_SCRIPT | tee $LOG_FILE
+
+    # Get the last 20 lines from the log file and store in imp_info.txt
+    tail -n 20 $LOG_FILE >> $IMP_INFO_FILE
+
+    # Run the Hive query using beeline and append the result to imp_info.txt
+    BEELINE_OUTPUT=$(beeline -u jdbc:hive2://$HIVE_SERVER:10000 -n $HIVE_USER -p $HIVE_PASSWORD -e "$HIVE_QUERY")
+    echo "$BEELINE_OUTPUT" >> $IMP_INFO_FILE
+
+    # Extract relevant information from the log file
+    TOTAL_PROCESSED=$(grep "Total Processed" $LOG_FILE | awk -F: '{print $2}' | xargs)
+    TOTAL_SUCCESS=$(grep "Total Success" $LOG_FILE | awk -F: '{print $2}' | xargs)
+    TOTAL_ERROR=$(grep "Total Error" $LOG_FILE | awk -F: '{print $2}' | xargs)
+
+    # Append the iteration result to the HTML report
+    echo "<tr><td>$i</td><td>$LOG_FILE</td><td>$TOTAL_PROCESSED</td><td>$TOTAL_SUCCESS</td><td>$TOTAL_ERROR</td><td><pre>$BEELINE_OUTPUT</pre></td></tr>" >> $HTML_REPORT
+done
+
+# Finalize the HTML report
+echo "</table></body></html>" >> $HTML_REPORT
+
+
+
+
+#!/bin/bash
+
+# Define the name of the ksh script to run
+KSH_SCRIPT="your_ksh_script.ksh"
+
+# Define the log file name prefix
+LOG_FILE_PREFIX="output_"
+
+# Define the Hive query to execute using Beeline
+HIVE_QUERY="SELECT * FROM your_table LIMIT 10;"
+
+# Initialize counters
+total_processed=0
+total_success=0
+total_error=0
+
+# Array to hold all log filenames
+declare -a log_files
+
+# Function to generate HTML report
+generate_html_report() {
+    local iteration=$1
+    local log_file=$2
+    local beeline_output=$3
+    local success_lines=$(grep -c "Success" $log_file)
+    local error_lines=$(grep -c "Error" $log_file)
+
+    echo "<tr><td>$iteration</td><td>$log_file</td><td>$total_processed</td><td>$success_lines</td><td>$error_lines</td><td>$beeline_output</td></tr>" >> report.html
+}
+
+for i in {1..10}
+do
+    # Generate unique log file name for each iteration
+    LOG_FILE="${LOG_FILE_PREFIX}${i}.log"
+
+    # Run the ksh script and redirect both stdout and stderr to the log file
+    eval "$KSH_SCRIPT" > >(tee -a $LOG_FILE) 2>&1
+
+    # Display the last 20 lines of the log file on the terminal
+    tail -n 20 $LOG_FILE
+
+    # Extract the last 20 lines from the log file and store them in imp_info.txt
+    tail -n 20 $LOG_FILE > imp_info.txt
+
+    # Execute the Hive query using Beeline and append the result to imp_info.txt
+    beeline -u jdbc:hive2://localhost:10000/default -e "$HIVE_QUERY" >> imp_info.txt
+
+    # Update counters based on log file content
+    total_processed=$((total_processed+20))
+    total_success=$(($total_success+$success_lines))
+    total_error=$(($total_error+$error_lines))
+
+    # Add log file name to array
+    log_files+=("$LOG_FILE")
+
+    # Generate HTML report for this iteration
+    generate_html_report $i $LOG_FILE $(cat imp_info.txt | grep -v "^$" | head -n 20)
+
+    echo "Iteration $i completed."
+done
+
+# Start HTML report generation
+echo "<html><head><title>All Iterations Report</title></head><body><table border='1'>" >> report.html
+echo "<tr><th>Iteration No.</th><th>Log Filename</th><th>Total Processed</th><th>Total Success</th><th>Total Error</th><th>Beeline Output</th></tr>" >> report.html
+
+# Populate HTML report with all iterations
+for log_file in "${log_files[@]}"; do
+    # Find corresponding iteration number
+    iteration_number=$(basename "$log_file".log | tr -d '_')
+    # Append the report row for this iteration
+    generate_html_report $iteration_number $log_file $(cat imp_info.txt | grep -v "^$" | head -n 20)
+done
+
+# Close HTML report
+echo "</table></body></html>" >> report.html
+
+echo "HTML report generated."
+
+# Clean up temporary files
+rm imp_info.txt
+
+#!/bin/bash
+
 # Define the command to run
 COMMAND="your_command_here"
 
