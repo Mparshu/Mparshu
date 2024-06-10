@@ -1,5 +1,10 @@
 huList Content Comparisons
 
+# Splitting the multiline string on newline characters
+lines = multiline_string.split('\n')
+
+# Creating a DataFrame from the split lines
+df = pd.DataFrame(lines, columns=['Text'])
 
 #!/bin/bash
 
