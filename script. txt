@@ -1,5 +1,11 @@
 huList Content Comparisons
 
+def get_expected_value(*args):
+    for condition in broadcast_conditions.value:
+        if all(evaluate_condition(condition[f'column{i+1}'], args[i]) for i in range(len(args) - 1)):
+            return condition['expected_value']
+    return None
+
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import udf
 from pyspark.sql.types import StringType
