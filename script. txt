@@ -1,5 +1,63 @@
 huList Content Comparisons
 
+column,condition,value
+age,>,30
+salary,<=,50000
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import udf
+from pyspark.sql.types import BooleanType
+
+# Initialize Spark session
+spark = SparkSession.builder.appName("PySpark UDF Example").getOrCreate()
+
+# Read the CSV file with conditions
+conditions_df = spark.read.csv("path_to_conditions_file.csv", header=True, inferSchema=True)
+
+# Convert conditions DataFrame to a list of dictionaries
+conditions = conditions_df.collect()
+
+# Function to apply conditions
+def apply_conditions(*columns):
+    column_names = ["age", "salary"]  # replace with your actual column names
+    row = dict(zip(column_names, columns))
+    
+    for condition in conditions:
+        col = condition['column']
+        op = condition['condition']
+        value = condition['value']
+        
+        if op == '>' and not row[col] > value:
+            return False
+        elif op == '>=' and not row[col] >= value:
+            return False
+        elif op == '<' and not row[col] < value:
+            return False
+        elif op == '<=' and not row[col] <= value:
+            return False
+        elif op == '==' and not row[col] == value:
+            return False
+        elif op == '!=' and not row[col] != value:
+            return False
+    
+    return True
+
+# Register UDF
+apply_conditions_udf = udf(apply_conditions, BooleanType())
+
+# Sample DataFrame to apply conditions
+df = spark.createDataFrame([
+    (25, 30000),
+    (35, 60000),
+    (40, 40000)
+], ["age", "salary"])
+
+# Apply UDF to DataFrame
+filtered_df = df.filter(apply_conditions_udf(*[df[col] for col in df.columns]))
+
+filtered_df.show()
+
+
 # Splitting the multiline string on newline characters
 lines = multiline_string.split('\n')
 
