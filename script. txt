@@ -8,6 +8,57 @@ from pyspark.sql.types import StringType
 spark = SparkSession.builder.appName("PySpark UDF Example").getOrCreate()
 
 # Read the CSV file with conditions
+conditions_df = spark.read.option("header", "true").csv("/content/new_file.csv")
+
+# Broadcast the conditions DataFrame
+broadcast_conditions = spark.sparkContext.broadcast(conditions_df.collect())
+
+def evaluate_condition(cond, value):
+    if cond == 'any':
+        return True
+    condition = cond.replace('x', str(value))
+    try:
+        return eval(condition)
+    except:
+        return False
+
+def get_expected_value(column1, column2, column3, column4):
+    for condition in broadcast_conditions.value:
+        if (
+            evaluate_condition(condition['column1'], column1) and
+            evaluate_condition(condition['column2'], column2) and
+            evaluate_condition(condition['column3'], column3) and
+            evaluate_condition(condition['column4'], column4)
+        ):
+            return condition['expected_value']
+    return None
+
+# Register UDF
+get_expected_value_udf = udf(get_expected_value, StringType())
+
+# Sample DataFrame
+df = spark.createDataFrame([
+    (-9997, 1, 'some_value', 5),
+    (-9997, 3, 'any', 10),
+    (-9997, -1, 'any', 7)
+], ["column1", "column2", "column3", "column4"])
+
+# Apply the UDF to create a new column
+df_with_expected_value = df.withColumn("expected_value", get_expected_value_udf(df["column1"], df["column2"], df["column3"], df["column4"]))
+
+# Show the resulting DataFrame
+df_with_expected_value.show()
+
+
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import udf
+from pyspark.sql.types import StringType
+
+# Initialize Spark session
+spark = SparkSession.builder.appName("PySpark UDF Example").getOrCreate()
+
+# Read the CSV file with conditions
 conditions_df = spark.read.option("header", "true").csv("path_to_conditions_file.csv")
 
 # Broadcast the conditions DataFrame
