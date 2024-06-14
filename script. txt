@@ -1,5 +1,42 @@
 huList Content Comparisons
 
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import udf
+from pyspark.sql.types import StringType
+
+# Initialize Spark session
+spark = SparkSession.builder.appName("PySpark UDF Example").getOrCreate()
+
+# Read the CSV file with conditions
+conditions_df = spark.read.option("header", "true").csv("path_to_conditions_file.csv")
+
+# Broadcast the conditions DataFrame
+broadcast_conditions = spark.sparkContext.broadcast(conditions_df.collect())
+
+# Function to get action based on the value
+def get_action(value):
+    for row in broadcast_conditions.value:
+        if row['value'] == str(value):
+            return row['action']
+    return None
+
+# Register UDF
+get_action_udf = udf(get_action, StringType())
+
+# Sample DataFrame
+df = spark.createDataFrame([
+    (52,),
+    (51,),
+    (60,)
+], ["column_value"])
+
+# Apply the UDF to create a new column
+df_with_actions = df.withColumn("expected_flag", get_action_udf(df["column_value"]))
+
+# Show the resulting DataFrame
+df_with_actions.show()
+
+
 column,condition,value
 age,>,30
 salary,<=,50000
