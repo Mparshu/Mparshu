@@ -1,5 +1,33 @@
 huList Content Comparisons
 
+from pyspark.sql import SparkSession
+import sys
+
+def main(parquet_path):
+    # Initialize Spark session
+    spark = SparkSession.builder.appName("Parquet Reader").getOrCreate()
+
+    # Read the Parquet files from the given path
+    df = spark.read.parquet(parquet_path)
+
+    # Get the count of records
+    count = df.count()
+
+    # Print the count
+    print(f"Number of records: {count}")
+
+    # Stop the Spark session
+    spark.stop()
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: parquet_reader.py <path-to-parquet-files>")
+        sys.exit(1)
+
+    parquet_path = sys.argv[1]
+    main(parquet_path)
+
+
 
 saurav.k.kumar@capgemini.com
 neeraj.verma@capgemini.com
