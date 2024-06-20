@@ -1,5 +1,177 @@
 huList Content Comparisons
 
+
+import sys
+import os
+import pandas as pd
+import subprocess
+
+def read_excel_file(excel_path, sheet_name):
+    # Check if the file exists
+    if not os.path.isfile(excel_path):
+        print(f"Error: The file '{excel_path}' does not exist.")
+        sys.exit(1)
+
+    # Load the Excel file
+    try:
+        excel_file = pd.ExcelFile(excel_path)
+    except Exception as e:
+        print(f"An error occurred while reading the Excel file: {e}")
+        sys.exit(1)
+    
+    # Check if the sheet name exists in the Excel file
+    if sheet_name not in excel_file.sheet_names:
+        print(f"Error: The sheet '{sheet_name}' does not exist in the Excel file.")
+        sys.exit(1)
+
+    # Load the specified sheet into a DataFrame
+    try:
+        df = pd.read_excel(excel_path, sheet_name=sheet_name)
+        return df
+    except Exception as e:
+        print(f"An error occurred while reading the sheet: {e}")
+        sys.exit(1)
+
+def process_parameters_column(df):
+    if 'Parameters' not in df.columns:
+        print("Error: 'Parameters' column not found in the sheet.")
+        sys.exit(1)
+    
+    parameters_list = df['Parameters'].dropna().apply(lambda x: x.split()).tolist()
+    return parameters_list
+
+def read_graph_paths(df):
+    if 'GraphPath' not in df.columns:
+        print("Error: 'GraphPath' column not found in the sheet.")
+        sys.exit(1)
+    
+    graph_paths = df['GraphPath'].dropna().tolist()
+    for path in graph_paths:
+        try:
+            result = subprocess.run(['cat', path], capture_output=True, text=True)
+            if result.returncode == 0:
+                print(f"Contents of {path}:\n{result.stdout}")
+            else:
+                print(f"Error reading {path}: {result.stderr}")
+        except Exception as e:
+            print(f"An error occurred while reading {path}: {e}")
+
+def main():
+    if len(sys.argv) != 3:
+        print("Usage: python script.py <ExcelPath> <ExcelSheetName>")
+        sys.exit(1)
+    
+    excel_path = sys.argv[1]
+    excel_sheet_name = sys.argv[2]
+    
+    df = read_excel_file(excel_path, excel_sheet_name)
+    
+    # Process the Parameters column
+    parameters_list = process_parameters_column(df)
+    
+    # Print the list of lists
+    print("Parameters List:")
+    print(parameters_list)
+    
+    # Read and print the contents of the GraphPath files
+    read_graph_paths(df)
+
+if __name__ == "__main__":
+    main()
+
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import monotonically_increasing_id
+
+# Initialize Spark session
+spark = SparkSession.builder.appName("DataFrameDuplicate").getOrCreate()
+
+# Assuming you already have a DataFrame `df` with 3000 records
+# Duplicate the DataFrame multiple times
+def duplicate_dataframe(df, target_count):
+    # Calculate how many times we need to duplicate the dataframe
+    factor = target_count // df.count()
+    
+    # Create a new DataFrame by duplicating the original DataFrame
+    duplicated_df = df
+    for _ in range(factor - 1):
+        duplicated_df = duplicated_df.union(df)
+    
+    # Calculate how many extra rows we need
+    extra_rows = target_count - duplicated_df.count()
+    
+    # Add the extra rows if needed
+    if extra_rows > 0:
+        extra_df = df.limit(extra_rows)
+        duplicated_df = duplicated_df.union(extra_df)
+    
+    return duplicated_df
+
+# Example usage
+target_count = 100000
+duplicated_df = duplicate_dataframe(df, target_count)
+
+# Add an index column if needed to differentiate between rows
+duplicated_df = duplicated_df.withColumn("id", monotonically_increasing_id())
+
+# Show the count of the final DataFrame
+print(duplicated_df.count())
+
+# Show some records from the final DataFrame
+duplicated_df.show()
+
+
+from pyspark.sql import SparkSession
+
+# Initialize Spark Session
+spark = SparkSession.builder.appName("ExpandDataFrame").getOrCreate()
+
+# Assuming 'df' is your original DataFrame with 3,000 records
+# Create a DataFrame that will be used to union with the original DataFrame
+df_to_union = df.limit(100000)
+
+# Initialize an empty DataFrame with the same schema as the original
+expanded_df = spark.createDataFrame([], df.schema)
+
+# Union the DataFrames until we reach the desired number of records
+while expanded_df.count() < 100000:
+    expanded_df = expanded_df.union(df_to_union)
+
+# If the count exceeds 100,000, take only the first 100,000 records
+if expanded_df.count() > 100000:
+    expanded_df = expanded_df.limit(100000)
+
+# Show the count to verify the number of records
+print(expanded_df.count())
+
+
+from pyspark.sql import SparkSession
+import sys
+
+def main(parquet_path):
+    # Initialize Spark session
+    spark = SparkSession.builder.appName("Parquet Reader").getOrCreate()
+
+    # Read the Parquet files from the given path
+    df = spark.read.parquet(parquet_path)
+
+    # Get the count of records
+    count = df.count()
+
+    # Print the count
+    print(f"Number of records: {count}")
+
+    # Stop the Spark session
+    spark.stop()
+
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: parquet_reader.py <path-to-parquet-files>")
+        sys.exit(1)
+
+    parquet_path = sys.argv[1]
+    main(parquet_path)
+
+
 def get_expected_value(*args):
     for condition in broadcast_conditions.value:
         if all(evaluate_condition(condition[f'column{i+1}'], args[i]) for i in range(len(args) - 1)):
