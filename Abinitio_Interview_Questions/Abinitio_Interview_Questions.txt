@@ -1,0 +1,268 @@
+
+ 
+CONTENTS
+GDE QUESTIONS	2
+COMPONENTS:	2
+GDE BASICS:	3
+ARCHITECTURE:	3
+ICFF:	4
+CONDUCT>IT QUESTIONS	4
+BACKEND COMMANDS	5
+SCENARIO BASED	6
+
+
+
+
+
+ 
+GDE QUESTIONS
+COMPONENTS:
+
+1)	What will happen if we give both output index and output indexes in reformat? Will it work or throw error? If it works whose priority will be considered?
+
+2)	How many times finalize function is called in case of Rollup and Scan?
+
+3)	Difference between Replicate and Broadcast?
+
+4)	What is the significance of driving port in Join component?
+
+
+5)	What is Max Core of a Component?
+
+6)	Use of documentation component? And how to enable it?
+
+7)	What is a local lookup?
+
+
+8)	Difference between rollup and scan?
+
+9)	How to capture records that did not fulfill the select expression in reformat?
+
+10)	How to exclude hidden files coming in directory_listing () functions output?
+
+For example, the pattern [!.]* causes hidden files to be omitted from the result.
+
+11)	How to exclude header or any certain number of specified records from each file while reading them using Read File component?
+
+12)	How to get all matching records when using lookup file?
+
+
+
+GDE BASICS:
+13)	What is the difference between check point and phase?
+
+14)	How can we disable dependency analysis checks of any graph/pset?
+
+15)	What is the difference between is_null() and is_defined() functions ?
+
+16)	Which variable can be used in end script to check status of completion of graph?
+
+17)	How many types of abinitiorc file are there?
+
+18)	What are reusable datasets?
+
+19)	How to give dynamic legends in graphs?
+
+
+20)	Have you ever encountered an error called “depth not equal”?
+
+21)	What are Cartesian joins?
+
+
+22)	What is skew? How can you avoid it?
+
+.
+
+ARCHITECTURE:
+23)	Where in Abinitio hierarchy does Co>op resides?
+
+24)	What is the use of EME?
+
+25)	Where in hierarchy the user defined components come?
+
+
+
+
+
+ICFF:
+26)	What is the use of address port in write block compressed lookup and what it stores?
+
+27)	What is a direct addressed ICFF?
+
+28)	What is the significance of index file in ICFF?
+
+
+CONDUCT>IT QUESTIONS
+
+1)	There are 100 tables to be unloaded from database. What would be the most efficient way to do so?
+
+2)	What are different plan methods? – Success, Failure, Rollback etc.
+
+3)	What is the backend command to check plan execution status?
+
+4)	When two plan tasks are connected directly to third when will the third one start it’s execution? Is it when either of predecessor task is complete or when both are completed?
+
+ 
+
+
+5)	What are dynamic plan parameters? How they can be set?
+
+6)	How to change the plan parameters at the time of running a plan?
+
+BACKEND COMMANDS
+
+1)	Air commands:
+Command	Description
+air object access
+Tests whether you can read, write, execute, or see the existence of a particular object.
+air object cat
+Writes an object to stdout (standard output).
+air object changed
+Identifies which objects have changed.
+air object chmod
+Changes the permissions of a repository object.
+air object chown
+Changes the ownership of a repository object.
+air object cp
+Copies an object.
+air object dataset-associations
+Returns objects and their dataset associations.
+air object field-lineage
+Outputs a text description of field lineage for a graph or for the graph instance associated with an input pset.
+air object info
+Displays information about directory objects, objects without names, and the root of the technical repository.
+air object load
+Loads objects from a portable interchange format file into a technical repository.
+air object ls
+Displays information about the objects in a technical repository directory.
+air object mkdir
+Creates a directory.
+air object mv
+Renames an object.
+air object poll-for-change
+Monitors the technical repository for changes to a specified set of objects that are under source control. When changes to those objects are detected during a polling interval, executes a user-specified script or command.
+air object referencing-files
+Displays the paths to all objects that use a target object.
+air object requires
+Creates a list of additional files that will be promoted when you load a save file created through air object save.
+
+air object rm
+Removes a directory entry.
+air object rollback
+Makes the specified version the current version in the technical repository or restores a removed object.
+air object rollback-version
+Identifies objects that were modified at a specified version, finds their prior versions and stores those at the current version.
+air object save
+Saves repository objects to a save file in portable-interchange-format.
+air object search grep
+Searches a technical repository for files containing the specified search string.
+air object search parameter
+Searches one or more technical repository paths for a given parameter name.
+air object show-permissions
+Displays permissions for objects in a technical repository.
+air object uses	This command has been renamed to air object referencing-files. (The former name is still supported.)
+
+air object versions
+Lists all version numbers for a given object.
+
+2)	Use of -exact option in tag creation.
+3)	How to list tables in any database using m_db.
+4)	How to list resolved values of parameters of dbc file.
+5)	How to see specific record using m_dump.
+6)	How to see range of records using m_dump.
+7)	How to see incomplete record using m_dump.
+8)	wc -l vs m_wc on a serial file.
+9)	How to add objects to existing tag.
+10)	How to change versions of objects to latest version of already existing tag.
+SCENARIO BASED
+
+1)	How to take a substring from after nth occurrence of any given character in it?
+Ex : Maharashtra – Substring after second occurrence of ‘A’.
+
+2)	How to assign sequence numbers group wise?
+
+Product Type	Product Name	Serial No.
+123	ABC	1
+123	DEF	2
+123	GHI	3
+456	JKL	1
+456	MNO	2
+456	PQR	3
+
+3)	Which value will come in output of one of the column if we use max() function on another column in rollup?
+
+Ex : To get city with max population if we use max on Population which city will come in output.
+
+City Name	Population
+Pune	50000000
+Nashik	8000000
+Aurangabad	6000000
+
+
+4)	What will be output in case of different join types – Inner, Left, Right
+
+Input 0 							Input 1 
+1								1
+1								1
+1								2
+2								2
+2								3
+2								3
+3
+3
+
+
+5)	How to achieve below result:
+
+Input:
+
+State	City
+Maharashtra	Pune
+Karnataka	Bengaluru
+Tamil Nadu	Chennai
+Maharashtra	Nashik
+Tamil Nadu	Vellore
+Karnataka	Mangalore
+Maharashtra	Mumbai
+
+
+Output:		
+State	City
+Maharashtra	Nashik, Mumbai, Pune
+Karnataka	Bengaluru, Mangalore
+Tamil Nadu	Chennai, Vellore
+
+6)	How to make sure Rollup return zero count in case it is being used to count the number of records but there are no records coming in input?
+
+7)	File has transaction data and have three fields:
+
+
+Cust_id	Type	Amount
+1 		c	500
+1		c	800
+1		d	400
+2		c	900
+2		d	500
+
+a)	Find the sum of total credits and debits for each customer.
+Construct a graph and explain step by step each component.
+b)	Find the sum of total credits and debits for all customers.
+Construct a graph and explain step by step each component.
+
+8)	A file contains 100 records with three fields.
+
+Filename, File_dml, Compress_status
+
+We have one generic graph.
+a)	Need to use three fields and run 100 iterations.
+b)	How to handle three fields in plan parameter level.
+c)	How to run it in a concurrent method.
+d)	How to run it in a serial method.
+e)	How to pass three field values to a generic graph as an input.
+
+9)	Multiple files come into a directory with the same file pattern name differentiated with date:
+
+a) How to read the multiple files.
+b) Read some files for specific file pattern. 
+c) Explain component by component.
+
