@@ -1,6 +1,30 @@
 huList Content Comparisons
 
 from pyspark.sql import SparkSession
+
+# Initialize Spark Session
+spark = SparkSession.builder.appName("ExpandDataFrame").getOrCreate()
+
+# Assuming 'df' is your original DataFrame with 3,000 records
+# Create a DataFrame that will be used to union with the original DataFrame
+df_to_union = df.limit(100000)
+
+# Initialize an empty DataFrame with the same schema as the original
+expanded_df = spark.createDataFrame([], df.schema)
+
+# Union the DataFrames until we reach the desired number of records
+while expanded_df.count() < 100000:
+    expanded_df = expanded_df.union(df_to_union)
+
+# If the count exceeds 100,000, take only the first 100,000 records
+if expanded_df.count() > 100000:
+    expanded_df = expanded_df.limit(100000)
+
+# Show the count to verify the number of records
+print(expanded_df.count())
+
+
+from pyspark.sql import SparkSession
 import sys
 
 def main(parquet_path):
