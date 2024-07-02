@@ -1,6 +1,47 @@
 huList Content Comparisons
 
 from pyspark.sql import SparkSession
+from pyspark.sql.functions import monotonically_increasing_id
+
+# Initialize Spark session
+spark = SparkSession.builder.appName("DataFrameDuplicate").getOrCreate()
+
+# Assuming you already have a DataFrame `df` with 3000 records
+# Duplicate the DataFrame multiple times
+def duplicate_dataframe(df, target_count):
+    # Calculate how many times we need to duplicate the dataframe
+    factor = target_count // df.count()
+    
+    # Create a new DataFrame by duplicating the original DataFrame
+    duplicated_df = df
+    for _ in range(factor - 1):
+        duplicated_df = duplicated_df.union(df)
+    
+    # Calculate how many extra rows we need
+    extra_rows = target_count - duplicated_df.count()
+    
+    # Add the extra rows if needed
+    if extra_rows > 0:
+        extra_df = df.limit(extra_rows)
+        duplicated_df = duplicated_df.union(extra_df)
+    
+    return duplicated_df
+
+# Example usage
+target_count = 100000
+duplicated_df = duplicate_dataframe(df, target_count)
+
+# Add an index column if needed to differentiate between rows
+duplicated_df = duplicated_df.withColumn("id", monotonically_increasing_id())
+
+# Show the count of the final DataFrame
+print(duplicated_df.count())
+
+# Show some records from the final DataFrame
+duplicated_df.show()
+
+
+from pyspark.sql import SparkSession
 
 # Initialize Spark Session
 spark = SparkSession.builder.appName("ExpandDataFrame").getOrCreate()
