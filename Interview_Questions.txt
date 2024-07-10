@@ -1,0 +1,168 @@
+Have you used 
+Hadoop,
+Pyspark,
+Shell Scripting,
+Linux Commands,
+Abinitio
+Informatica
+Python.
+
+
+What is the need of DWH? 
+
+SCD and its types (slowly changing dimensions) CDC
+
+Joins and its types?
+
+SQL Questions.
+get phone number as 123-456-7890
+1234567890 INPUT
+123-456-7890 OUTPUT
+--
+select
+substr(number,1,3)||'-'||substr(number,3,6)||'-'||substr(number,
+6,4) from customer;
+
+--
+
+B) Update input table to get
+ID GENDER
+1 M
+2 M
+3 M
+4 F
+5 F
+6 F
+ANSUPDATE
+INPUT_TABLE SET GENDER =
+CASE
+WHEN GENDER = ’M’ THEN ‘F’
+WHEN GENDER = ’F’ THEM ‘M’
+ELSE NULL
+END;
+
+2. How do you identify the duplicate records? write a query.
+SQL>
+Select empno,count(empno) from emp group by empno
+having count(empno) > 1;
+
+
+Explode query.
+
+Unix Commands	
+What is command to rename
+What is command for listing of the files.
+9. How do you check for a particular text/line in Unix?
+10. Grep command
+How to get 4th record in the file using Linux.
+Sed 4p filename
+
+
+
+Python 
+How to use f string in print statement?
+
+OOPS (classes and objects)
+Create an Animal class in Python and then create Dog and Bird classes that inherit from Animal. In the Dog class, add a method bark, and in the Bird class, add a method fly. Instantiate objects of Dog and Bird and demonstrate the use of the inherited and added methods.
+
+# Define the Animal class
+class Animal:
+    def __init__(self, name, age):
+        self.name = name
+        self.age = age
+    
+    def make_sound(self):
+        return "Some generic sound"
+
+# Define the Dog class inheriting from Animal
+class Dog(Animal):
+    def bark(self):
+        return "Woof! Woof!"
+
+# Define the Bird class inheriting from Animal
+class Bird(Animal):
+    def fly(self):
+        return "Flap! Flap!"
+
+# Instantiate objects of Dog and Bird
+dog = Dog(name="Buddy", age=3)
+bird = Bird(name="Tweety", age=1)
+
+# Demonstrate the use of inherited and added methods
+print(f"{dog.name} says: {dog.make_sound()}")
+print(f"{dog.name} barks: {dog.bark()}")
+
+print(f"{bird.name} says: {bird.make_sound()}")
+print(f"{bird.name} flies: {bird.fly()}")
+
+
+Pandas Question:
+Create a Python script using the pandas library to read an Excel file. The Excel file contains a column named graph_path. For each path in this column, execute the stat Linux command and store the result in a new Excel file named result.xls.
+
+import pandas as pd
+import subprocess
+
+# Read the Excel file
+df = pd.read_excel('input.xlsx')
+
+# Initialize an empty list to store the results
+results = []
+
+# Loop through each graph_path in the DataFrame
+for index, row in df.iterrows():
+    graph_path = row['graph_path']
+    
+    try:
+        # Run the stat command on the graph_path
+        stat_result = subprocess.run(['stat', graph_path], capture_output=True, text=True)
+        stat_output = stat_result.stdout
+    except Exception as e:
+        stat_output = str(e)
+    
+    # Append the result to the results list
+    results.append({
+        'graph_path': graph_path,
+        'stat_result': stat_output
+    })
+
+# Create a new DataFrame from the results
+result_df = pd.DataFrame(results)
+
+# Write the results to a new Excel file
+result_df.to_excel('result.xls', index=False)
+
+
+
+
+
+What is the purpose of MapReduce in Hadoop?
+The purpose of MapReduce in Hadoop is to provide a programming model and processing framework for large-scale data processing across distributed clusters. MapReduce enables parallel processing of data by breaking down tasks into smaller, independent units that can be executed concurrently on multiple nodes in the cluster. It consists of two main phases:
+
+1. **Map Phase:** During this phase, input data is divided into smaller chunks, and a map function is applied to each chunk independently. The map function processes the input data and generates intermediate key-value pairs.
+
+2. **Reduce Phase:** In this phase, the intermediate key-value pairs produced by the map phase are shuffled, sorted, and then passed to a reduce function. The reduce function aggregates, summarizes, or combines the intermediate data based on the keys to produce the final output.
+
+
+1. **Sqoop:** Sqoop is a tool designed for efficiently transferring bulk data between Apache Hadoop and structured data stores such as relational databases (e.g., MySQL, Oracle, SQL Server). It facilitates the import of data from external sources into Hadoop's distributed file system (HDFS) and the export of data from HDFS into external databases. Sqoop automates the process of data transfer, handling parallelism, connectivity, and data conversion between Hadoop and relational databases.
+
+what is DAG in pyspark?
+In PySpark, a DAG (Directed Acyclic Graph) represents the logical execution plan of a Spark job
+
+
+4. **What is a DataFrame in PySpark?**
+   - DataFrame is a distributed collection of data organized into named columns, similar to a table in a relational database. It provides a more user-friendly interface compared to RDDs and supports operations like filtering, aggregation, and SQL queries.
+
+
+6. **What is lazy evaluation in PySpark?**
+   - Lazy evaluation means that transformations on RDDs or DataFrames are not executed immediately but are deferred until an action is called. This optimization reduces unnecessary computation and improves performance.
+
+7. **How do you perform transformations and actions in PySpark?**
+   - Transformations in PySpark (e.g., `map()`, `filter()`, `groupBy()`) create a new RDD or DataFrame, while actions (e.g., `collect()`, `count()`, `show()`) trigger the execution of transformations and return results to the driver program.
+
+
+Abinitio Questions
+
+What is the command for tag checkout?
+
+What will be the command if I want to check 400th record from mfs file from Terminal?
+
