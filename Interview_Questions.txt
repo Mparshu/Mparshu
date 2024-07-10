@@ -166,3 +166,19 @@ What is the command for tag checkout?
 
 What will be the command if I want to check 400th record from mfs file from Terminal?
 
+You have a Hive table named user_activities with the following structure:
+
+user_id	activities
+1	[{"date": "2023-01-01", "activity": "login"}, {"date": "2023-01-02", "activity": "purchase"}]
+2	[{"date": "2023-01-01", "activity": "browse"}, {"date": "2023-01-03", "activity": "logout"}]
+Write a Hive query to explode the activities array of structs into individual rows.
+
+-- Query to explode the activities array of structs into individual rows
+SELECT
+    user_id,
+    activity.date AS date,
+    activity.activity AS activity
+FROM
+    user_activities
+    LATERAL VIEW EXPLODE(activities) AS activity;
+
