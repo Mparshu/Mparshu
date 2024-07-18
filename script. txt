@@ -1,5 +1,28 @@
 huList Content Comparisons
 
+SELECT 
+    CASE 
+        WHEN customerid >= 0 AND customerid <= 2499999999 THEN 0
+        WHEN customerid >= 2500000000 AND customerid <= 3999999999 THEN 1
+        WHEN customerid >= 4000000000 AND customerid <= 5499999999 THEN 2
+        WHEN customerid >= 5500000000 AND customerid <= 6999999999 THEN 3
+        WHEN customerid >= 7000000000 AND customerid <= 8499999999 THEN 4
+        ELSE 5
+    END AS customer_split,
+    COUNT(*) AS customer_count
+FROM your_table_name
+GROUP BY 
+    CASE 
+        WHEN customerid >= 0 AND customerid <= 2499999999 THEN 0
+        WHEN customerid >= 2500000000 AND customerid <= 3999999999 THEN 1
+        WHEN customerid >= 4000000000 AND customerid <= 5499999999 THEN 2
+        WHEN customerid >= 5500000000 AND customerid <= 6999999999 THEN 3
+        WHEN customerid >= 7000000000 AND customerid <= 8499999999 THEN 4
+        ELSE 5
+    END;
+
+
+
 
 import sys
 import os
