@@ -1,0 +1,5 @@
+# Ignore all (xlsx) files
+*.xlsx
+# DO-NOT ignore this specific file
+#!DBB/Tool Input.xlsx
+
