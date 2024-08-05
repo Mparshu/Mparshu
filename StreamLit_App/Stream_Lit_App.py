@@ -16,7 +16,8 @@ def compare_sheets(excel_data1, excel_data2):
 def display_report(report):
     st.title("Excel Sheets Comparison Report")
     for sheet_name, result in report.items():
-        st.write(f"Sheet Name: {sheet_name} - Result: {result}")
+        color = "red" if result == "Do Not Match" else "green"
+        st.write(f"Sheet Name: {sheet_name} - Result: <span style='color:{color}'>{result}</span>", unsafe_allow_html=True)
 
 # Streamlit UI
 st.title('Excel File Comparator')
@@ -31,5 +32,6 @@ if uploaded_file1 and uploaded_file2:
     excel_data1 = read_excel(bytes_data1)
     excel_data2 = read_excel(bytes_data2)
 
-    comparison_report = compare_sheets(excel_data1, excel_data2)
-    display_report(comparison_report)
+    if st.button('Compare Sheets'):
+        comparison_report = compare_sheets(excel_data1, excel_data2)
+        display_report(comparison_report)
