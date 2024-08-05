@@ -1,5 +1,67 @@
 huList Content Comparisons
 
+
+from pyspark.sql import SparkSession
+import pandas as pd
+from pyspark.sql.types import StructType
+import pyspark_schema  # Make sure this module is in your PYTHONPATH or the same directory
+
+# Initialize a Spark session
+spark = SparkSession.builder \
+    .appName("Excel to Parquet") \
+    .getOrCreate()
+
+# Path to your Excel file
+excel_file_path = "/path/to/your/excel_file.xlsx"
+
+# Dictionary mapping table names to their respective paths
+table_paths = {
+    "table1": "/path/to/save/table1",
+    "table2": "/path/to/save/table2",
+    # Add other table names and their paths
+}
+
+# Dictionary mapping table names to their partition columns
+partition_columns = {
+    "table1": "partition_column1",
+    "table2": "partition_column2",
+    # Add other table names and their partition columns
+}
+
+# Load the Excel file
+excel_data = pd.ExcelFile(excel_file_path)
+
+# Iterate over each sheet name (table name)
+for sheet_name in excel_data.sheet_names:
+    # Read data from the sheet
+    pdf = pd.read_excel(excel_file_path, sheet_name=sheet_name)
+    
+    # Convert pandas DataFrame to Spark DataFrame
+    sdf = spark.createDataFrame(pdf)
+    
+    # Get the schema for the table
+    schema: StructType = getattr(pyspark_schema, sheet_name)
+    
+    # Apply the schema to the DataFrame
+    sdf = spark.createDataFrame(sdf.rdd, schema)
+    
+    # Drop the partition column
+    partition_column = partition_columns.get(sheet_name)
+    if partition_column:
+        sdf = sdf.drop(partition_column)
+    
+    # Get the save path for the current table
+    save_path = table_paths.get(sheet_name)
+    
+    if save_path:
+        # Save the DataFrame to a Parquet file
+        sdf.write.parquet(save_path)
+    else:
+        print(f"No save path defined for table {sheet_name}")
+
+# Stop the Spark session
+spark.stop()
+
 SELECT 
     CASE 
         WHEN customerid >= 0 AND customerid <= 2499999999 THEN 0
