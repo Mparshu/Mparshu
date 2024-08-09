@@ -1,5 +1,27 @@
 huList Content Comparisons
 
+from pyspark.sql import SparkSession
+
+# Initialize Spark session
+spark = SparkSession.builder \
+    .appName("Drop Hive Partitions") \
+    .enableHiveSupport() \
+    .getOrCreate()
+
+# Table name
+table_name = "new_db.new_table_name"
+
+# Get the list of partitions
+partitions = spark.sql(f"SHOW PARTITIONS {table_name}").collect()
+
+# Drop each partition
+for partition in partitions:
+    partition_spec = partition['partition']
+    spark.sql(f"ALTER TABLE {table_name} DROP IF EXISTS PARTITION ({partition_spec})")
+
+# Stop the Spark session
+spark.stop()
+
 
 from pyspark.sql import SparkSession
 import pandas as pd
