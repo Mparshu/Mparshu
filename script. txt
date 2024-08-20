@@ -1,5 +1,39 @@
 huList Content Comparisons
 
+
+from pyspark.sql import SparkSession
+from pyspark.testing.utils import assertDataFrameEqual
+
+# Create Spark session for cluster 1
+spark_cluster1 = SparkSession.builder \
+    .appName("Cluster1") \
+    .config("spark.hadoop.hive.metastore.uris", "thrift://cluster1-host:9083") \
+    .enableHiveSupport() \
+    .getOrCreate()
+
+# Create Spark session for cluster 2
+spark_cluster2 = SparkSession.builder \
+    .appName("Cluster2") \
+    .config("spark.hadoop.hive.metastore.uris", "thrift://cluster2-host:9083") \
+    .enableHiveSupport() \
+    .getOrCreate()
+
+# Load the data from Hive tables
+df1 = spark_cluster1.sql("SELECT * FROM your_table")
+df2 = spark_cluster2.sql("SELECT * FROM your_table")
+
+# Compare the DataFrames
+try:
+    assertDataFrameEqual(df1, df2)
+    print("Tables are equal")
+except AssertionError as e:
+    print("Tables are not equal")
+    print(e)
+
+# Stop Spark sessions
+spark_cluster1.stop()
+spark_cluster2.stop()
+
 from pyspark.sql import SparkSession
 
 # Initialize Spark session
