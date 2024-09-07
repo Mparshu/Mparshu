@@ -4,6 +4,8 @@ from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 from pyspark.sql.utils import AnalysisException
 from itertools import product
+from functools import reduce
+from pyspark.sql import DataFrame
 
 def load_json(json_path):
     with open(json_path, 'r') as f:
@@ -36,6 +38,16 @@ def get_partition_combinations(df, partition_columns):
     # Generate all possible combinations of the partition values
     return list(product(*distinct_values))
 
+def filter_by_partition_combination(df: DataFrame, partition_columns: list, combination: tuple) -> DataFrame:
+    """
+    Apply a filter based on the combination of partition columns and their respective values.
+    """
+    # Construct the filter conditions by pairing partition columns and their respective values from the combination
+    filter_conditions = [col(partition_columns[i]) == combination[i] for i in range(len(partition_columns))]
+
+    # Use reduce to combine multiple conditions using AND (equivalent to applying multiple filters together)
+    return df.filter(reduce(lambda a, b: a & b, filter_conditions))
+
 def convert_csv_to_parquet(csv_path, parquet_base_path, hdfs_base_path, schema, partition_columns):
     # Initialize Spark session
     spark = SparkSession.builder \
@@ -56,9 +68,8 @@ def convert_csv_to_parquet(csv_path, parquet_base_path, hdfs_base_path, schema, 
         
         # Write each partition to HDFS dynamically
         for combination in partition_combinations:
-            # Build a filter expression for each combination
-            filter_expr = [col(partition_columns[i]) == combination[i] for i in range(len(partition_columns))]
-            partition_df = df.filter(*filter_expr)
+            # Filter the DataFrame based on the combination of partition values
+            partition_df = filter_by_partition_combination(df, partition_columns, combination)
 
             # Build the dynamic HDFS path based on the partition columns and values
             partition_hdfs_subpath = '/'.join([f"{partition_columns[i]}={combination[i]}" for i in range(len(partition_columns))])
