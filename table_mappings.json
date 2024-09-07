@@ -1,0 +1,12 @@
+{
+    "files": [
+      {
+        "csv_file_path": "/path/to/your/csv1.csv",
+        "table_name": "table1",
+        "database_name": "db1",
+        "hdfs_base_path": "/user/hdfs/db1/table1",
+        "partition_column": "active"
+      }
+    ]
+  }
+  
