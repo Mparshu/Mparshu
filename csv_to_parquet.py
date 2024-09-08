@@ -1,11 +1,11 @@
-import json
 import os
+import json
+import zipfile
+import argparse
+import shutil
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 from pyspark.sql.utils import AnalysisException
-from itertools import product
-from functools import reduce
-from pyspark.sql import DataFrame
 
 def load_json(json_path):
     with open(json_path, 'r') as f:
@@ -19,116 +19,213 @@ def get_hive_table_schema(spark, database_name, table_name):
     schema = spark.table(table_name).schema
     return schema
 
-def validate_partition_columns(df, partition_columns):
-    # Check if all partition columns exist
-    for column in partition_columns:
-        if column not in df.columns:
-            raise Exception(f"Partition column '{column}' does not exist in the CSV file.")
+def validate_partition_column(df, partition_column):
+    # Check if the partition column exists
+    if partition_column not in df.columns:
+        raise Exception(f"Partition column '{partition_column}' does not exist in the file.")
 
-    # Check for null values in any of the partition columns
-    for column in partition_columns:
-        null_count = df.filter(col(column).isNull()).count()
-        if null_count > 0:
-            raise Exception(f"Partition column '{column}' contains NULL values. Please clean the data.")
+    # Check for null values in the partition column
+    null_count = df.filter(col(partition_column).isNull()).count()
+    if null_count > 0:
+        raise Exception(f"Partition column '{partition_column}' contains NULL values. Please clean the data.")
 
-def get_partition_combinations(df, partition_columns):
-    # Get distinct values for each partition column
-    distinct_values = [df.select(column).distinct().rdd.flatMap(lambda x: x).collect() for column in partition_columns]
+def get_partition_values(df, partition_column):
+    # Get distinct partition values in the column
+    return df.select(partition_column).distinct().collect()
+
+def read_file(spark, file_path, schema=None):
+    """
+    Reads a file based on its extension and returns a DataFrame.
+    - If the file is CSV, it uses spark.read.csv
+    - If the file is JSON, it uses spark.read.json
+    """
+    file_extension = os.path.splitext(file_path)[1]
+
+    if file_extension == '.csv':
+        df = spark.read.csv(file_path, header=True, schema=schema)
+        print(f"CSV file {file_path} read successfully.")
+    elif file_extension == '.json':
+        df = spark.read.json(file_path, schema=schema)
+        print(f"JSON file {file_path} read successfully.")
+    else:
+        raise Exception(f"Unsupported file format: {file_extension}. Only CSV and JSON files are supported.")
     
-    # Generate all possible combinations of the partition values
-    return list(product(*distinct_values))
+    return df
 
-def filter_by_partition_combination(df: DataFrame, partition_columns: list, combination: tuple) -> DataFrame:
-    """
-    Apply a filter based on the combination of partition columns and their respective values.
-    """
-    # Construct the filter conditions by pairing partition columns and their respective values from the combination
-    filter_conditions = [col(partition_columns[i]) == combination[i] for i in range(len(partition_columns))]
-
-    # Use reduce to combine multiple conditions using AND (equivalent to applying multiple filters together)
-    return df.filter(reduce(lambda a, b: a & b, filter_conditions))
-
-def convert_csv_to_parquet(csv_path, parquet_base_path, hdfs_base_path, schema, partition_columns):
-    # Initialize Spark session
-    spark = SparkSession.builder \
-        .appName("CSV to Parquet with Partitioning") \
-        .enableHiveSupport() \
-        .getOrCreate()
-
+def convert_file_to_parquet(spark, file_path, hdfs_base_path, schema, partition_column):
     try:
-        # Read CSV file with the given schema
-        df = spark.read.csv(csv_path, header=True, schema=schema)
-        print(f"CSV file {csv_path} read successfully with provided schema")
+        # Read the file based on its extension (CSV or JSON)
+        df = read_file(spark, file_path, schema=schema)
         
-        # Validate the partition columns
-        validate_partition_columns(df, partition_columns)
+        # Validate the partition column
+        validate_partition_column(df, partition_column)
 
-        # Get all combinations of partition column values
-        partition_combinations = get_partition_combinations(df, partition_columns)
+        # Get distinct partition values for the partition column
+        partition_values = get_partition_values(df, partition_column)
         
-        # Write each partition to HDFS dynamically
-        for combination in partition_combinations:
-            # Filter the DataFrame based on the combination of partition values
-            partition_df = filter_by_partition_combination(df, partition_columns, combination)
-
-            # Build the dynamic HDFS path based on the partition columns and values
-            partition_hdfs_subpath = '/'.join([f"{partition_columns[i]}={combination[i]}" for i in range(len(partition_columns))])
-            partition_hdfs_path = os.path.join(hdfs_base_path, partition_hdfs_subpath)
+        # Write each partition directly to HDFS
+        for row in partition_values:
+            partition_value = row[partition_column]
             
-            # Save the partition data as parquet
-            partition_df.write.mode('overwrite').parquet(os.path.join(parquet_base_path, partition_hdfs_subpath))
-            print(f"Partition written to Parquet for {partition_hdfs_subpath}.")
+            # Filter the DataFrame based on the partition value
+            partition_df = df.filter(col(partition_column) == partition_value)
 
-            # Move the Parquet file to HDFS
-            os.system(f"hdfs dfs -mkdir -p {partition_hdfs_path}")
-            os.system(f"hdfs dfs -put -f {parquet_base_path}/{partition_hdfs_subpath}/*.parquet {partition_hdfs_path}")
-            print(f"Parquet file for {partition_hdfs_subpath} loaded into HDFS: {partition_hdfs_path}")
+            # Build the dynamic HDFS path based on the partition column and value
+            partition_hdfs_path = os.path.join(hdfs_base_path, f"{partition_column}={partition_value}")
+            
+            # Save the partition data as parquet directly to HDFS
+            partition_df.write.mode('overwrite').parquet(partition_hdfs_path)
+            print(f"Partition written to Parquet for {partition_column}={partition_value} in HDFS: {partition_hdfs_path}")
     
     except AnalysisException as ae:
         print(f"An error occurred with the partition column: {ae}")
     except Exception as e:
         print(f"An error occurred: {e}")
-    finally:
-        spark.stop()
 
-def process_files_from_json(json_path, parquet_base_path):
-    # Initialize Spark session with Hive support enabled
-    spark = SparkSession.builder \
-        .appName("CSV to Parquet with Hive") \
-        .enableHiveSupport() \
-        .getOrCreate()
+def unzip_file(zip_path, extract_to):
+    """
+    Unzips the given file to the specified location.
+    """
+    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+        zip_ref.extractall(extract_to)
+        print(f"Unzipped {zip_path} to {extract_to}")
 
+def update_file_paths(metadata, inbound_dir):
+    """
+    Updates the file paths in the metadata JSON to include the full inbound directory path.
+    """
+    for entry in metadata["files"]:
+        # Prepend the inbound_dir to the file path
+        entry["csv_file_path"] = os.path.join(inbound_dir, entry["csv_file_path"])
+        print(f"Updated file path: {entry['csv_file_path']}")
+
+def execute_hive_queries(spark, hql_file):
+    """
+    Executes the Hive queries in the provided .hql file.
+    Stops execution if any query fails.
+    """
+    try:
+        with open(hql_file, 'r') as f:
+            queries = f.read().split(';')  # Assuming queries are separated by ';'
+        
+        for query in queries:
+            query = query.strip()
+            if query:
+                print(f"Executing Hive query from {hql_file}: {query}")
+                query = query.rstrip(';')
+                spark.sql(query)
+                print(f"Query executed successfully: {query}")
+    
+    except Exception as e:
+        raise Exception(f"Failed to execute Hive query in {hql_file}: {e}")
+
+def find_and_execute_hql_files(inbound_dir, spark):
+    """
+    Finds and executes all .hql files in the unzipped folder sequentially.
+    Stops if any query execution fails.
+    """
+    hql_files = [f for f in os.listdir(inbound_dir) if f.endswith('.hql')]
+    
+    if not hql_files:
+        print("No .hql files found to execute.")
+        return
+    
+    for hql_file in hql_files:
+        hql_file_path = os.path.join(inbound_dir, hql_file)
+        print(f"Found .hql file: {hql_file_path}")
+        
+        # Execute the Hive queries from the .hql file
+        execute_hive_queries(spark, hql_file_path)
+
+def cleanup_unzipped_folder(unzipped_folder):
+    """
+    Deletes only the specific unzipped folder after processing is complete.
+    """
+    try:
+        if os.path.exists(unzipped_folder):
+            shutil.rmtree(unzipped_folder)
+            print(f"Deleted unzipped folder: {unzipped_folder}")
+        else:
+            print(f"Unzipped folder {unzipped_folder} does not exist.")
+    except Exception as e:
+        print(f"Error occurred during cleanup: {e}")
+
+
+def process_files_from_json(spark, json_path):
     # Load the JSON metadata
     data = load_json(json_path)
 
     # Loop through each file entry in the JSON
     for entry in data["files"]:
-        csv_file_path = entry["csv_file_path"]
+        file_path = entry["csv_file_path"]  # This field can now be either CSV or JSON
         table_name = entry["table_name"]
         database_name = entry["database_name"]
         hdfs_base_path = entry["hdfs_base_path"]
-        partition_columns = entry["partition_column"].split(',')  # Handling multiple partition columns as a comma-separated string
+        partition_column = entry["partition_column"]
 
-        # Define parquet path based on the table name and database name
-        parquet_path = os.path.join(parquet_base_path, database_name, table_name)
-
-        print(f"Processing file: {csv_file_path}")
-        print(f"Parquet Path: {parquet_path}")
+        print(f"Processing file: {file_path}")
         print(f"HDFS Path: {hdfs_base_path}")
 
         # Retrieve schema from Hive for the specified table
         schema = get_hive_table_schema(spark, database_name, table_name)
         print(f"Schema for {database_name}.{table_name} retrieved from Hive")
 
-        # Convert CSV to Parquet using the schema from Hive and load to HDFS
-        convert_csv_to_parquet(csv_file_path, parquet_path, hdfs_base_path, schema, partition_columns)
+        # Convert the file (CSV or JSON) to Parquet using the schema from Hive and load directly to HDFS
+        convert_file_to_parquet(spark, file_path, hdfs_base_path, schema, partition_column)
 
 if __name__ == "__main__":
-    # Path to the JSON file
-    json_file_path = "/path/to/your/metadata.json"
+    # Argument parser for dynamic file selection
+    parser = argparse.ArgumentParser(description="Process CSV/JSON files from ZIP and convert them to Parquet for HDFS.")
+    parser.add_argument("--select", required=False, help="Path to the metadata JSON file.")
+    parser.add_argument("--zip", required=False, help="Path to the ZIP file containing metadata and files.")
     
-    # Base path where the parquet files will be temporarily stored before loading into HDFS
-    parquet_base_path = "/local/parquet/storage"
+    args = parser.parse_args()
 
-    # Process the files
-    process_files_from_json(json_file_path, parquet_base_path)
+    # Initialize Spark session with Hive support enabled
+    spark = SparkSession.builder \
+        .appName("File to Parquet with Hive") \
+        .enableHiveSupport() \
+        .getOrCreate()
+
+    # If a ZIP file is provided, unzip it to $HOME/Inbound
+    if args.zip:
+        home_dir = os.path.expanduser("~")
+        inbound_dir = os.path.join(home_dir, "Inbound")
+        os.makedirs(inbound_dir, exist_ok=True)
+        unzip_file(args.zip, inbound_dir)
+        unzipped_folder_path = os.path.join(inbound_dir, os.path.splitext(os.path.basename(args.zip))[0])
+
+        # Get the name of the unzipped folder
+        unzipped_folder_name = os.path.basename(unzipped_folder_path)
+
+        # Set the path to metadata.json after unzipping
+        json_file_path = os.path.join(inbound_dir, "metadata.json")
+
+        # Execute any .hql files found in the unzipped folder before loading data
+        find_and_execute_hql_files(inbound_dir, spark)
+
+        # Load and update metadata file paths with the full inbound path
+        metadata = load_json(json_file_path)
+        update_file_paths(metadata, inbound_dir)
+
+        # Save the updated metadata to a temporary JSON file
+        temp_json_path = os.path.join(inbound_dir, "updated_metadata.json")
+        with open(temp_json_path, 'w') as temp_file:
+            json.dump(metadata, temp_file, indent=4)
+        
+        # Now process the files from the updated metadata
+        process_files_from_json(spark, temp_json_path)
+
+        # Clean up only the unzipped folder after processing
+        cleanup_unzipped_folder(inbound_dir)
+
+    else:
+        # Use the --select argument if no ZIP file is provided
+        json_file_path = args.select
+        if json_file_path:
+            process_files_from_json(spark, json_file_path)
+        else:
+            print("Error: Please provide a JSON file using --select or a ZIP file using --zip.")
+
+    # Stop the Spark session
+    spark.stop()
