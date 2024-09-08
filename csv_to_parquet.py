@@ -3,9 +3,21 @@ import json
 import zipfile
 import argparse
 import shutil
+import logging
+import os
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col
 from pyspark.sql.utils import AnalysisException
+
+# Setup logging
+def setup_logger():
+    log_file = os.path.join(os.path.expanduser("~"), "Inbound", "processing.log")
+    logging.basicConfig(
+        filename=log_file,
+        level=logging.INFO,
+        format='%(asctime)s - %(levelname)s - %(message)s'
+    )
+    return logging.getLogger("DataProcessing")
 
 def load_json(json_path):
     with open(json_path, 'r') as f:
@@ -33,6 +45,23 @@ def get_partition_values(df, partition_column):
     # Get distinct partition values in the column
     return df.select(partition_column).distinct().collect()
 
+def check_all_null_columns(df):
+    """
+    Check if all columns in the DataFrame have only NULL values.
+    Returns True if all columns are NULL, False otherwise.
+    """
+    try:
+        null_columns = df.select([spark_sum(df[col_name].isNull().cast("int")).alias(col_name) for col_name in df.columns])
+        total_rows = df.count()
+
+        # If the sum of nulls for all columns equals the total number of rows, we have an issue
+        all_null = all(null_columns.collect()[0][col_name] == total_rows for col_name in df.columns)
+
+        return all_null
+    except Exception as e:
+        logger.error(f"Error while checking for all NULL columns: {e}")
+        raise e
+
 def read_file(spark, file_path, schema=None):
     """
     Reads a file based on its extension and returns a DataFrame.
@@ -54,41 +83,63 @@ def read_file(spark, file_path, schema=None):
 
 def convert_file_to_parquet(spark, file_path, hdfs_base_path, schema, partition_column):
     try:
+        logger.info(f"Processing file: {file_path}")
+
         # Read the file based on its extension (CSV or JSON)
         df = read_file(spark, file_path, schema=schema)
         
         # Validate the partition column
         validate_partition_column(df, partition_column)
 
+        if check_all_null_columns(df):
+            logger.error(f"File structure issue detected in {file_path}. All columns have NULL values.")
+            raise Exception(f"File structure issue detected in {file_path}. All columns have NULL values.")
+
         # Get distinct partition values for the partition column
         partition_values = get_partition_values(df, partition_column)
         
+        logger.info(f"Found {len(partition_values)} partitions for column '{partition_column}' in file {file_path}")
+
         # Write each partition directly to HDFS
         for row in partition_values:
             partition_value = row[partition_column]
             
             # Filter the DataFrame based on the partition value
             partition_df = df.filter(col(partition_column) == partition_value)
+            partition_count = partition_df.count()
 
             # Build the dynamic HDFS path based on the partition column and value
             partition_hdfs_path = os.path.join(hdfs_base_path, f"{partition_column}={partition_value}")
             
+            logger.info(f"Loading partition '{partition_column}={partition_value}' with {partition_count} records into {partition_hdfs_path}")
+
             # Save the partition data as parquet directly to HDFS
             partition_df.write.mode('overwrite').parquet(partition_hdfs_path)
+            logger.info(f"Partition '{partition_column}={partition_value}' loaded successfully to {partition_hdfs_path}")
             print(f"Partition written to Parquet for {partition_column}={partition_value} in HDFS: {partition_hdfs_path}")
-    
+
     except AnalysisException as ae:
+        logger.error(f"An error occurred with the partition column: {ae}")
         print(f"An error occurred with the partition column: {ae}")
     except Exception as e:
+        logger.error(f"Error processing file {file_path}: {e}")
         print(f"An error occurred: {e}")
 
 def unzip_file(zip_path, extract_to):
     """
     Unzips the given file to the specified location.
     """
-    with zipfile.ZipFile(zip_path, 'r') as zip_ref:
-        zip_ref.extractall(extract_to)
-        print(f"Unzipped {zip_path} to {extract_to}")
+    try:
+        logger.info(f"Extracting zip file: {zip_path} to {extract_to}")
+        with zipfile.ZipFile(zip_path, 'r') as zip_ref:
+            zip_ref.extractall(extract_to)
+            print(f"Unzipped {zip_path} to {extract_to}")
+
+        extracted_files = os.listdir(extract_to)
+        logger.info(f"Zip file extracted. Found {len(extracted_files)} files.")
+    except Exception as e:
+        logger.error(f"Error unzipping file {zip_path}: {e}")
+        raise e
 
 def update_file_paths(metadata, inbound_dir):
     """
@@ -106,17 +157,20 @@ def execute_hive_queries(spark, hql_file):
     """
     try:
         with open(hql_file, 'r') as f:
-            queries = f.read().split(';')  # Assuming queries are separated by ';'
+            queries = f.read().split(';')
         
         for query in queries:
             query = query.strip()
             if query:
+                logger.info(f"Executing Hive query from {hql_file}: {query}")
                 print(f"Executing Hive query from {hql_file}: {query}")
                 query = query.rstrip(';')
                 spark.sql(query)
+                logger.info(f"Hive query executed successfully: {query}")
                 print(f"Query executed successfully: {query}")
     
     except Exception as e:
+        logger.error(f"Failed to execute Hive query in {hql_file}: {e}")
         raise Exception(f"Failed to execute Hive query in {hql_file}: {e}")
 
 def find_and_execute_hql_files(inbound_dir, spark):
@@ -124,6 +178,7 @@ def find_and_execute_hql_files(inbound_dir, spark):
     Finds and executes all .hql files in the unzipped folder sequentially.
     Stops if any query execution fails.
     """
+    logger.info(f"Checking hql files from: {inbound_dir}")
     hql_files = [f for f in os.listdir(inbound_dir) if f.endswith('.hql')]
     
     if not hql_files:
@@ -132,6 +187,7 @@ def find_and_execute_hql_files(inbound_dir, spark):
     
     for hql_file in hql_files:
         hql_file_path = os.path.join(inbound_dir, hql_file)
+        logger.info(f"Found .hql file: {hql_file_path}")
         print(f"Found .hql file: {hql_file_path}")
         
         # Execute the Hive queries from the .hql file
@@ -152,26 +208,35 @@ def cleanup_unzipped_folder(unzipped_folder):
 
 
 def process_files_from_json(spark, json_path):
-    # Load the JSON metadata
-    data = load_json(json_path)
+    try:
+        # Load the JSON metadata
+        data = load_json(json_path)
+        files_processed = 0
 
-    # Loop through each file entry in the JSON
-    for entry in data["files"]:
-        file_path = entry["csv_file_path"]  # This field can now be either CSV or JSON
-        table_name = entry["table_name"]
-        database_name = entry["database_name"]
-        hdfs_base_path = entry["hdfs_base_path"]
-        partition_column = entry["partition_column"]
+        # Loop through each file entry in the JSON
+        for entry in data["files"]:
+            file_path = entry["csv_file_path"]
+            table_name = entry["table_name"]
+            database_name = entry["database_name"]
+            hdfs_base_path = entry["hdfs_base_path"]
+            partition_column = entry["partition_column"]
 
-        print(f"Processing file: {file_path}")
-        print(f"HDFS Path: {hdfs_base_path}")
+            print(f"Processing file: {file_path}")
+            print(f"HDFS Path: {hdfs_base_path}")
 
-        # Retrieve schema from Hive for the specified table
-        schema = get_hive_table_schema(spark, database_name, table_name)
-        print(f"Schema for {database_name}.{table_name} retrieved from Hive")
+            # Retrieve schema from Hive for the specified table
+            schema = get_hive_table_schema(spark, database_name, table_name)
+            print(f"Schema for {database_name}.{table_name} retrieved from Hive")
 
-        # Convert the file (CSV or JSON) to Parquet using the schema from Hive and load directly to HDFS
-        convert_file_to_parquet(spark, file_path, hdfs_base_path, schema, partition_column)
+            # Convert the file (CSV or JSON) to Parquet using the schema from Hive and load directly to HDFS
+            logger.info(f"Starting processing for table: {table_name} with file: {file_path}")
+            convert_file_to_parquet(spark, file_path, hdfs_base_path, schema, partition_column)
+            files_processed += 1
+
+        logger.info(f"Processing complete. Total files processed: {files_processed}")
+    except Exception as e:
+        logger.error(f"Error in processing files from metadata: {e}")
+        raise e
 
 if __name__ == "__main__":
     # Argument parser for dynamic file selection
@@ -180,6 +245,9 @@ if __name__ == "__main__":
     parser.add_argument("--zip", required=False, help="Path to the ZIP file containing metadata and files.")
     
     args = parser.parse_args()
+
+    # Initialize the logger
+    logger = setup_logger()
 
     # Initialize Spark session with Hive support enabled
     spark = SparkSession.builder \
