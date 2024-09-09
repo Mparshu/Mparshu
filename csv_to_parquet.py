@@ -5,13 +5,17 @@ import argparse
 import shutil
 import logging
 import os
+import datetime
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col,sum
+from pyspark.sql import functions as F
 from pyspark.sql.utils import AnalysisException
+
+current_timestamp = datetime.datetime.now().strftime("%Y-%m-%d_%H:%M:%S")
 
 # Setup logging
 def setup_logger():
-    log_file = os.path.join(os.path.expanduser("~"), "Inbound", "processing.log")
+    log_file = os.path.join(os.path.expanduser("~"), "Inbound", f"processing{current_timestamp}.log")
     logging.basicConfig(
         filename=log_file,
         level=logging.INFO,
@@ -45,6 +49,7 @@ def get_partition_values(df, partition_column):
     # Get distinct partition values in the column
     return df.select(partition_column).distinct().collect()
 
+'''
 def check_all_null_columns(df):
     """
     Check if all columns in the DataFrame have only NULL values.
@@ -61,6 +66,30 @@ def check_all_null_columns(df):
     except Exception as e:
         logger.error(f"Error while checking for all NULL columns: {e}")
         raise e
+'''
+
+def check_all_null_columns(df):
+    """
+    Check if all columns in the DataFrame have only NULL values.
+    Returns True if all columns are NULL, False otherwise.
+    """
+    try:
+        # Calculate the sum of nulls for each column
+        null_columns = df.select([sum(df[col_name].isNull().cast("int")).alias(col_name) for col_name in df.columns])
+
+        # Count the total number of rows in the DataFrame
+        total_rows = df.count()
+
+        # Collect the results into a list
+        null_counts = null_columns.collect()[0]
+
+        # Check if the sum of nulls for all columns equals the total number of rows
+        all_null = all(null_counts[col_name] == total_rows for col_name in df.columns)
+
+        return all_null
+    except Exception as e:
+        logger.error(f"Error while checking for all NULL columns: {e}")
+        raise e    
 
 def read_file(spark, file_path, schema=None):
     """
