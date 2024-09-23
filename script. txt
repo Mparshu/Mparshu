@@ -1,3 +1,21 @@
+echo "Hi [Employee's Name],
+
+I hope this message finds you well. Given your expertise and the critical nature of the upcoming month-end batch run, we would like to request your continued support during this period.
+
+To ensure everything proceeds smoothly, we kindly ask you to extend your notice period by one additional week. Your updated Last Working Day would then be 30th September 2024.
+
+Your contribution during this time will be invaluable, and we appreciate your understanding and cooperation.
+
+Please let us know if you have any questions or concerns.
+
+Best regards,
+[Your Name]
+[Your Position]
+[Company Name]" | mailx -s "Request for Extension of Notice Period" employee@example.com
+
+
+
+
 huList Content Comparisons
 import json
 import os
