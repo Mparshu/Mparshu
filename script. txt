@@ -1,20 +1,25 @@
-echo "Hi [Employee's Name],
+import yt_dlp
 
-I hope this message finds you well. Given your expertise and the critical nature of the upcoming month-end batch run, we would like to request your continued support during this period.
+# Function to download playlist videos using yt-dlp
+def download_playlist(playlist_url, download_path):
+    ydl_opts = {
+        'outtmpl': download_path + '/%(title)s.%(ext)s',  # Save file with video title as filename
+        'format': 'best',  # Download the best available quality
+        'noplaylist': False  # Make sure to download all videos in the playlist
+    }
 
-To ensure everything proceeds smoothly, we kindly ask you to extend your notice period by one additional week. Your updated Last Working Day would then be 30th September 2024.
+    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+        ydl.download([playlist_url])
 
-Your contribution during this time will be invaluable, and we appreciate your understanding and cooperation.
+if __name__ == "__main__":
+    # Playlist URL
+    playlist_url = "https://www.youtube.com/playlist?list=PLMWaZteqtEaLacN3eS3s8pw2jtwBVb1BH"
 
-Please let us know if you have any questions or concerns.
+    # Your download path
+    download_path = r"D:\Date_Engg\Azure Data Factory"
 
-Best regards,
-[Your Name]
-[Your Position]
-[Company Name]" | mailx -s "Request for Extension of Notice Period" employee@example.com
-
-
-
+    # Start downloading the playlist
+    download_playlist(playlist_url, download_path)
 
 huList Content Comparisons
 import json
