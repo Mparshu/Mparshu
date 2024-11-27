@@ -1,55 +1,59 @@
-import requests
+import http.client
+import json
+import urllib.parse
 
 # Configuration
 jira_api_token = 'your_bearer_token'  # Use your actual Bearer token here
-jira_instance = 'https://your_jira_instance'
+jira_instance = 'your_jira_instance'  # e.g., 'yourdomain.atlassian.net'
 assignee_username = 'assignee_username'
 
 def get_issues_assigned_to_user(assignee):
-    url = f"{jira_instance}/rest/api/2/search"
+    conn = http.client.HTTPSConnection(jira_instance)
     jql_query = f"assignee={assignee}"
-    params = {
+    params = urllib.parse.urlencode({
         'jql': jql_query,
-        'fields': 'key',  # We only need the issue key for further requests
-        'maxResults': 100  # Adjust based on your needs
-    }
+        'fields': 'key',
+        'maxResults': 100
+    })
     
     headers = {
         'Authorization': f'Bearer {jira_api_token}',
         'Accept': 'application/json'
     }
     
-    response = requests.get(url, params=params, headers=headers)
+    conn.request("GET", f"/rest/api/2/search?{params}", headers=headers)
     
-    if response.status_code == 200:
-        return response.json().get('issues', [])
+    response = conn.getresponse()
+    data = response.read().decode()
+    
+    if response.status == 200:
+        return json.loads(data).get('issues', [])
     else:
-        print(f"Failed to fetch issues: {response.status_code} - {response.text}")
+        print(f"Failed to fetch issues: {response.status} - {data}")
         return []
 
 def get_last_comment(issue_key):
-    url = f"{jira_instance}/rest/api/2/issue/{issue_key}/comment"
-    params = {
-        'orderBy': '-created',
-        'maxResults': 1
-    }
+    conn = http.client.HTTPSConnection(jira_instance)
     
     headers = {
         'Authorization': f'Bearer {jira_api_token}',
         'Accept': 'application/json'
     }
     
-    response = requests.get(url, params=params, headers=headers)
+    conn.request("GET", f"/rest/api/2/issue/{issue_key}/comment?orderBy=-created&maxResults=1", headers=headers)
     
-    if response.status_code == 200:
-        comments = response.json().get('comments', [])
+    response = conn.getresponse()
+    data = response.read().decode()
+    
+    if response.status == 200:
+        comments = json.loads(data).get('comments', [])
         if comments:
             last_comment = comments[0]
             return last_comment['body'], last_comment['created']
         else:
             return None, None
     else:
-        print(f"Failed to fetch comments for issue {issue_key}: {response.status_code} - {response.text}")
+        print(f"Failed to fetch comments for issue {issue_key}: {response.status} - {data}")
         return None, None
 
 def main():
