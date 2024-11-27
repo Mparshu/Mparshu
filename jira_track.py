@@ -71,3 +71,33 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+
+
+
+import requests
+
+# Configuration
+jira_url = 'https://your_jira_instance.atlassian.net/rest/api/2/serverInfo'  # Replace with your JIRA instance URL
+jira_api_token = 'your_api_token'  # Your JIRA API token
+jira_email = 'your_email@example.com'  # Your JIRA email
+
+def test_jira_connection():
+    headers = {
+        'Authorization': f'Bearer {jira_api_token}',
+        'Accept': 'application/json'
+    }
+    
+    try:
+        response = requests.get(jira_url, headers=headers)
+        
+        if response.status_code == 200:
+            print("Connection successful!")
+            print("Response:", response.json())
+        else:
+            print(f"Failed to connect: {response.status_code} - {response.text}")
+    except Exception as e:
+        print(f"An error occurred: {e}")
+
+if __name__ == "__main__":
+    test_jira_connection()
