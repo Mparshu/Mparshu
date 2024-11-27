@@ -1,9 +1,7 @@
 import requests
-from requests.auth import HTTPBasicAuth
 
 # Configuration
-jira_email = 'your_email@example.com'
-jira_api_token = 'your_api_token'
+jira_api_token = 'your_bearer_token'  # Use your actual Bearer token here
 jira_instance = 'https://your_jira_instance'
 assignee_username = 'assignee_username'
 
@@ -16,7 +14,12 @@ def get_issues_assigned_to_user(assignee):
         'maxResults': 100  # Adjust based on your needs
     }
     
-    response = requests.get(url, params=params, auth=HTTPBasicAuth(jira_email, jira_api_token))
+    headers = {
+        'Authorization': f'Bearer {jira_api_token}',
+        'Accept': 'application/json'
+    }
+    
+    response = requests.get(url, params=params, headers=headers)
     
     if response.status_code == 200:
         return response.json().get('issues', [])
@@ -31,7 +34,12 @@ def get_last_comment(issue_key):
         'maxResults': 1
     }
     
-    response = requests.get(url, params=params, auth=HTTPBasicAuth(jira_email, jira_api_token))
+    headers = {
+        'Authorization': f'Bearer {jira_api_token}',
+        'Accept': 'application/json'
+    }
+    
+    response = requests.get(url, params=params, headers=headers)
     
     if response.status_code == 200:
         comments = response.json().get('comments', [])
