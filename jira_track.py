@@ -13,6 +13,10 @@ with open("config.json") as config_file:
 JIRA_BASE_URL = config["jira_url"]
 API_TOKEN = config["api_token"]
 MANAGER_EMAIL = config["manager_email"]
+SMTP_SERVER = config["smtp_server"]
+SMTP_PORT = config["smtp_port"]
+FROM_EMAIL = config["from_email"]
+FROM_EMAIL_PASSWORD = config["from_email_password"]
 
 # Load employee data
 def load_employees(file_path="employees.csv"):
@@ -48,18 +52,20 @@ def has_recent_comment(issue):
 
 # Send HTML email
 def send_email(to_email, subject, body):
-    smtp_server = "smtp.example.com"  # Update with your SMTP server
-    from_email = "noreply@example.com"  # Update with your email
-
     msg = MIMEMultipart()
-    msg["From"] = from_email
+    msg["From"] = FROM_EMAIL
     msg["To"] = to_email
     msg["Subject"] = subject
-
     msg.attach(MIMEText(body, "html"))
 
-    with SMTP(smtp_server) as server:
-        server.sendmail(from_email, to_email, msg.as_string())
+    try:
+        with SMTP(SMTP_SERVER, SMTP_PORT) as server:
+            server.starttls()
+            server.login(FROM_EMAIL, FROM_EMAIL_PASSWORD)
+            server.sendmail(FROM_EMAIL, to_email, msg.as_string())
+        print("Email sent successfully.")
+    except Exception as e:
+        print(f"Failed to send email: {e}")
 
 # Main workflow
 def main():
