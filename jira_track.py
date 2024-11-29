@@ -50,16 +50,27 @@ def has_recent_comment(issue):
             return True
     return False
 
-# Generate HTML table
-def generate_table(data, headers):
+# Generate HTML table - Updated function
+def generate_table(data, headers=None):
+    # If data is empty, return empty string
+    if not data:
+        return ""
+
+    # If headers not provided, use keys from first dictionary
+    if headers is None:
+        headers = list(data[0].keys())
+
     html = "<table border='1' style='border-collapse: collapse; width: 100%; text-align: left;'>"
     html += "<tr>"
     for header in headers:
         html += f"<th style='padding: 8px; background-color: #f2f2f2;'>{header}</th>"
     html += "</tr>"
+
     for row in data:
         html += "<tr>"
-        for value in row:
+        for header in headers:
+            # Safely get value, use empty string if not found
+            value = row.get(header, '')
             html += f"<td style='padding: 8px;'>{value}</td>"
         html += "</tr>"
     html += "</table>"
@@ -116,15 +127,15 @@ def main():
 
     if no_jira_employees:
         html_body += "<h2>Employees without assigned JIRAs</h2>"
-        html_body += generate_table(no_jira_employees, ["Employee"])
+        html_body += generate_table(no_jira_employees)
 
     if no_comment_jiras:
         html_body += "<h2>JIRAs without recent comments</h2>"
-        html_body += generate_table(no_comment_jiras, ["Employee", "JIRA"])
+        html_body += generate_table(no_comment_jiras)
 
     if multiple_jiras:
         html_body += "<h2>Employees with multiple JIRAs</h2>"
-        html_body += generate_table(multiple_jiras, ["Employee", "JIRAs"])
+        html_body += generate_table(multiple_jiras)
 
     # Send email
     send_email(MANAGER_EMAIL, "JIRA Status Report", html_body)
