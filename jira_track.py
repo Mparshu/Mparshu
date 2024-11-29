@@ -1,7 +1,6 @@
 import csv
 import json
 import requests
-from requests.auth import HTTPBasicAuth
 from datetime import datetime, timedelta
 from smtplib import SMTP
 from email.mime.multipart import MIMEMultipart
@@ -12,7 +11,6 @@ with open("config.json") as config_file:
     config = json.load(config_file)
 
 JIRA_BASE_URL = config["jira_url"]
-USERNAME = config["username"]
 API_TOKEN = config["api_token"]
 MANAGER_EMAIL = config["manager_email"]
 
@@ -30,8 +28,9 @@ def fetch_jiras(assignee):
     url = f"{JIRA_BASE_URL}/rest/api/2/search"
     query = f"assignee={assignee}"
     params = {"jql": query, "fields": "id,comment,summary", "maxResults": 100}
+    headers = {"Authorization": f"Bearer {API_TOKEN}"}
 
-    response = requests.get(url, auth=HTTPBasicAuth(USERNAME, API_TOKEN), params=params)
+    response = requests.get(url, headers=headers, params=params)
     if response.status_code == 200:
         return response.json().get("issues", [])
     else:
