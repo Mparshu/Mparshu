@@ -50,27 +50,16 @@ def has_recent_comment(issue):
             return True
     return False
 
-# Generate HTML table - Updated function
-def generate_table(data, headers=None):
-    # If data is empty, return empty string
-    if not data:
-        return ""
-
-    # If headers not provided, use keys from first dictionary
-    if headers is None:
-        headers = list(data[0].keys())
-
+# Generate HTML table
+def generate_table(data, headers):
     html = "<table border='1' style='border-collapse: collapse; width: 100%; text-align: left;'>"
     html += "<tr>"
     for header in headers:
         html += f"<th style='padding: 8px; background-color: #f2f2f2;'>{header}</th>"
     html += "</tr>"
-
     for row in data:
         html += "<tr>"
-        for header in headers:
-            # Safely get value, use empty string if not found
-            value = row.get(header, '')
+        for value in row:
             html += f"<td style='padding: 8px;'>{value}</td>"
         html += "</tr>"
     html += "</table>"
@@ -100,6 +89,7 @@ def main():
     no_jira_employees = []
     no_comment_jiras = []
     multiple_jiras = []
+    detailed_jiras = []
 
     for employee in employees:
         jiras = fetch_jiras(employee["Email"])
@@ -116,6 +106,14 @@ def main():
                 })
 
             for jira in jiras:
+                last_comment = jira["fields"]["comment"]["comments"][-1] if jira["fields"]["comment"]["comments"] else None
+                detailed_jiras.append({
+                    "JIRA": f"<a href='{JIRA_BASE_URL}/browse/{jira['key']}'>{jira['key']}</a>",
+                    "Assignee": employee["Name"],
+                    "Last Comment": last_comment["body"] if last_comment else "No Comments",
+                    "Last Comment Timestamp": last_comment["updated"] if last_comment else "N/A"
+                })
+
                 if not has_recent_comment(jira):
                     no_comment_jiras.append({
                         "Employee": employee["Name"],
@@ -127,15 +125,19 @@ def main():
 
     if no_jira_employees:
         html_body += "<h2>Employees without assigned JIRAs</h2>"
-        html_body += generate_table(no_jira_employees)
+        html_body += generate_table(no_jira_employees, ["Employee"])
 
     if no_comment_jiras:
         html_body += "<h2>JIRAs without recent comments</h2>"
-        html_body += generate_table(no_comment_jiras)
+        html_body += generate_table(no_comment_jiras, ["Employee", "JIRA"])
 
     if multiple_jiras:
         html_body += "<h2>Employees with multiple JIRAs</h2>"
-        html_body += generate_table(multiple_jiras)
+        html_body += generate_table(multiple_jiras, ["Employee", "JIRAs"])
+
+    if detailed_jiras:
+        html_body += "<h2>Detailed JIRA Information</h2>"
+        html_body += generate_table(detailed_jiras, ["JIRA", "Assignee", "Last Comment", "Last Comment Timestamp"])
 
     # Send email
     send_email(MANAGER_EMAIL, "JIRA Status Report", html_body)
