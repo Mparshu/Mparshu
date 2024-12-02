@@ -1,3 +1,34 @@
+def load_holidays(file_path="holidays.csv"):
+    """Load holiday dates from a CSV file."""
+    holidays = set()
+    with open(file_path, mode="r") as file:
+        reader = csv.reader(file)
+        for row in reader:
+            holidays.add(datetime.strptime(row[0], "%Y-%m-%d").date())
+    return holidays
+
+def is_working_day(date, holidays):
+    """Check if a given date is a working day."""
+    # Exclude weekends (Saturday and Sunday)
+    if date.weekday() in (5, 6):  # 5 = Saturday, 6 = Sunday
+        return False
+    # Exclude holidays
+    if date in holidays:
+        return False
+    return True
+
+def has_recent_comment(issue, holidays):
+    """Check if the JIRA issue has a recent comment on a working day."""
+    comments = issue["fields"]["comment"]["comments"]
+    for comment in comments:
+        updated = datetime.strptime(comment["updated"][:-9], "%Y-%m-%dT%H:%M:%S").date()
+        # Check if the comment was updated in the last 24 hours and on a working day
+        for days_back in range(1, 8):  # Look back up to 7 days to account for weekends and holidays
+            check_date = datetime.now().date() - timedelta(days=days_back)
+            if is_working_day(check_date, holidays) and updated == check_date:
+                return True
+    return False
+
 def main():
     employees = load_employees()
     holidays = load_holidays()  # Load holidays from CSV
