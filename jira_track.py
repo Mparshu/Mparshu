@@ -1,102 +1,77 @@
-def load_holidays(file_path="holidays.csv"):
-    """Load holiday dates from a CSV file."""
-    holidays = set()
-    with open(file_path, mode="r") as file:
-        reader = csv.reader(file)
-        for row in reader:
-            holidays.add(datetime.strptime(row[0], "%Y-%m-%d").date())
-    return holidays
-
-def is_working_day(date, holidays):
-    """Check if a given date is a working day."""
-    # Exclude weekends (Saturday and Sunday)
-    if date.weekday() in (5, 6):  # 5 = Saturday, 6 = Sunday
-        return False
-    # Exclude holidays
-    if date in holidays:
-        return False
-    return True
-
-def has_recent_comment(issue, holidays):
+def generate_table(data, headers):
     """
-    Check if the JIRA issue has a comment updated today or on the last working day.
+    Generate an HTML table with styling.
     """
-    comments = issue["fields"]["comment"]["comments"]
+    table_style = """
+    <style>
+        table {
+            border-collapse: collapse;
+            margin: auto; /* Center align table */
+            padding: 10px;
+            width: 80%; /* Adjust width as needed */
+        }
+        th, td {
+            border: 1px solid black;
+            text-align: center;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+    """
+    table_html = "<table>"
+    # Add table headers
+    table_html += "<tr>"
+    for header in headers:
+        table_html += f"<th>{header}</th>"
+    table_html += "</tr>"
+
+    # Add table rows
+    for row in data:
+        table_html += "<tr>"
+        for header in headers:
+            table_html += f"<td>{row.get(header, '')}</td>"
+        table_html += "</tr>"
     
-    # Get today's date and the last working day
-    today = datetime.now().date()
-    last_working_day = today - timedelta(days=1)
-    while not is_working_day(last_working_day, holidays):
-        last_working_day -= timedelta(days=1)
-    
-    # If there are no comments, return False
-    if not comments:
-        return False
-    
-    # Get the last comment's updated date
-    last_comment = comments[-1]
-    updated = datetime.strptime(last_comment["updated"][:-9], "%Y-%m-%dT%H:%M:%S").date()
+    table_html += "</table>"
+    return table_style + table_html
 
-    # Check if the last comment was updated today or on the last working day
-    if updated == today or updated == last_working_day:
-        return True
-    return False
-def main():
-    employees = load_employees()
-    holidays = load_holidays()  # Load holidays from CSV
 
-    no_jira_employees = []
-    no_comment_jiras = []
-    multiple_jiras = []
-    detailed_jiras = []
 
-    for employee in employees:
-        jiras = fetch_jiras(employee["Email"])
+footer_message = """
+<p style="text-align: center; margin-top: 20px;">
+    <strong>Thanks and Regards,</strong><br>
+    Jira Admin Team
+</p>
+<p style="text-align: center; font-size: 12px; color: gray;">
+    This is an automated mail, please do not reply to this mail.
+</p>
+"""
 
-        if not jiras:
-            no_jira_employees.append({"Employee": employee["Name"]})
-        else:
-            if len(jiras) > 1:
-                multiple_jiras.append({
-                    "Employee": employee["Name"],
-                    "JIRAs": ", ".join(
-                        [f"<a href='{JIRA_BASE_URL}/browse/{jira['key']}'>{jira['key']}</a>" for jira in jiras]
-                    )
-                })
 
-            for jira in jiras:
-                last_comment = jira["fields"]["comment"]["comments"][-1] if jira["fields"]["comment"]["comments"] else None
-                detailed_jiras.append({
-                    "JIRA": f"<a href='{JIRA_BASE_URL}/browse/{jira['key']}'>{jira['key']}</a>",
-                    "Assignee": employee["Name"],
-                    "Last Comment": last_comment["body"] if last_comment else "No Comments",
-                    "Last Comment Timestamp": last_comment["updated"] if last_comment else "N/A"
-                })
 
-                if not has_recent_comment(jira, holidays):
-                    no_comment_jiras.append({
-                        "Employee": employee["Name"],
-                        "JIRA": f"<a href='{JIRA_BASE_URL}/browse/{jira['key']}'>{jira['key']}</a>"
-                    })
+    html_body = "<h1 style='text-align: center;'>JIRA Status Report</h1>"
 
-    # Generate HTML email content
-    html_body = "<h1>JIRA Status Report</h1>"
+if no_jira_employees:
+    html_body += "<h2 style='text-align: center;'>Employees without assigned JIRAs</h2>"
+    html_body += generate_table(no_jira_employees, ["Employee"])
 
-    if no_jira_employees:
-        html_body += "<h2>Employees without assigned JIRAs</h2>"
-        html_body += generate_table(no_jira_employees, ["Employee"])
+if no_comment_jiras:
+    html_body += "<h2 style='text-align: center;'>JIRAs without recent comments</h2>"
+    html_body += generate_table(no_comment_jiras, ["Employee", "JIRA"])
 
-    if no_comment_jiras:
-        html_body += "<h2>JIRAs without recent comments</h2>"
-        html_body += generate_table(no_comment_jiras, ["Employee", "JIRA"])
+if multiple_jiras:
+    html_body += "<h2 style='text-align: center;'>Employees with multiple JIRAs</h2>"
+    html_body += generate_table(multiple_jiras, ["Employee", "JIRAs"])
 
-    if multiple_jiras:
-        html_body += "<h2>Employees with multiple JIRAs</h2>"
-        html_body += generate_table(multiple_jiras, ["Employee", "JIRAs"])
+if detailed_jiras:
+    html_body += "<h2 style='text-align: center;'>Detailed JIRA Information</h2>"
+    html_body += generate_table(detailed_jiras, ["JIRA", "Assignee", "Last Comment", "Last Comment Timestamp"])
 
-    if detailed_jiras:
-        html_body += "<h2>Detailed JIRA Information</h2>"
-        html_body += generate_table(detailed_jiras, ["JIRA", "Assignee", "Last Comment", "Last Comment Timestamp"])
+# Append the footer message
+html_body += footer_message
+
 
     # Send email
     send_email(MANAGER_EMAIL, "JIRA Status Report", html_body)
