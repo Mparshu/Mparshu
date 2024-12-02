@@ -18,10 +18,12 @@ def is_working_day(date, holidays):
     return True
 
 def has_recent_comment(issue, holidays):
-    """Check if the JIRA issue has a comment updated on the last working day."""
+    """
+    Check if the JIRA issue has a comment updated today or on the last working day.
+    """
     comments = issue["fields"]["comment"]["comments"]
     
-    # Get the last working day
+    # Get today's date and the last working day
     today = datetime.now().date()
     last_working_day = today - timedelta(days=1)
     while not is_working_day(last_working_day, holidays):
@@ -35,9 +37,10 @@ def has_recent_comment(issue, holidays):
     last_comment = comments[-1]
     updated = datetime.strptime(last_comment["updated"][:-9], "%Y-%m-%dT%H:%M:%S").date()
 
-    # Check if the last comment was updated on the last working day
-    return updated == last_working_day
-
+    # Check if the last comment was updated today or on the last working day
+    if updated == today or updated == last_working_day:
+        return True
+    return False
 def main():
     employees = load_employees()
     holidays = load_holidays()  # Load holidays from CSV
