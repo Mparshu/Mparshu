@@ -1,3 +1,43 @@
+from pyspark.sql import SparkSession
+import pandas as pd
+
+# Step 1: Initialize SparkSession
+spark = SparkSession.builder \
+    .appName("Read SQL Table and Save to Excel") \
+    .config("spark.sql.catalogImplementation", "hive") \
+    .enableHiveSupport() \
+    .getOrCreate()
+
+# Step 2: SQL query to fetch data
+sql_query = """
+SELECT * 
+FROM your_table_name 
+WHERE your_condition
+"""
+
+# Step 3: Create a PySpark DataFrame from the SQL query
+df = spark.sql(sql_query)
+
+# Step 4: Convert PySpark DataFrame to Pandas DataFrame
+pandas_df = df.toPandas()
+
+# Step 5: Save the SQL query and data to an Excel file
+output_file = "output.xlsx"
+
+# Save using pandas ExcelWriter
+with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
+    # Save the query as a separate sheet
+    pd.DataFrame({"Query": [sql_query]}).to_excel(writer, sheet_name="SQL_Query", index=False)
+    # Save the data as another sheet
+    pandas_df.to_excel(writer, sheet_name="Data", index=False)
+
+# Step 6: Stop SparkSession
+spark.stop()
+
+print(f"Data and query have been saved to {output_file}")
+
+
+
 import yt_dlp
 
 # Function to download playlist videos using yt-dlp
