@@ -25,7 +25,7 @@ pandas_df = df.toPandas()
 output_file = "output.xlsx"
 
 # Save using pandas ExcelWriter
-with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
+with pd.ExcelWriter(output_file) as writer:
     # Save the query as a separate sheet
     pd.DataFrame({"Query": [sql_query]}).to_excel(writer, sheet_name="SQL_Query", index=False)
     # Save the data as another sheet
@@ -35,7 +35,6 @@ with pd.ExcelWriter(output_file, engine='xlsxwriter') as writer:
 spark.stop()
 
 print(f"Data and query have been saved to {output_file}")
-
 
 
 import yt_dlp
