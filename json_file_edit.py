@@ -87,3 +87,18 @@ def update_json_file(file_path):
 
 # Execute the update function
 update_json_file(file_path)
+
+import random
+
+def generate_small_float():
+    """
+    Generate a random float value between 0.001 and 0.110.
+    
+    Returns:
+    float: A random float in the specified range
+    """
+    return round(random.uniform(0.001, 0.110), 3)
+
+# Example usage
+print(generate_small_float())
+
