@@ -44,3 +44,46 @@ if __name__ == "__main__":
     
     # Call the function to randomize customer IDs
     randomize_customer_ids(input_file, output_file, customer_ids)
+
+
+
+
+
+
+import json
+import random
+import os
+
+# Path to the JSON file
+file_path = "path/to/your/file.json"
+
+# List of random pdscore values to choose from
+pdscore_random_value_list = [0.5, 1.2, 3.4, 2.8, 4.1, 5.0]
+
+# Function to generate a random 10-digit number
+def generate_random_customerid():
+    return str(random.randint(10**9, 10**10 - 1))
+
+# Update the JSON file
+def update_json_file(file_path):
+    if not os.path.exists(file_path):
+        print(f"File not found: {file_path}")
+        return
+
+    # Read the JSON file
+    with open(file_path, 'r') as file:
+        data = json.load(file)
+
+    # Update the fields in the JSON data
+    for record in data:
+        record['customerid'] = generate_random_customerid()
+        record['pdscore'] = random.choice(pdscore_random_value_list)
+
+    # Save the updated JSON back to the same file
+    with open(file_path, 'w') as file:
+        json.dump(data, file, indent=4)
+
+    print(f"File updated successfully: {file_path}")
+
+# Execute the update function
+update_json_file(file_path)
