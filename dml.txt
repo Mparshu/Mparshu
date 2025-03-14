@@ -1,0 +1,33 @@
+type Header_t = record
+    anz_string_t DestinationID;
+    anz_string_t SenderID;
+    anz_string_t OperationOrganizationID;
+    anz_string_t MessageType;
+    anz_string_t DateSent;
+    anz_string_t TimeSent;
+    anz_string_t MessageID;
+    string('\0',charset='x-ab-internal') XML_fields() = 'DestinationID=%e/DestinationID';
+end;
+
+type SubHeader_t = record
+    anz_string_t InstrumentID;
+    anz_string_t ActivityType;
+    anz_string_t ActivitySequenceNumber;
+    anz_string_t DocumentType;
+    anz_string_t WorkItemNumber;
+    anz_string_t DocumentName;
+    anz_string_t FaxPrintorData;
+    anz_string_t ReceiverFax;
+    anz_string_t FaxSubject;
+    anz_string_t FaxComments;
+    anz_string_t OnlineorTemporal;
+    anz_string_t DistributeIndicator;
+    anz_string_t FinalorDraftorCopy;
+    anz_string_t FileType;
+    anz_string_t UserID;
+    anz_string_t Product;
+    anz_string_t ProductType;
+    anz_string_t NumberofPages;
+    anz_string_t NumberofPrints;
+    string('\0',charset='x-ab-internal') XML_fields() = 'InstrumentID=%e/InstrumentID/text()';
+end;
